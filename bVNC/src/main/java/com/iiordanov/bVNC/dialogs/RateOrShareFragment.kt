@@ -71,6 +71,13 @@ class RateOrShareFragment : DialogFragment() {
         if (Utils.isOpaque(activity)) {
             previousVersionsButton?.visibility = GONE
         }
+        // What this application does not have, it does not offer: each of these buttons needs
+        // an outbound target (see Utils.hasProjectLink), and one with an empty target stays hidden.
+        hideIfNoTarget(v, R.id.emailButton, R.string.project_email_support)
+        hideIfNoTarget(v, R.id.buttonSupportForum, R.string.project_url_help_forum)
+        hideIfNoTarget(v, R.id.buttonReportBug, R.string.project_url_bug_reports)
+        hideIfNoTarget(v, R.id.buttonOtherApps, R.string.project_url_more_apps)
+        hideIfNoTarget(v, R.id.buttonPreviousVersions, R.string.project_url_releases)
         versionAndCode = v.findViewById<View>(R.id.versionAndCode) as TextView
         versionAndCode?.text = Utils.getVersionAndCode(v.context)
         setVisibilityOfElements(v)
@@ -108,6 +115,12 @@ class RateOrShareFragment : DialogFragment() {
             catch (e: NullPointerException) {
                 isCustomNullPointerException(e)
             }
+        }
+    }
+
+    private fun hideIfNoTarget(view: View, buttonId: Int, targetResource: Int) {
+        if (!Utils.hasProjectLink(view.context, targetResource)) {
+            view.findViewById<View>(buttonId)?.visibility = GONE
         }
     }
 

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:installLocation="auto"
+    android:versionCode="1"
+    android:versionName="1.0.0-dualdesk">
+
+    <uses-permission tools:node="removeAll" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <uses-feature
+        android:name="android.hardware.touchscreen"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.microphone"
+        android:required="false" />
+    <uses-feature
+        android:name="android.software.leanback"
+        android:required="false" />
+
+    <!--
+        RustDesk is reached as an external application. Since Android 11, an application that is
+        not declared here is invisible: getPackageInfo() throws and resolveActivity() returns
+        null, so the hand-off would be reported as "RustDesk is not installed" while it is
+        installed.
+    -->
+    <queries>
+        <package android:name="com.carriez.flutter_hbb" />
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="rustdesk" />
+        </intent>
+    </queries>
+
+    <application
+        android:name="com.iiordanov.bVNC.App"
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_dualdesk"
+        android:label="DualDesk"
+        android:theme="@style/AppThemeDayNight"
+        tools:replace="android:label,android:theme">
+        <activity
+            android:name="com.undatech.opaque.ConnectionGridActivity"
+            android:configChanges="keyboardHidden"
+            android:exported="true"
+            android:label="DualDesk"
+            android:theme="@style/AppThemeDayNight"
+            android:resizeableActivity="true"
+            >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.MULTIWINDOW_LAUNCHER" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.iiordanov.bVNC.aRDP"
+            android:configChanges="orientation|keyboardHidden"
+            android:label="DualDesk"
+            android:resizeableActivity="true"
+            android:screenOrientation="fullUser"
+            android:theme="@style/AppThemeDayNight"
+            android:windowSoftInputMode="stateHidden|adjustResize" />
+        <activity
+            android:name="com.iiordanov.bVNC.RemoteCanvasActivity"
+            android:configChanges="colorMode|density|fontScale|fontWeightAdjustment|keyboard|keyboardHidden|layoutDirection|locale|mcc|mnc|navigation|orientation|screenLayout|screenSize|smallestScreenSize|touchscreen|uiMode"
+            android:exported="true"
+            android:resizeableActivity="true"
+            android:theme="@style/AppTheme"
+            android:windowSoftInputMode="stateHidden|adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="rdp" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="intent" />
+                <data android:mimeType="application/vnd.rdp" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:host="*"/>
+                <data android:mimeType="application/rdp"/>
+                <data android:mimeType="application/x-rdp"/>
+                <data android:scheme="file"/>
+                <data android:scheme="content"/>
+                <data android:pathPattern=".*\\.rdp"/>
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

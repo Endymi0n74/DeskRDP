@@ -991,6 +991,18 @@ Below that is where you configure your connection.
     <string name="donate_app">Donate ❤</string>
     <string name="more_apps">More Apps 📱</string>
     <string name="previous_versions">Previous Versions ⍼</string>
+    <!--
+      Where the outbound links of the help screen point. This code base is shared by several
+      applications, so a flavour overrides these instead of editing the activity, and an empty
+      value means the flavour has no such target: the button is then not offered at all.
+    -->
+    <string name="project_url_help_forum" translatable="false">https://groups.google.com/forum/#!forum/bvnc-ardp-aspice-opaque-remote-desktop-clients</string>
+    <string name="project_url_bug_reports" translatable="false">https://github.com/iiordanov/remote-desktop-clients/issues</string>
+    <string name="project_url_releases" translatable="false">https://github.com/iiordanov/remote-desktop-clients/releases</string>
+    <string name="project_url_more_apps" translatable="false">market://search?q=pub:"Iordan Iordanov (Undatech)"</string>
+    <string name="project_email_support" translatable="false">support@morpheusly.com</string>
+    <!-- Empty means: share the store listing of this application, see Utils.getDonationPackageUrl. -->
+    <string name="project_url_share" translatable="false"></string>
     <string name="keyboard_layout_map">Keyboard Layout</string>
     <string name="keyboard_type">Software Keyboard Type</string>
     <string name="pref_keyboard_type_label_TYPE_NULL">Default (TYPE_NULL)</string>
@@ -1007,4 +1019,14 @@ Below that is where you configure your connection.
     <string name="disable_battery_optimizations">🔋Disable Battery Optimizations</string>
     <string name="disable_battery_optimizations_failed">Could not open battery optimization settings. Disable battery optimization manually in system settings.</string>
     <string name="disable_battery_optimizations_already_done">App is already exempt from battery optimizations.</string>
+    <string name="action_new_rustdesk_connection">New RustDesk access</string>
+    <string name="rustdesk_device_id_hint">RustDesk device ID</string>
+    <string name="rustdesk_password_hint">Password (optional)</string>
+    <string name="rustdesk_device_id_required">Enter the RustDesk device ID.</string>
+    <string name="rustdesk_edit_connection">Edit RustDesk access</string>
+    <string name="rustdesk_not_installed">RustDesk is not installed on this device.</string>
+    <string name="rustdesk_no_device_id">No device ID to open.</string>
+    <string name="rustdesk_no_response">RustDesk did not respond to the launch request.</string>
+    <string name="rustdesk_clipboard_id_only">Device ID copied: paste it in RustDesk.</string>
+    <string name="rustdesk_clipboard_with_password">Device ID and password copied: paste them in RustDesk.</string>
 </resources>

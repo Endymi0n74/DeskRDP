@@ -982,4 +982,14 @@ L\'application est déjà exemptée des optimisations de la batterie.</string>
     <string name="morpheusly_cta_download">Obtenez Morpheusly</string>
     <string name="connection_add_shortcut">Ajouter à l\'écran d\'accueil</string>
     <string name="shortcut_not_supported">Ce lanceur ne prend pas en charge l\'épinglage des raccourcis.</string>
+    <string name="action_new_rustdesk_connection">Nouvel accès RustDesk</string>
+    <string name="rustdesk_device_id_hint">Identifiant RustDesk</string>
+    <string name="rustdesk_password_hint">Mot de passe (facultatif)</string>
+    <string name="rustdesk_device_id_required">Saisissez l\'identifiant RustDesk.</string>
+    <string name="rustdesk_edit_connection">Modifier l\'accès RustDesk</string>
+    <string name="rustdesk_not_installed">RustDesk n\'est pas installé sur cet appareil.</string>
+    <string name="rustdesk_no_device_id">Aucun identifiant d\'appareil à ouvrir.</string>
+    <string name="rustdesk_no_response">RustDesk n\'a pas répondu à l\'ouverture.</string>
+    <string name="rustdesk_clipboard_id_only">Identifiant copié dans le presse-papiers : collez-le dans RustDesk.</string>
+    <string name="rustdesk_clipboard_with_password">Identifiant et mot de passe copiés dans le presse-papiers : collez-les dans RustDesk.</string>
 </resources>

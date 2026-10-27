@@ -266,7 +266,11 @@ public class ConnectionBean extends AbstractConnectionBean implements Comparable
         }
         String address = "";
         if (!showOnlyConnectionNicknames) {
-            address = this.getAddress() + ":" + this.getPort();
+            // A delegated RustDesk connection is identified by its device id alone: appending the
+            // unused port would show a ":0" the user never typed.
+            address = this.getConnectionType() == Constants.CONN_TYPE_RUSTDESK
+                    ? this.getAddress()
+                    : this.getAddress() + ":" + this.getPort();
             if (!"".equals(this.getUserName())) {
                 address = this.getUserName() + "@" + address;
             }
@@ -274,6 +278,11 @@ public class ConnectionBean extends AbstractConnectionBean implements Comparable
                 address = "SSH " + this.getSshUser() + "@" + this.getSshServer() + ":" +
                         this.getSshPort() + "\n" + address;
             }
+        }
+        // A RustDesk entry is created with its device id as nickname: repeating it on the second
+        // line would read as two different fields.
+        if (getConnectionType() == Constants.CONN_TYPE_RUSTDESK && getAddress().equals(getNickname())) {
+            address = "";
         }
         return nickname + address;
     }
@@ -575,6 +584,13 @@ public class ConnectionBean extends AbstractConnectionBean implements Comparable
         // If this is an VNC over SSH connection, add the SSH server:port in parentheses
         if (getConnectionType() == Constants.CONN_TYPE_SSH) {
             result += "(" + getSshServer() + ":" + getSshPort() + ")" + ":";
+        }
+
+        // A RustDesk device is reached by its id: there is no port to advertise, and printing
+        // ":0" next to the id would suggest a host:port the user never entered.
+        if (getConnectionType() == Constants.CONN_TYPE_RUSTDESK) {
+            result += getAddress();
+            return result;
         }
 
         // Add the VNC server and port.

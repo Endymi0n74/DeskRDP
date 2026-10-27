@@ -37,26 +37,35 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.res.Configuration;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.autofill.AutofillManager;
 import android.widget.EditText;
 import android.widget.GridView;
+import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.core.view.MenuItemCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.dualdesk.rustdesk.LaunchOutcome;
+import com.dualdesk.rustdesk.RustDeskLauncher;
 import com.google.android.material.snackbar.Snackbar;
 import com.iiordanov.bVNC.App;
 import com.iiordanov.bVNC.ConnectionBean;
@@ -129,6 +138,17 @@ public class ConnectionGridActivity extends AppCompatActivity implements GetText
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Status bar icons. In the light side of the DayNight theme the bar is white while the
+        // icons stay white too — the clock and the battery become invisible. Android only fixes
+        // this when the surface is told which appearance to use.
+        boolean nightMode = (getResources().getConfiguration().uiMode
+                & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
+        WindowInsetsControllerCompat insets =
+                WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+        insets.setAppearanceLightStatusBars(!nightMode);
+        insets.setAppearanceLightNavigationBars(!nightMode);
+
         Utils.showActionBarWithTitle(this);
         appContext = getApplicationContext();
         setContentView(R.layout.grid_view_activity);
@@ -139,18 +159,31 @@ public class ConnectionGridActivity extends AppCompatActivity implements GetText
         gridView.setOnItemLongClickListener((parent, v, position, id) -> {
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(ConnectionGridActivity.this);
             String gridItemText = ((TextView) v.findViewById(R.id.grid_item_text)).getText().toString();
+            String runtimeId = ((TextView) v.findViewById(R.id.grid_item_id)).getText().toString();
+
+            // A delegated RustDesk connection is edited by our own form: opening the RDP setup
+            // screen on it would rewrite the entry as an RDP host. A home-screen shortcut is not
+            // offered either — it would carry an address and a port the entry does not have.
+            Object selected = getConnectionLoader(this).getConnectionsById().get(runtimeId);
+            boolean rustDesk = selected instanceof ConnectionBean
+                    && ((ConnectionBean) selected).getConnectionType() == Constants.CONN_TYPE_RUSTDESK;
+
             alertDialogBuilder.setTitle(getString(R.string.connection_edit_delete_prompt) + " " + gridItemText + " ?");
             List<CharSequence> options = new ArrayList<>();
             options.add(getString(R.string.connection_edit));
             options.add(getString(R.string.connection_delete));
-            if (shortcutCreationSupported()) {
+            if (!rustDesk && shortcutCreationSupported()) {
                 options.add(getString(R.string.connection_add_shortcut));
             }
             CharSequence[] cs = options.toArray(new CharSequence[0]);
             alertDialogBuilder.setItems(cs, (dialog, item) -> {
                 String choice = cs[item].toString();
                 if (getString(R.string.connection_edit).equals(choice)) {
-                    editConnection(v);
+                    if (rustDesk) {
+                        showRustDeskDialog((ConnectionBean) selected);
+                    } else {
+                        editConnection(v);
+                    }
                 } else if (getString(R.string.connection_delete).equals(choice)) {
                     deleteConnection(v);
                 } else if (getString(R.string.connection_add_shortcut).equals(choice)) {
@@ -273,6 +306,16 @@ public class ConnectionGridActivity extends AppCompatActivity implements GetText
             System.gc();
 
         String runtimeId = ((TextView) v.findViewById(R.id.grid_item_id)).getText().toString();
+
+        // A delegated connection is not opened here: another application takes over, and the list
+        // stays in the foreground once the hand-off is done.
+        Object selected = getConnectionLoader(this).getConnectionsById().get(runtimeId);
+        if (selected instanceof ConnectionBean
+                && ((ConnectionBean) selected).getConnectionType() == Constants.CONN_TYPE_RUSTDESK) {
+            launchRustDesk((ConnectionBean) selected);
+            return;
+        }
+
         Intent intent = new IntentHelper().getIntent(
                 getConnectionLoader(this),
                 runtimeId,
@@ -473,6 +516,145 @@ public class ConnectionGridActivity extends AppCompatActivity implements GetText
     @SuppressWarnings("unused")
     public void addNewConnection(View view) {
         addNewConnection();
+    }
+
+    /** Menu action: creates a connection that RustDesk owns, not us. */
+    public void addRustDeskConnection(MenuItem menuItem) {
+        showRustDeskDialog(null);
+    }
+
+    /**
+     * Creates a RustDesk connection, or edits one when [existing] is given.
+     *
+     * The form is deliberately minimal: RustDesk is reached by device id, and the password is
+     * only there so it can be offered through the clipboard when the hand-off needs it.
+     */
+    private void showRustDeskDialog(ConnectionBean existing) {
+        boolean editing = existing != null;
+
+        int padding = (int) (16 * getResources().getDisplayMetrics().density);
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(padding, padding, padding, 0);
+        excludeTreeFromAutofill(layout);
+
+        EditText deviceId = new EditText(this);
+        deviceId.setHint(R.string.rustdesk_device_id_hint);
+        deviceId.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+        excludeFromAutofill(deviceId);
+        if (editing) {
+            deviceId.setText(existing.getAddress());
+        }
+        layout.addView(deviceId);
+
+        EditText password = new EditText(this);
+        password.setHint(R.string.rustdesk_password_hint);
+        password.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        excludeFromAutofill(password);
+        if (editing) {
+            password.setText(existing.getPassword());
+        }
+        layout.addView(password);
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle(editing ? R.string.rustdesk_edit_connection
+                        : R.string.action_new_rustdesk_connection)
+                .setView(layout)
+                .setPositiveButton(android.R.string.ok, null)
+                .setNegativeButton(android.R.string.cancel, null)
+                .create();
+        dialog.setOnShowListener(shown -> {
+            if (dialog.getWindow() != null) {
+                excludeTreeFromAutofill(dialog.getWindow().getDecorView());
+            }
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(view -> {
+                // Avant de fermer : abandonner le contexte de remplissage. Le laisser se
+                // terminer fait proposer au système d'enregistrer ce qui vient d'être saisi,
+                // ce qui recouvre l'application juste après la création.
+                abandonAutofillContext();
+                saveRustDeskConnection(existing, deviceId.getText().toString().trim(),
+                        password.getText().toString());
+                dialog.dismiss();
+            });
+        });
+        dialog.show();
+    }
+
+    /**
+     * Keeps a form field out of Android's autofill.
+     *
+     * Without this, submitting the form makes the system offer to store the RustDesk id and its
+     * password in the device's password manager, and that sheet covers the app right after the
+     * first creation. Neither value belongs to an account of this device: the id is RustDesk's
+     * own addressing, and the password is a secret of the machine being reached.
+     */
+    private void excludeFromAutofill(EditText field) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            field.setImportantForAutofill(View.IMPORTANT_FOR_AUTOFILL_NO);
+        }
+    }
+
+    /**
+     * Retire toute une sous-hiérarchie du remplissage automatique.
+     *
+     * Marquer les champs un à un ne suffit pas : depuis Android 14, une vue marquée
+     * IMPORTANT_FOR_AUTOFILL_NO peut malgré tout figurer dans la structure transmise au
+     * service. Constaté sur le POCO le 27/10 : le service Google recevait l'identifiant et le
+     * mot de passe et proposait de les enregistrer. Sur la racine, NO_EXCLUDE_DESCENDANTS
+     * interdit en plus le parcours des descendants.
+     */
+    private void excludeTreeFromAutofill(View view) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            view.setImportantForAutofill(View.IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS);
+        }
+    }
+
+    /**
+     * Abandonne le contexte de remplissage courant au lieu de le laisser se terminer.
+     *
+     * C'est l'abandon qui empêche la proposition d'enregistrer : laisser le contexte
+     * s'achever (fermeture de la boîte, arrêt de l'écran) amène le système à offrir
+     * d'enregistrer ce qui vient d'être saisi.
+     */
+    private void abandonAutofillContext() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            AutofillManager manager = getSystemService(AutofillManager.class);
+            if (manager != null) {
+                manager.cancel();
+            }
+        }
+    }
+
+    private void saveRustDeskConnection(ConnectionBean existing, String deviceId, String password) {
+        if (deviceId.isEmpty()) {
+            Snackbar.make(gridView, R.string.rustdesk_device_id_required, Snackbar.LENGTH_LONG)
+                    .show();
+            return;
+        }
+        ConnectionBean connection = existing != null ? existing : new ConnectionBean(this);
+        connection.setNickname(deviceId);
+        connection.setAddress(deviceId);
+        connection.setPassword(password);
+        // Without this the shared save path blanks PASSWORD for every connection.
+        connection.setKeepPassword(true);
+        if (existing == null) {
+            connection.setPort(0);
+            connection.setConnectionType(Constants.CONN_TYPE_RUSTDESK);
+            connection.setInvisible(false);
+            connection.setScreenshotFilename(Utils.newScreenshotFileName());
+        }
+        connection.save(this);
+        onResume();
+    }
+
+    /** Hands the session to the installed RustDesk application. */
+    private void launchRustDesk(ConnectionBean connection) {
+        LaunchOutcome outcome = new RustDeskLauncher(this)
+                .launch(connection.getAddress(), connection.getPassword());
+        if (outcome.getMessage() != null) {
+            Snackbar.make(gridView, outcome.getMessage(), Snackbar.LENGTH_LONG).show();
+        }
+        Log.i(TAG, "RustDesk hand-off: " + outcome.getStrategy());
     }
 
     /**
@@ -731,7 +913,7 @@ public class ConnectionGridActivity extends AppCompatActivity implements GetText
     }
 
     public void showSupportForum(View item) {
-        startUriIntent(this, "https://groups.google.com/forum/#!forum/bvnc-ardp-aspice-opaque-remote-desktop-clients");
+        openProjectLink(R.string.project_url_help_forum);
     }
 
     public void emailUs(View item) {
@@ -740,7 +922,7 @@ public class ConnectionGridActivity extends AppCompatActivity implements GetText
         final Intent emailIntent = new Intent(Intent.ACTION_SEND);
         String packageName = Utils.pName(App.getContext());
         String versionAndBuild = Utils.getVersionAndCode(App.getContext());
-        emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{"support@morpheusly.com"});
+        emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{Utils.projectLink(this, R.string.project_email_support)});
         emailIntent.putExtra(
                 Intent.EXTRA_SUBJECT,
                 String.format("Help with: %s, version: %s", packageName, versionAndBuild)
@@ -751,7 +933,7 @@ public class ConnectionGridActivity extends AppCompatActivity implements GetText
     }
 
     public void reportBug(View item) {
-        startUriIntent(this, "https://github.com/iiordanov/remote-desktop-clients/issues");
+        openProjectLink(R.string.project_url_bug_reports);
     }
 
     public void rateApp(View item) {
@@ -761,7 +943,8 @@ public class ConnectionGridActivity extends AppCompatActivity implements GetText
 
     public void shareApp(View item) {
         Log.d(TAG, "shareApp: Copying app link to clipboard");
-        String url = Utils.getDonationPackageUrl(this);
+        String declared = Utils.projectLink(this, R.string.project_url_share);
+        String url = declared.isEmpty() ? Utils.getDonationPackageUrl(this) : declared;
         setClipboard(this, url);
         Snackbar.make(gridView, R.string.share_app_toast, Snackbar.LENGTH_LONG).show();
     }
@@ -771,10 +954,17 @@ public class ConnectionGridActivity extends AppCompatActivity implements GetText
     }
 
     public void moreApps(View item) {
-        startUriIntent(this, "market://search?q=pub:\"Iordan Iordanov (Undatech)\"");
+        openProjectLink(R.string.project_url_more_apps);
     }
 
     public void previousVersions(View item) {
-        startUriIntent(this, "https://github.com/iiordanov/remote-desktop-clients/releases");
+        openProjectLink(R.string.project_url_releases);
+    }
+
+    /** Opens the outbound link this application declares for a help screen item, if it has one. */
+    private void openProjectLink(int resourceId) {
+        if (Utils.hasProjectLink(this, resourceId)) {
+            startUriIntent(this, Utils.projectLink(this, resourceId));
+        }
     }
 }

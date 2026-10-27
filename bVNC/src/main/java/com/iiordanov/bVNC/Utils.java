@@ -502,6 +502,19 @@ public class Utils {
         return "https://play.google.com/store/apps/details?id=" + donationPackageName;
     }
 
+    /**
+     * The outbound links of the help screen come from the application flavour's resources and
+     * are never written here. A flavour that declares no target for one of them offers no
+     * button for it, so each application shows only the surfaces it really has.
+     */
+    public static boolean hasProjectLink(Context context, int resourceId) {
+        return !projectLink(context, resourceId).isEmpty();
+    }
+
+    public static String projectLink(Context context, int resourceId) {
+        return context.getString(resourceId).trim();
+    }
+
     public static boolean isBlackBerry() {
         return Build.MODEL.contains("BlackBerry") ||
                 Build.BRAND.contains("BlackBerry") ||

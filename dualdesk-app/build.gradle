@@ -1,0 +1,60 @@
+apply plugin: 'com.android.application'
+
+/*
+ * DualDesk application module.
+ *
+ * Same code base and same resources as freeaRDP-app: the RDP client, its settings screens and
+ * its resources live in :bVNC, and every application variant in this repository is only a
+ * manifest plus a namespace. What makes this one ours is the RustDesk connection type handled by
+ * the connection grid (see com.dualdesk.rustdesk).
+ *
+ * The application id must keep the letters "rdp": Utils.isRdp() decides which protocol an
+ * application speaks from its package name alone.
+ */
+android {
+    compileSdkVersion compileApi
+
+    defaultConfig {
+        targetSdkVersion targetApi
+        minSdkVersion project.getProperties().get("SDK_VERSION")
+        multiDexEnabled true
+    }
+
+    splits {
+        abi {
+            enable true
+            reset()
+            include 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+            universalApk true
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+    }
+
+    packaging {
+        resources {
+            excludes += ['META-INF/versions/9/OSGI-INF/MANIFEST.MF']
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_21
+        targetCompatibility JavaVersion.VERSION_21
+    }
+
+    namespace 'com.dualdesk.rdp'
+    lint {
+        disable 'Instantiatable'
+    }
+}
+
+dependencies {
+    api 'com.android.support:multidex:1.0.3'
+    implementation project(':bVNC')
+    implementation project(':pubkeyGenerator')
+}

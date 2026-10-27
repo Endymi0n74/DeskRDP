@@ -40,6 +40,13 @@ public class Constants {
     public static final int CONN_TYPE_VENCRYPT = 4;
     public static final int CONN_TYPE_STUNNEL = 5;
 
+    /**
+     * Connection handed to the installed RustDesk application instead of being opened by our own
+     * engine. Stored in the same table as the others: the device id lives in ADDRESS and the
+     * password in PASSWORD, so no schema change is needed.
+     */
+    public static final int CONN_TYPE_RUSTDESK = 6;
+
     public static final int SOCKET_CONN_TIMEOUT = 20 * 1000;
 
     public static final int DEFAULT_SSH_PORT = 22;
