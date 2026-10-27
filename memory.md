@@ -343,3 +343,36 @@ Ce que la mesure établit :
 `preuve-poco/16-autofill-formulaire-rdp-temoin.png` (témoin : la feuille s'interpose après
 l'enregistrement du formulaire RDP) et `18-etat-final-paquet-reel.png` (état final : grille vide sous
 le nom DualDesk). La ligne de compte Google du paragraphe est masquée dans les captures 13, 14 et 16.
+
+## Brouillons de rapport supprimés (27/10/2026)
+
+Treize fichiers vivaient à la racine, restes de la présentation du rapport de six heures : neuf
+`README-<variante>.md` (la même conclusion en neuf reformulations, chacune listant les autres),
+trois lanceurs `generate_rapport_*` et `make_rapport.py`. Ils ont été **supprimés**, pour trois
+raisons vérifiables : leur fond est déjà ici, leur forme portait le chemin
+`C:\Users\<utilisateur>\appdata\local\temp\dualdesk-rapport` (et deux APK du bureau pour le
+script), et ils décrivaient un dépôt d'avant les deux commits du 27/10 en présentant l'absence de
+RustDesk comme un point ouvert — clos depuis.
+
+Conséquence à connaître : **le rapport ne se régénère plus par un script**. Il vit dans
+[RAPPORT.md](RAPPORT.md), réécrit le 27/10 à partir de ce fichier — c'est ce fichier qui alimente le
+rapport, et non l'inverse. `rapport.txt` (10 021 octets, généré le 27/10 à 00:42) reste dans le
+dossier temporaire de la session précédente ; il est périmé sur ces deux points précis. Reste non suivi à la racine :
+`bVNC/libs/`, deux jars que rien ne référence (les classes `com.antlersoft.android.db` sont suivies
+en source dans `common/src/main/java`). **Conservés** : le tarball des dépendances qui les a posés
+n'est plus sur le disque, donc les supprimer serait sans retour.
+
+### Dossier de travail vidé (27/10/2026)
+
+Le dossier temporaire de la session (`%TEMP%`) portait mes restes : trois copies de dépôt ou de
+paquets décompressés (`aRDP/`, `ardp-checkout/`, `dualdesk-verify/`), vingt journaux de compilation
+et de logcat, neuf scripts de vérification ad hoc, quatre brouillons de message de commit et une
+capture. Supprimés, soit environ 78 Mo. Deux vérifications avant de le faire : les 177 images du
+dossier de rapport sont **des copies conformes** d'images déjà dans les dépôts (comparaison md5 —
+une seule leur échappait, `rapport.txt`), et les scripts ad hoc ont leurs équivalents suivis dans
+`_check/`.
+
+Il reste dans ce dossier temporaire : `dualdesk-rapport/rapport.txt` seul. Les sorties de
+compilation des dépôts n'ont **pas** été touchées : `ardp/dualdesk-app/build` (1,2 Go) contient les
+cinq APK construits, dont l'universel de 190 Mo — les purger obligerait à refaire une compilation
+qui a demandé onze essais.
