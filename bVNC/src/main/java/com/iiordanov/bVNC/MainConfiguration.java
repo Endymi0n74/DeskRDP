@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Point;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.ClipboardManager;
 import android.text.Editable;
@@ -17,6 +18,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.ViewGroup;
+import android.view.autofill.AutofillManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -194,6 +197,7 @@ public abstract class MainConfiguration extends AppCompatActivity {
         Utils.showMenu(this);
         setContentView(layoutID);
         System.gc();
+        excludeFormFromAutofill();
         textNickname = findViewById(R.id.textNickname);
         sshServer = findViewById(R.id.sshServer);
         sshPort = findViewById(R.id.sshPort);
@@ -362,6 +366,12 @@ public abstract class MainConfiguration extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         Log.d(TAG, "onPause called");
+        // Cet écran enregistre aussi quand on le quitte sans passer par « Enregistrer » : le retour
+        // arrière ferme l'activité, ce qui suffit au système pour offrir d'enregistrer l'identifiant
+        // et le mot de passe de la machine distante. Mesuré le 27/10 : sans cet appel, la feuille
+        // revient par ce chemin alors qu'elle est absente par le bouton. Double avec
+        // saveConnectionAndCloseLayout, sans effet : annuler deux fois est sans conséquence.
+        abandonAutofillContext();
         if (database != null)
             database.close();
         if (selected != null) {
@@ -381,11 +391,51 @@ public abstract class MainConfiguration extends AppCompatActivity {
 
     protected void saveConnectionAndCloseLayout() {
         Log.d(TAG, "saveConnectionAndCloseLayout called");
+        // Avant de fermer : abandonner le contexte de saisie automatique. Le laisser se terminer
+        // fait proposer au système d'enregistrer l'identifiant et le mot de passe de la machine
+        // distante dans le gestionnaire de mots de passe du téléphone.
+        abandonAutofillContext();
         if (selected != null) {
             updateSelectedFromView();
             selected.saveAndWriteRecent(isEditingDefaultConnectionTemplate(), this);
         }
         finish();
+    }
+
+    /**
+     * Retire le formulaire de connexion de la saisie automatique.
+     *
+     * Les identifiants saisis ici sont ceux d'une machine distante, pas ceux d'un compte de ce
+     * téléphone. Marquer les champs un à un ne suffit pas (mesuré sur le POCO le 27/10) : depuis
+     * Android 14, une vue marquée IMPORTANT_FOR_AUTOFILL_NO peut malgré tout figurer dans la
+     * structure transmise au service. Sur la racine, NO_EXCLUDE_DESCENDANTS interdit en plus le
+     * parcours des descendants.
+     */
+    private void excludeFormFromAutofill() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            return;
+        }
+        ViewGroup content = findViewById(android.R.id.content);
+        if (content != null && content.getChildCount() > 0) {
+            content.getChildAt(0).setImportantForAutofill(
+                    View.IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS);
+        }
+    }
+
+    /**
+     * Abandonne le contexte de saisie automatique au lieu de le laisser se terminer.
+     *
+     * C'est l'abandon qui empêche la proposition d'enregistrer : achever le contexte (fermer
+     * l'écran, enregistrer l'accès) amène le système à offrir d'enregistrer ce qui vient d'être
+     * saisi.
+     */
+    private void abandonAutofillContext() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            AutofillManager manager = getSystemService(AutofillManager.class);
+            if (manager != null) {
+                manager.cancel();
+            }
+        }
     }
 
     public void arriveOnPage() {
