@@ -81,6 +81,26 @@ android {
     }
 }
 
+/*
+ * Controle avant publication.
+ *
+ * `assembleRelease` reussit aussi bien avec la cle de publication qu'avec aucune, ou qu'avec la
+ * cle de debogage : la signature est le seul point qu'une compilation ne verifie pas, et le
+ * symptome n'apparait que chez l'utilisateur (INSTALL_FAILED_UPDATE_INCOMPATIBLE). Cette tache
+ * relit le certificat des APK produits et refuse tout ce qui n'est pas la cle attendue.
+ *
+ * Elle reste volontairement hors de `assembleRelease` : un clone neuf, sans `_keystore/`, doit
+ * continuer de compiler. `PYTHON` permet de designer l'interpreteur si `python` n'est pas dans le
+ * PATH.
+ */
+tasks.register('verifieSignatureRelease', Exec) {
+    group = 'verification'
+    description = 'Verifie que les APK de release portent la cle de publication attendue.'
+    dependsOn 'assembleRelease'
+    workingDir rootProject.projectDir
+    commandLine(System.getenv('PYTHON') ?: 'python', '_check/verifie_signature.py')
+}
+
 dependencies {
     api 'com.android.support:multidex:1.0.3'
     implementation project(':bVNC')

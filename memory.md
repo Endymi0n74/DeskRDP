@@ -850,3 +850,37 @@ sont dans le README, section « Backup and restore » / « Sauvegarde et restaur
 
 Ce qui reste a faire, et qui n'est pas dans mon perimetre : copier l'archive ailleurs que sur ce
 disque. Une sauvegarde dans le dossier d'a cote ne protege de rien.
+
+## Controle de signature avant publication (28/10/2026)
+
+`assembleRelease` reussit avec la bonne cle, avec la cle de debogage, ou sans aucune cle : le
+fichier s'appelle simplement `…-release-unsigned.apk` dans le dernier cas. La signature etait donc le
+seul point qu'aucune verification ne couvrait, alors que c'est exactement ce qui a casse deux fois.
+
+- `_check/verifie_signature.py` lit le certificat avec `apksigner` (le plus recent des build-tools du
+  SDK, trouve par `ANDROID_SDK_ROOT` ou `local.properties`) et le compare a l'empreinte de la cle de
+  publication, codee en dur. Sans argument il controle les deux fichiers publies ;
+- tache Gradle `:dualdesk-app:verifieSignatureRelease` : `dependsOn assembleRelease`, puis execution
+  du script, dont le code de sortie fait echouer le build. `PYTHON` permet de designer
+  l'interpreteur si `python` n'est pas dans le PATH ;
+- la tache reste **hors** de `assembleRelease`, volontairement : un clone neuf sans `_keystore/` doit
+  continuer de compiler, et l'erreur doit tomber au moment de publier, pas a chaque build.
+
+Cas eprouves, tous executes :
+
+| Situation | Sortie | Code |
+|---|---|---|
+| APK signes par la cle de publication | `clé de publication` | 0 |
+| APK de debogage passe en argument | `MAUVAISE CLÉ (9277aa13…)` | 1 |
+| build fait sans `_keystore/` (dossier renomme) | `NON SIGNÉ (clé absente pendant le build)` | 1 |
+| chemin inexistant | `ABSENT` | 1 |
+| interpréteur qui sort en 1 (faux `PYTHON`) | `BUILD FAILED` | 1 |
+
+Le dernier cas est celui qui compte pour la tache Gradle : sans lui, on saurait seulement que le
+script sait echouer, pas que le build le remarque. Un premier essai de test — remplacer les APK de
+release par ceux de debogage — n'a rien prouve : `dependsOn assembleRelease` les a reconstruits
+avant le controle. C'est un comportement correct, mais il faut le savoir avant de conclure d'un
+« BUILD SUCCESSFUL » que le controle a vu quelque chose.
+
+Piege d'affichage retrouve : la console Windows en cp1252 rend les accents en « � » ; le script
+bascule `sys.stdout` en UTF-8 au demarrage, comme le recommande la note d'outillage du README.

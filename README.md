@@ -90,6 +90,22 @@ keytool -list -v -keystore _keystore/dualdesk-release.jks | grep 'SHA 256'
 1.10 is the first release signed with this key; the assets on the release page are the signed ones
 (`…-release.apk`, not `…-debug.apk`), and their SHA-256 is listed in the release notes.
 
+### Checking before publishing
+
+A release build **succeeds whether or not it was signed** — and `…-release.apk` exists either way.
+The signature is the one thing a compilation cannot vouch for, and its failure only shows up on the
+user's phone (`INSTALL_FAILED_UPDATE_INCOMPATIBLE`). So the last step before uploading is:
+
+```bash
+./gradlew :dualdesk-app:verifieSignatureRelease
+```
+
+It rebuilds, reads the certificate of both APKs and fails unless they carry the key above, naming
+the culprit otherwise (`MAUVAISE CLÉ`, `NON SIGNÉ`, `ABSENT`). The script behind it is
+`_check/verifie_signature.py`, usable alone on any APK: `python _check/verifie_signature.py mon.apk`.
+It is deliberately not part of `assembleRelease`: a fresh clone without `_keystore/` must still
+compile.
+
 ## Signer la publication
 
 `assembleDebug` ne demande aucune clé. `assembleRelease` signe avec la clé de publication du projet,
@@ -150,6 +166,23 @@ keytool -list -v -keystore _keystore/dualdesk-release.jks | grep 'SHA 256'
 
 La 1.10 est la première version signée par cette clé ; les fichiers de la page de release sont les
 signés (`…-release.apk`, et non `…-debug.apk`), et leur SHA-256 est donné dans les notes de version.
+
+### Contrôle avant publication
+
+Une construction de release **réussit qu'elle soit signée ou non** — et le fichier s'appelle
+`…-release.apk` dans les deux cas. La signature est la seule chose qu'une compilation ne peut pas
+garantir, et sa défaillance n'apparaît que sur le téléphone de l'utilisateur
+(`INSTALL_FAILED_UPDATE_INCOMPATIBLE`). D'où la dernière étape, avant tout envoi :
+
+```bash
+./gradlew :dualdesk-app:verifieSignatureRelease
+```
+
+Elle reconstruit, lit le certificat des deux APK et échoue si ce n'est pas la clé ci-dessus, en
+nommant le fautif (`MAUVAISE CLÉ`, `NON SIGNÉ`, `ABSENT`). Le script derrière est
+`_check/verifie_signature.py`, utilisable seul sur n'importe quel APK :
+`python _check/verifie_signature.py mon.apk`. Il reste volontairement hors de `assembleRelease` : un
+clone neuf, sans `_keystore/`, doit continuer de compiler.
 
 ## Exporting the access list: what happens to the RustDesk password
 
