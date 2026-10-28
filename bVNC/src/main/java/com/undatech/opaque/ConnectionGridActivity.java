@@ -852,8 +852,20 @@ public class ConnectionGridActivity extends AppCompatActivity implements GetText
         onResume();
     }
 
-    /** Hands the session to the installed RustDesk application. */
+    /**
+     * Opens a RustDesk session: embedded when this build carries the core, handed to the
+     * installed application otherwise.
+     *
+     * The embedded path is tried first because it is the only one where the application knows
+     * what the session is doing; the Intent chain stays as the fallback for builds without
+     * `librustdesk.so` (another ABI, or compiled without -Pdualdesk.rustdeskLib=...).
+     */
     private void launchRustDesk(ConnectionBean connection) {
+        if (com.dualdesk.rdp.RustDeskEmbedded.open(
+                this, connection.getAddress(), usablePassword(connection.getPassword()))) {
+            Log.i(TAG, "RustDesk session: embedded core");
+            return;
+        }
         LaunchOutcome outcome = new RustDeskLauncher(this)
                 .launch(connection.getAddress(), usablePassword(connection.getPassword()));
         if (outcome.getMessage() != null) {

@@ -115,8 +115,13 @@ application ne l'a pas » : `RateOrShareFragment` masque alors le bouton, et `Ut
 tient la même règle côté `ConnectionGridActivity`. Les autres applications du dépôt (aRDP, bVNC,
 aSPICE, Opaque) ne changent donc pas de comportement.
 
-Pour DualDesk : bogues et partage pointent vers `https://github.com/Endymi0n74/dualdesk` (+ `/issues`) ;
-forum, versions précédentes, « Plus d'applications » et adresse de contact sont vides, donc absents.
+Pour DualDesk : bogues et partage pointent vers `https://github.com/Endymi0n74/DualDesk`
+(+ `/issues`), le dépôt d'où le fork est réellement construit et publié — et non vers
+`DualDeskOld` (ex-`dualdesk`), qui est la réécriture Compose, un autre projet (autre paquet :
+`com.dualdesk` contre `com.dualdesk.rdp`). Depuis le 28/10/2026 le dépôt est **public** : ces deux
+liens s'ouvrent donc pour tout le monde (ils étaient réservés au propriétaire tant qu'il était
+privé).
+Le forum, les versions précédentes, « Plus d'applications » et l'adresse de contact sont vides, donc absents.
 Le don était déjà masqué (paquet sans « free ») et l'évaluation aussi (application installée hors Play).
 Le titre du menu devient « ⭐ Aide et partage » et le nom que le code donne à l'application RDP
 (`rdp_intro_title`) devient « DualDesk », en anglais et en français.
@@ -758,7 +763,7 @@ pas d'exécution.
 - `dualdesk-app/src/main/AndroidManifest.xml` : `versionName` `1.10-dualdesk`, `versionCode` 2
   (la 1.0.0 était en 1). Le suffixe `-dualdesk` est conservé : il fait partie de l'identité affichée,
   pas du numéro.
-- Release `v1.10` publiée (https://github.com/Endymi0n74/ardp/releases/tag/v1.10), tag poussé sur
+- Release `v1.10` publiée (https://github.com/Endymi0n74/DualDesk/releases/tag/v1.10), tag poussé sur
   `origin/master`. Assets **signés par la clé de publication** :
   `dualdesk-app-arm64-v8a-release.apk` (62 455 477 o,
   sha256 `305053980eaec6ea20ad21e0d412bd5671aa3e7398c69c940d6b194dad6c4a88`) et
@@ -884,3 +889,117 @@ avant le controle. C'est un comportement correct, mais il faut le savoir avant d
 
 Piege d'affichage retrouve : la console Windows en cp1252 rend les accents en « � » ; le script
 bascule `sys.stdout` en UTF-8 au demarrage, comme le recommande la note d'outillage du README.
+
+
+## Script de publication (28/10/2026)
+
+`publish-release.sh` (racine) : contrôles d'avant-vol, `:dualdesk-app:assembleRelease`, contrôle de
+signature, copie dans `_released/<tag>/`, notes de version (section du journal + tableau des
+SHA-256), tag annoté, poussée du tag, `gh release create`. La version est lue dans le manifeste :
+ce qui est publié est ce qui a été compilé. `--dry-run` s'arrête avant le tag ; `--skip-build`
+reprend avec les APK déjà produits — utile quand `gh release create` a échoué, puisque le tag est
+alors déjà en ligne et qu'une nouvelle exécution le retrouve sur HEAD (mode reprise).
+
+Trois pièges mesurés cette fois :
+
+- **`gh` ne vise pas ce dépôt.** Dans `ardp/`, `gh repo view` répond
+  `iiordanov/remote-desktop-clients` : la présence du remote `upstream` fait choisir l'amont au CLI.
+  Tous les appels portent donc `-R "$DEPOT"`, `$DEPOT` étant lu dans l'URL de `origin`, et le script
+  vérifie le droit d'écriture (`gh api repos/<depot> --jq .permissions.push`). Sans cela, le contrôle
+  « la release existe-t-elle déjà ? » interrogeait le mauvais dépôt.
+- **`gh repo view` n'accepte pas `-R`** (le dépôt y est un argument positionnel) : d'où `gh api`.
+- **`import verifie_signature` écrivait `_check/__pycache__/`**, ce qui salissait l'arbre et faisait
+  échouer le contrôle suivant du même script. L'empreinte est désormais lue dans la source par
+  expression régulière, et `__pycache__/` / `*.pyc` sont dans `.gitignore`.
+
+L'environnement par défaut ne suffit pas : `JAVA_HOME` désigne un JRE 11, qui ne compile pas une
+cible Java 21. Le script cherche un JDK au moins 21 (`JAVA_HOME`, `/usr/lib/jvm/*21*`,
+`/c/Program Files/Zulu/zulu-21`, …) et refuse de continuer s'il n'en trouve pas.
+
+Éprouvé sans rien publier : arbre sale, `_keystore/` absent, origin injoignable, commit absent de
+`origin/master`, tag déjà posé sur un autre commit, reprise quand le tag est sur HEAD, APK signé en
+débogage (arrêt avant toute copie), et chemin nominal en `--dry-run --skip-build` (notes, tailles,
+SHA-256). Non éprouvé : la création effective de la release GitHub, qui n'a pas été lancée.
+
+## Décision : ce dépôt est le produit (28/10/2026)
+
+Deux dépôts portent le nom DualDesk et se confondaient dans les liens comme dans les versions :
+`ardp` (celui-ci) et `dualdesk` (réécriture Compose). Le partage est désormais écrit, et il est
+partout : README des deux dépôts, ici.
+
+- **`ardp` livre.** C'est ici que les versions sont construites, signées par la clé de publication
+  et publiées. C'est aussi ici, et non dans le banc, que l'export emporte les mots de passe RustDesk
+  scellés derrière une phrase de passe (l'export de `dualdesk` ne contient aucun secret, par choix).
+  Les liens « partage » et « signaler un bug » pointent donc ici (`project_url_share`,
+  `project_url_bug_reports`), pas vers `dualdesk`. **Vérifié** : les deux scellent sous Keystore
+  (`KeystoreVault.kt` dans `dualdesk`), donc ce n'est pas le scellement qui distingue les deux, mais
+  la capacité de l'export à traverser d'un appareil à l'autre.
+- **`dualdesk` est le banc d'essai.** Public, AGPL-3.0, FreeRDP 3.x : il mesure la voie GFX/H.264,
+  le canal CLIPRDR et la session RustDesk embarquée. Il ne publie aucune version stable.
+- **Seul le savoir traverse, pas le code** : faire entrer du code AGPL-3.0 dans ce fork GPLv3 en
+  change la licence. Reporter une mesure, une cause racine ou un piège documenté, oui ; copier un
+  fichier, seulement si on décide de passer le fork en AGPL-3.0.
+- Conséquence pratique déjà rencontrée : les deux applications s'appellent `DualDesk` à l'écran et
+  cohabitent sur le téléphone (paquets `com.dualdesk.rdp` et `com.dualdesk`). Une capture d'écran ne
+  dit pas laquelle est ouverte — la vérifier par le paquet (`adb shell dumpsys activity | grep`).
+
+### Renommage et visibilité (28/10/2026)
+
+- GitHub : `ardp` → **`DualDesk`** (public), `dualdesk` → **`DualDeskOld`** (privé). Ordre
+  obligatoire : renommer `dualdesk` **d'abord**, sinon le nom `DualDesk` reste pris (les noms de
+  dépôt sont insensibles à la casse chez un même propriétaire).
+- **Collecte de casse a verifier dans les deux sens** : GitHub ne distinguant pas la casse, l'URL
+  `github.com/Endymi0n74/dualdesk` ne redirige **pas** vers `DualDeskOld` — elle sert ce dépôt-ci,
+  `DualDesk` (vérifié : HTTP 200, titre du fork). Tout ancien lien en minuscules pointe donc
+  désormais vers le fork, pas vers le banc. `.../DualDeskOld` anonyme renvoie bien 404 (privé).
+- `origin` des deux clones locaux a été réécrit en conséquence. Le **répertoire de travail reste
+  `D:/Codex/ardp`** : `build-run.sh`, `publish-release.sh` et les mémoires y réfèrent par chemin, un
+  renommage du dossier casserait tout sans rien apporter. `publish-release.sh` lit le dépôt dans
+  l'URL d'`origin`, il suit donc le renommage sans modification.
+- **Adresse personnelle retirée de l'historique (28/10/2026, après la mise en public).** Onze
+  commits de la queue portaient l'auteur (et le committer) avec l'adresse personnelle, et les deux
+  tags annotés la portaient en tagger. Les onze commits ont été **rejoués** avec l'identité noreply
+  du compte (`102302606+Endymi0n74@users.noreply.github.com`), `git commit-tree` conservant arbre,
+  message et dates ; les tags `v1.0.0` et `v1.10` ont été recréés sur leurs nouvelles cibles avec la
+  même date de tagger. `master` et les deux tags ont ensuite été poussés en force.
+  - **Vérifié** : arbre de la tête identique avant/après (`a7797364…`), messages et 11 dates
+    d'auteur identiques, aucune adresse dans les métadonnées de `master` ni des tags ; l'API GitHub
+    renvoie la noreply sur les dix derniers commits ; les deux releases gardent leurs deux assets.
+  - **Non vérifiable / hors de portée** : les anciens commits restent joignables par leur SHA chez
+    GitHub un certain temps, et une copie déjà clonée ou un miroir peut les garder. Le nettoyage
+    local est complet (reflogs expirants + `gc --prune=now`, ancien commit absent du dépôt).
+- Le reste a été vérifié : aucun keystore, aucun `.env` réel (le `.env` suivi contient la ligne
+  `docker/.env` de l'amont), aucune adresse IP réelle (`192.0.2.10` est du TEST-NET), et les 21
+  fichiers de `preuve-poco/` ne contiennent ni identifiant ni bureau réel.
+
+## Cœur RustDesk embarqué, absorbé depuis `dualdesk` (28/10/2026)
+
+Le banc `dualdesk` (aujourd'hui supprimé) portait une chose que le fork n'avait pas : un cœur
+RustDesk **dans son processus**. Il est maintenant ici, dans le fork, et `dualdesk` a disparu.
+
+- Ce qui est venu du banc : la recette `scripts/compile-rustdesk-android.sh` (copiée telle quelle,
+  avec ses dix pièges commentés), le `.so` déjà compilé, et le **contrat JNI** — les symboles sont
+  `Java_com_dualdesk_rdp_RustDeskNative_*`, donc le paquet `com.dualdesk.rdp` est imposé : le
+  renommer donnerait un `UnsatisfiedLinkError` à la première session.
+- Ce qui a été écrit ici : la façade Kotlin (`RustDeskNative`), la session et le rendu
+  (`RustDeskEmbeddedActivity`, Java, sans coroutines — le fork n'en a pas), le point d'entrée
+  `RustDeskEmbedded`, et le câblage dans `ConnectionGridActivity.launchRustDesk` : embarqué d'abord,
+  report par Intent **en repli** si la bibliothèque est absente.
+- La bibliothèque **n'est pas versionnée** (32 Mo). Elle passe par
+  `-Pdualdesk.rustdeskLib=<chemin>`, copiée dans `build/rustdeskJni` (dossier généré, jamais `src/`),
+  et ce dossier est une source set `jniLibs`. Sans la propriété, l'APK est celui de la 1.10.
+- **Vérifié** : `assembleDebug` passe avec le cœur ; `lib/arm64-v8a/librustdesk.so`
+  (32 868 352 octets) dans l'APK ; activité présente dans le manifeste fusionné ; classes dans
+  `classes2.dex` ; et les **16** méthodes `external` de la façade correspondent aux **16** symboles
+  exportés (`llvm-nm -D`). APK annoncé `com.dualdesk.rdp` `1.11-dualdesk` `versionCode 3`.
+- **Non vérifié** : aucune session réelle ouverte depuis le fork (POCO débranché, et un émulateur
+  x86_64 ne peut pas charger une bibliothèque arm64). Gestes, rendu et reprise après perte de
+  surface restent à confirmer sur appareil.
+- **Piège de build payé au passage** : Kotlin compilait en cible 17 alors que `compileOptions`
+  demande 21, ce qui faisait refuser la compilation par Gradle ; `build-run.sh` contournait avec
+  `-D kotlin.jvm.target.validation.mode=warning`, drapeau qui ne s'applique pas comme prévu. C'est
+  réglé à la racine (`subprojects { ... jvmTarget JVM_21 }`). Deuxième piège : le JDK — la cible 21
+  exige un JDK 21, et `JAVA_HOME` pointait vers un JRE/JDK 17.
+- **Licence** : le cœur est AGPL-3.0 (`LICENCE-RustDesk.txt`). Une build qui l'embarque est
+  distribuée sous AGPL-3.0 **dans son ensemble** ; sans le cœur, elle reste GPLv3. C'est la première
+  fois que le fork change de licence selon la build : à dire clairement au moment de publier.

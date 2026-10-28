@@ -5,10 +5,44 @@ This repository is a fork of [iiordanov/remote-desktop-clients](https://github.c
 RustDesk accesses as well. The state of each feature and the measurements behind it are in
 [RAPPORT.md](RAPPORT.md) (French); known traps and tooling are in [memory.md](memory.md).
 
+## This repository is the product
+
+**DualDesk ships from here.** This fork is where versions are built, signed with the project's
+publication key and published — 1.10 today. It was called `ardp` until 28/10/2026: GitHub redirects
+the old URL, so existing clones keep fetching. It is also the one whose export carries the sealed
+RustDesk passwords behind a passphrase, so they can be restored on another device; the bench's own
+export deliberately carries no secret at all, not even after transferring.
+
+The sibling repository [DualDeskOld](https://github.com/Endymi0n74/DualDeskOld) (`com.dualdesk`,
+AGPL-3.0) is the **research bench**: a Compose rewrite on FreeRDP 3.x, where the GFX/H.264 path and
+the embedded RustDesk session are measured against real hosts. It ships no stable release; what it
+proves comes back here as a measurement, not as shipped code. Copying *code* from it would move this
+fork from GPLv3 to AGPL-3.0, so by default only knowledge crosses.
+
+Two applications both named `DualDesk` can sit side by side on one phone, since their packages
+differ. The icon users install is the one built here.
+
+## Ce dépôt est le produit
+
+**DualDesk est livré d'ici.** Ce fork est l'endroit où les versions sont construites, signées avec la
+clé de publication du projet et publiées — la 1.10 aujourd'hui. Il s'appelait `ardp` jusqu'au
+28/10/2026 : GitHub redirige l'ancienne URL, les clones existants continuent donc de fonctionner. C'est aussi celui dont l'export
+emporte les mots de passe RustDesk scellés derrière une phrase de passe, donc restaurables sur un
+autre appareil ; l'export du banc, lui, ne contient aucun secret, même pas de façon transférable.
+
+Le dépôt voisin [DualDeskOld](https://github.com/Endymi0n74/DualDeskOld) (`com.dualdesk`, AGPL-3.0) est le
+**banc d'essai** : une réécriture Compose sur FreeRDP 3.x, où la voie GFX/H.264 et la session
+RustDesk embarquée sont mesurées contre de vrais postes. Il ne publie aucune version stable ; ce
+qu'il prouve revient ici sous forme de mesure, pas de code livré. Copier du *code* depuis lui ferait
+passer ce fork de GPLv3 à AGPL-3.0 : par défaut, seul le savoir traverse.
+
+Deux applications nommées `DualDesk` peuvent cohabiter sur un même téléphone, leurs paquets
+différant. Celle que les utilisateurs installent est celle construite ici.
+
 ## Version and releases
 
 The current version is **1.10** (`versionName` `1.10-dualdesk`, `versionCode` 2), published on the
-[Releases](https://github.com/Endymi0n74/ardp/releases/tag/v1.10) page with two assets:
+[Releases](https://github.com/Endymi0n74/DualDesk/releases/tag/v1.10) page with two assets:
 `dualdesk-app-arm64-v8a-release.apk` for any recent phone, and `dualdesk-app-universal-release.apk`
 when the ABI is unknown. What changed since the previous milestone is in
 [CHANGELOG.md](CHANGELOG.md).
@@ -22,7 +56,7 @@ the sealed RustDesk passwords**: export with a passphrase before doing it.
 ## Version et publications
 
 La version courante est la **1.10** (`versionName` `1.10-dualdesk`, `versionCode` 2), publiée sur la
-page [Releases](https://github.com/Endymi0n74/ardp/releases/tag/v1.10) avec deux fichiers :
+page [Releases](https://github.com/Endymi0n74/DualDesk/releases/tag/v1.10) avec deux fichiers :
 `dualdesk-app-arm64-v8a-release.apk` pour tout téléphone récent, et
 `dualdesk-app-universal-release.apk` quand l'ABI est inconnue. Ce qui a changé depuis le jalon
 précédent est dans [CHANGELOG.md](CHANGELOG.md).
@@ -106,6 +140,28 @@ the culprit otherwise (`MAUVAISE CLÉ`, `NON SIGNÉ`, `ABSENT`). The script behi
 It is deliberately not part of `assembleRelease`: a fresh clone without `_keystore/` must still
 compile.
 
+### Publishing in one command
+
+`publish-release.sh` runs the whole sequence — preflight, build, signature check, copy, tag, GitHub
+release — and stops at the first refusal:
+
+```bash
+./publish-release.sh                # build, verify, tag, publish
+./publish-release.sh --dry-run      # build and verify, but push and publish nothing
+./publish-release.sh --skip-build   # resume after a release creation that failed
+```
+
+The version is not an argument: it is read from `versionName` in
+`dualdesk-app/src/main/AndroidManifest.xml`, so what gets published is what was compiled. Before
+building anything it refuses a dirty tree, a commit that is not on `origin/master`, a version whose
+tag already exists, a missing `_keystore/`, and a version with no section in `CHANGELOG.md`. The
+release notes are that changelog section plus the per-file SHA-256 the script measured on the files
+it copied.
+
+Every `gh` call passes `-R <origin>`: in this checkout `gh` resolves to the **upstream** repository
+(`iiordanov/remote-desktop-clients`) rather than the fork, so a release created without it would
+land somewhere else.
+
 ## Signer la publication
 
 `assembleDebug` ne demande aucune clé. `assembleRelease` signe avec la clé de publication du projet,
@@ -184,6 +240,50 @@ nommant le fautif (`MAUVAISE CLÉ`, `NON SIGNÉ`, `ABSENT`). Le script derrière
 `python _check/verifie_signature.py mon.apk`. Il reste volontairement hors de `assembleRelease` : un
 clone neuf, sans `_keystore/`, doit continuer de compiler.
 
+### Publier en une commande
+
+`publish-release.sh` enchaîne toute la séquence — contrôles, construction, vérification de signature,
+copie, tag, release GitHub — et s'arrête au premier refus :
+
+```bash
+./publish-release.sh                # construire, vérifier, taguer, publier
+./publish-release.sh --dry-run      # construire et vérifier, sans rien pousser ni publier
+./publish-release.sh --skip-build   # reprendre après une création de release qui a échoué
+```
+
+La version n'est pas un argument : elle est lue dans `versionName` de
+`dualdesk-app/src/main/AndroidManifest.xml`, donc ce qui est publié est ce qui a été compilé. Avant
+de construire quoi que ce soit, il refuse un arbre sale, un commit absent de `origin/master`, une
+version dont le tag existe déjà, un `_keystore/` manquant, et une version sans section dans
+`CHANGELOG.md`. Les notes de version sont cette section du journal, plus le SHA-256 que le script a
+lui-même mesuré sur les fichiers copiés.
+
+Chaque appel à `gh` porte `-R <origin>` : dans ce dossier, `gh` résout vers le dépôt **amont**
+(`iiordanov/remote-desktop-clients`) et non vers le fork — une release créée sans cela partirait
+ailleurs.
+
+## The embedded RustDesk core
+
+From 1.11, a RustDesk access can be opened **inside this application**: the RustDesk core
+(`librustdesk`) is linked over JNI, decodes the frames and hands them to our own surface. No third
+party application is started, and the session becomes observable — state, desktop size, frame rate.
+The Intent hand-off of 1.10 stays as the **fallback**, used whenever the library is not in the APK.
+
+The library is a 32 MB arm64-v8a artifact and is **not** versioned. A build that wants it passes the
+file explicitly:
+
+```bash
+./gradlew :dualdesk-app:assembleRelease \
+    -Pdualdesk.rustdeskLib=/path/to/librustdesk.so
+```
+
+Without it the APK simply has no core and the grid keeps handing the session to RustDesk — the 1.10
+behaviour. Limits, licence consequence and build recipe: [docs/RUSTDESK-NATIF.md](docs/RUSTDESK-NATIF.md)
+(French). Short version: arm64-v8a only, physical keyboard only, no clipboard, no hardware H.264.
+
+The core is **AGPL-3.0** (`LICENCE-RustDesk.txt`), so a build that embeds it is distributed under
+AGPL-3.0 as a whole; a build without it stays GPLv3 like the fork upstream.
+
 ## Exporting the access list: what happens to the RustDesk password
 
 A RustDesk password is stored **sealed** under a key of the Android Keystore. That key never leaves
@@ -215,6 +315,30 @@ without a device:
 ```bash
 ./gradlew :bVNC:testDebugUnitTest --tests "com.dualdesk.rustdesk.*" --offline
 ```
+
+## Le cœur RustDesk embarqué
+
+Depuis la 1.11, un accès RustDesk s'ouvre **dans l'application** : le cœur RustDesk
+(`librustdesk`) est lié par JNI, décode les images et les remet à notre propre surface. Aucune
+application tierce n'est lancée, et la session devient observable — état, taille du bureau, images
+par seconde. Le report par Intent de la 1.10 reste le **repli**, utilisé dès que la bibliothèque
+n'est pas dans l'APK.
+
+La bibliothèque est un artefact arm64-v8a de 32 Mo, **non versionné**. Une build qui la veut désigne
+le fichier explicitement :
+
+```bash
+./gradlew :dualdesk-app:assembleRelease \
+    -Pdualdesk.rustdeskLib=/chemin/vers/librustdesk.so
+```
+
+Sans cela l'APK n'a simplement pas de cœur et la grille continue de remettre la session à RustDesk —
+le comportement de la 1.10. Limites, conséquence de licence et recette de compilation :
+[docs/RUSTDESK-NATIF.md](docs/RUSTDESK-NATIF.md). En bref : arm64-v8a seulement, clavier physique
+seulement, pas de presse-papiers, pas de H.264 matériel.
+
+Le cœur est en **AGPL-3.0** (`LICENCE-RustDesk.txt`) : une build qui l'embarque est distribuée sous
+AGPL-3.0 dans son ensemble ; une build sans lui reste en GPLv3 comme l'amont du fork.
 
 ## Export des accès : ce que devient le mot de passe RustDesk
 

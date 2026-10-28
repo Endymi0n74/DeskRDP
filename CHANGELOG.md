@@ -1,7 +1,44 @@
 # Journal des versions / Changelog
 
-Les versions publiées sont sur la page [Releases](https://github.com/Endymi0n74/ardp/releases).
-Published builds live on the [Releases](https://github.com/Endymi0n74/ardp/releases) page.
+Les versions publiées sont sur la page [Releases](https://github.com/Endymi0n74/DualDesk/releases).
+Published builds live on the [Releases](https://github.com/Endymi0n74/DualDesk/releases) page.
+
+## 1.11 — 28 octobre 2026
+
+### Français
+
+- **Le cœur RustDesk est embarqué.** Un accès RustDesk peut s'ouvrir dans l'application : la
+  bibliothèque native est liée par JNI, décode les images et les rend à notre surface. La session
+  devient observable (état, taille du bureau, images par seconde) au lieu d'être remise à
+  l'application RustDesk, qui ne rendait aucun compte. Le report par Intent reste le repli quand la
+  bibliothèque n'est pas dans l'APK.
+- **Limites connues, dites telles quelles** : arm64-v8a seulement (32 Mo de bibliothèque), clavier
+  physique seulement — pas de clavier logiciel —, pas de presse-papiers, pas de H.264 matériel.
+  Détail et recette de compilation : `docs/RUSTDESK-NATIF.md`.
+- **Licence** : le cœur est en AGPL-3.0, donc une build qui l'embarque est distribuée sous AGPL-3.0
+  dans son ensemble. Une build sans le cœur reste en GPLv3.
+- **Cible JVM unifiée** : Kotlin restait en cible 17 alors que Java demande 21, ce qui obligeait à
+  contourner le contrôle de Gradle (`kotlin.jvm.target.validation.mode=warning`). Le désaccord est
+  réglé à la racine, et le contournement n'est plus nécessaire.
+- `versionCode` 2 → 3. Les accès existants, leurs mots de passe scellés et l'export avec phrase de
+  passe sont inchangés.
+
+### English
+
+- **The RustDesk core is embedded.** A RustDesk access can open inside the application: the native
+  library is linked over JNI, decodes frames and draws them on our surface. The session becomes
+  observable (state, desktop size, frame rate) instead of being handed to the RustDesk app, which
+  reported nothing back. The Intent hand-off remains the fallback when the library is absent.
+- **Known limits, stated plainly**: arm64-v8a only (a 32 MB library), physical keyboard only — no
+  on-screen keyboard —, no clipboard, no hardware H.264. Details and build recipe:
+  `docs/RUSTDESK-NATIF.md` (French).
+- **Licence**: the core is AGPL-3.0, so a build embedding it is distributed under AGPL-3.0 as a
+  whole. A build without the core stays GPLv3.
+- **Unified JVM target**: Kotlin stayed on 17 while Java asks for 21, which forced the Gradle check
+  to be bypassed (`kotlin.jvm.target.validation.mode=warning`). The mismatch is fixed at the root
+  and the workaround is no longer needed.
+- `versionCode` 2 → 3. Existing accesses, their sealed passwords and the passphrase export are
+  unchanged.
 
 ## 1.10 — 28 octobre 2026
 

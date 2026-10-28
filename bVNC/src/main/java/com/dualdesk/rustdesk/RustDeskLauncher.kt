@@ -28,9 +28,9 @@ data class LaunchOutcome(
  * Hands a RustDesk session to the installed RustDesk application.
  *
  * This class does not speak the RustDesk protocol: it prepares the session (device id, and the
- * password when one is known) and lets the upstream application take over. The alternative —
- * embedding librustdesk through JNI — is a much larger commitment than a launcher, and the
- * launcher is what a connection manager actually needs.
+ * password when one is known) and lets the upstream application take over. Since 1.11 it is the
+ * **fallback**: when the APK carries the embedded core (`com.dualdesk.rdp.RustDeskEmbedded`), the
+ * grid opens the session in-process and never reaches this class.
  *
  * The order of the attempts lives in [RustDeskLaunchChain], which is free of Android imports and
  * therefore exercised by plain JVM tests; this class only supplies the Android transport.

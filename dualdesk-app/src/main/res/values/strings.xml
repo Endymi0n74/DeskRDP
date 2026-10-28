@@ -10,8 +10,8 @@
 <resources>
     <string name="action_rate_or_share_app">⭐ Help and share</string>
     <string name="rdp_intro_title">DualDesk: a remote desktop client</string>
-    <string name="project_url_bug_reports" translatable="false">https://github.com/Endymi0n74/dualdesk/issues</string>
-    <string name="project_url_share" translatable="false">https://github.com/Endymi0n74/dualdesk</string>
+    <string name="project_url_bug_reports" translatable="false">https://github.com/Endymi0n74/DualDesk/issues</string>
+    <string name="project_url_share" translatable="false">https://github.com/Endymi0n74/DualDesk</string>
     <string name="project_url_help_forum" translatable="false"></string>
     <string name="project_url_releases" translatable="false"></string>
     <string name="project_url_more_apps" translatable="false"></string>

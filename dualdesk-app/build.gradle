@@ -19,6 +19,23 @@ apply plugin: 'com.android.application'
  * Quand le fichier est absent — clone neuf, machine de compilation — le variant release est
  * simplement non signe : `assembleDebug` continue de fonctionner comme avant.
  */
+/*
+ * Embedded RustDesk core.
+ *
+ * The heart is a 32 MB arm64-v8a shared library produced by
+ * `rustdesk-src` (see docs/RUSTDESK-NATIF.md). It is NOT versioned: the repository is a client, not
+ * a binary dump, and the library is reproducible from its sources. A build that wants the embedded
+ * session passes the file explicitly:
+ *
+ *     ./gradlew :dualdesk-app:assembleRelease \
+ *         -Pdualdesk.rustdeskLib=/path/to/librustdesk.so
+ *
+ * Without the property the APK simply has no `librustdesk.so`: the grid then keeps handing the
+ * session to the installed RustDesk application, which is the behaviour of 1.10.
+ */
+def rustdeskLib = project.findProperty('dualdesk.rustdeskLib')
+def rustdeskJniDir = layout.buildDirectory.dir('rustdeskJni')
+
 def keystorePropsFile = rootProject.file('_keystore/keystore.properties')
 def keystoreProps = new java.util.Properties()
 if (keystorePropsFile.exists()) {
@@ -76,9 +93,37 @@ android {
     }
 
     namespace 'com.dualdesk.rdp'
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs += rustdeskJniDir
+        }
+    }
+
     lint {
         disable 'Instantiatable'
     }
+}
+
+/*
+ * Places the core where Android expects it: lib/arm64-v8a/librustdesk.so.
+ *
+ * The task is a no-op when the property is absent, so the ordinary build stays unchanged; when it
+ * is present, `preBuild` copies the file into the generated directory, which is itself a source
+ * set — nothing is written into `src/`, so the tree stays clean.
+ */
+tasks.register('copieRustDeskLib', Copy) {
+    group = 'dualdesk'
+    description = 'Copie librustdesk.so (arm64-v8a) dans les jniLibs du variant, si fournie.'
+    if (rustdeskLib) {
+        from file(rustdeskLib)
+        rename { 'librustdesk.so' }
+        into rustdeskJniDir.map { it.dir('arm64-v8a') }
+    }
+}
+
+tasks.named('preBuild') {
+    dependsOn 'copieRustDeskLib'
 }
 
 /*

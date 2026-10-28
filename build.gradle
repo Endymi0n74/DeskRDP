@@ -27,3 +27,22 @@ ext {
     targetApi = properties.get('TARGET_API', 36)
     minApi = properties.get('MIN_API', 21)
 }
+
+/*
+ * Aligne la cible JVM des taches Kotlin sur celle des taches Java (21).
+ *
+ * Sans cela Kotlin reste a sa valeur par defaut (17) alors que `compileOptions` demande 21 pour
+ * chaque module : Gradle refuse la compilation (« Inconsistent JVM Target Compatibility ») et il
+ * fallait jusqu'ici passer `kotlin.jvm.target.validation.mode=warning` pour contourner le
+ * controle. Le desaccord reste alors invisible jusqu'a l'execution, sous forme de
+ * `UnsupportedClassVersionError`. Une seule cible, declaree une seule fois.
+ */
+subprojects { subproject ->
+    subproject.plugins.withId('org.jetbrains.kotlin.android') {
+        subproject.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile).configureEach {
+            compilerOptions {
+                jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+            }
+        }
+    }
+}

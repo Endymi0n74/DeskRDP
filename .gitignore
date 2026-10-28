@@ -227,3 +227,7 @@ venv
 
 # Cle de publication : jamais dans l historique.
 _keystore/
+
+# Caches Python des contrôles (_check/)
+__pycache__/
+*.pyc
