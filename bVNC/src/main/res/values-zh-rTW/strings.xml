@@ -807,7 +807,7 @@ aSPICE對應的功能如下：
     <string name="pref_keyboard_type_label_TYPE_NULL">默認(TYPE_NULL)</string>
     <string name="pref_keyboard_type_label_VISIBLE_PASSWORD">沒有文字／數字的提示功能 (VISIBLE_PASSWORD)</string>
     <string name="pref_keyboard_type_label_TYPE_CLASS_TEXT">有文字提示功能 (TYPE_CLASS_TEXT)</string>
-    <string name="no_application_to_handle_vpn">此連線設定為透過外部應用程式啟動VPN。 您需要安裝像Morpheusly這樣的應用程式才能啟動它。</string>
+    <string name="no_application_to_handle_vpn">此連線設定為透過外部應用程式啟動VPN。 您需要安裝該 VPN 應用程式才能啟動它。</string>
     <string name="vnc_viewer_started">VNC檢視器已啟動</string>
     <string name="enable_gateway">"啟動 RDP Gateway "</string>
     <string name="scroll_speed">觸控捲動速度</string>
@@ -897,11 +897,6 @@ aSPICE對應的功能如下：
     <string name="svnc_encryption_offered_title">伺服器提供加密</string>
     <string name="svnc_encryption_offered_message">伺服器支援 SecureVNCPlugin 加密，但您未在連線設定中啟用它。\n\n不使用加密連線表示您的工作階段資料（包括憑證）將以明文傳輸。\n\n要啟用加密，請取消並在連線設定中勾選「要求 SecureVNCPlugin 加密」。</string>
     <string name="error_securevncplugin_server_requires_encryption">伺服器僅提供加密連線類型 (SecureVNCPlugin)，但您的連線設定中未啟用加密。請啟用「要求 SecureVNCPlugin 加密」以連線到此伺服器。</string>
-    <string name="morpheusly_cta_title">從任何地方存取您的計算機</string>
-    <string name="morpheusly_cta_dismiss">現在不要</string>
-    <string name="action_morpheusly">獲取Morpheusly</string>
-    <string name="morpheusly_cta_body">透過零網路設定透過網際網路進行安全的遠端桌面存取。在您想要存取的每台電腦上安裝 Morpheusly 桌面應用程式、登入並查看哪些電腦在線上並透過 Morpheusly 行動應用程式無縫連接。</string>
-    <string name="morpheusly_cta_download">獲取Morpheusly</string>
     <string name="connection_add_shortcut">新增至主畫面</string>
     <string name="shortcut_not_supported">此啟動器不支援釘選捷徑。</string>
 </resources>

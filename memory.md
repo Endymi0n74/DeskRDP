@@ -134,8 +134,8 @@ utilisé, `am start` ne reprenait pas le premier plan (le verrou n'est pas conto
   variante** dans les ressources partagées : `rdp_intro_text` (dialogue de bienvenue jamais montré
   ici), `pro_feature_rdp`, `ad_donate_*`, et `freeardp_app_name` — cette dernière nomme
   `freeaRDP-app`, une autre application du même dépôt, à ne pas renommer.
-- Le **bouton Morpheusly** de la barre d'action (toujours visible) fait la promotion d'un produit
-  tiers du même auteur. Ce n'est pas aRDP ; laissé en place faute de demande.
+- Le bouton **Morpheusly** de la barre d'action a été retiré, puis la fonction entière avec lui
+  (voir « Morpheusly retiré du fork » en fin de fichier).
 - Les traductions autres que l'anglais et le français gardent les libellés d'origine (par exemple
   le titre du menu « évaluer/partager » en espagnol) : ce sont des étiquettes, pas des liens.
 - Les deux stratégies de repli (activité, presse-papiers) sont désormais exercées **sur banc JVM**
@@ -687,3 +687,99 @@ Keystore, ce qui valide le format et la composition, pas le magasin de clés d'A
 Ce qui n'est pas prouvé : le comportement **sur le POCO** (création, modification, relance d'un accès
 scellé, et migration d'un accès existant). Le banc JVM couvre le format et l'aller-retour, pas le
 Keystore d'un appareil réel ; l'essai est à faire au retour du téléphone.
+
+## Morpheusly retiré du fork (28/10/2026)
+
+Motif : dernier résidu de l'application d'origine. L'icône « Obtenez Morpheusly » occupait un
+emplacement **permanent** de la barre d'action de la grille (`showAsAction="always"`), à côté de la
+recherche et de l'overflow, pour une fonction que le fork n'utilise pas.
+
+Fait en deux temps, parce que la demande l'a été : d'abord le bouton (diff de deux fichiers), puis la
+fonction entière — feuille, layout, icône, chaînes — une fois la suppression complète demandée.
+
+- `grid_view_activity_actions.xml` : l'élément `actionMorpheusly` est retiré (9 entrées → 8) ;
+- `ConnectionGridActivity` : le handler `openMorpheusly`, l'import `MorpheuslyBottomSheet` et le
+  contournement de teinte (`MenuItemCompat.setIconTintList(morpheusly, null)`, qui n'avait de sens
+  que pour cette icône multicolore) disparaissent avec lui ; dans `launchConnection`, la branche
+  `ActivityNotFoundException` n'ouvre plus `market://search?q=pub:"Morpheusly"` — le Snackbar
+  `no_application_to_handle_vpn` reste, mais l'utilisateur n'est plus renvoyé vers la fiche Play de
+  l'application d'origine ;
+- fichiers supprimés : `bVNC/.../dialogs/MorpheuslyBottomSheet.java`,
+  `res/layout/morpheusly_bottom_sheet.xml`, `res/drawable/ic_morpheusly.xml` ;
+- chaînes : `action_morpheusly` et `morpheusly_cta_{title,body,download,dismiss}` retirées de
+  **53 fichiers** `values*/strings.xml`, soit 265 lignes (5 par fichier, aucun fichier n'a rien perdu
+  d'autre) ;
+- `no_application_to_handle_vpn` : la marque disparaît des **53 langues**. Ce n'était pas une
+  chaîne à supprimer (le message reste nécessaire quand une connexion VPN n'a pas d'application
+  pour la prendre en charge) mais une phrase à réécrire : seule la clause qui nommait l'application
+  a été remplacée, par « cette application VPN » dans la langue du fichier, le reste de la
+  traduction d'origine étant conservé. Deux exceptions, réécrites entièrement : `gu`, dont la
+  phrase était un charabia (« આ connection external app VPN launch set… »), et `pt-rBR`, restée en
+  anglais. `es` était tronquée (première phrase seulement) et a été complétée. Piège rencontré :
+  dans `bg` et `tr` la valeur commence **à la ligne suivante**, donc une recherche ligne à ligne
+  les rate — c'est un `grep` sur le nom de la marque, pas sur `name=`, qui les a rattrapées.
+
+Reste volontairement en place, avec la raison :
+
+- `support@morpheusly.com` (`project_email_support`) : adresse de contact de l'amont, toujours
+  fonctionnelle ; la retirer supprimerait un moyen d'écrire à l'auteur du code d'origine ;
+- le **paquet** `com.morpheusly.common` (module `common`, `namespace 'com.morpheusly.common'`) :
+  homonyme sans rapport avec le bouton, dont le renommage toucherait des dizaines d'`import` dans
+  les activités RDP, SPICE et VNC.
+
+Mesure :
+
+- `:dualdesk-app:assembleDebug` : **BUILD SUCCESSFUL**, ressources compilées (c'est le vrai test ici,
+  puisqu'une chaîne retirée alors qu'un layout la référence casse `processDebugResources`) ;
+- dans l'APK, `aapt2 dump resources` ne contient plus ni `id/actionMorpheusly`, ni
+  `string/action_morpheusly`, ni `layout/morpheusly_bottom_sheet`, ni `drawable/ic_morpheusly`, ni
+  aucune occurrence de la marque — seule reste l'adresse `support@morpheusly.com` ;
+- `aapt2 dump xmltree` sur `res/menu/grid_view_activity_actions.xml` : 8 `item` ;
+- écran : AVD `dd-verif` (image android-34 x86_64, `ANDROID_AVD_HOME=D:/Codex/android-tools/avd`,
+  donc **rien dans `C:`** ; `-no-window -gpu swiftshader_indirect`, WHPX), APK
+  `dualdesk-app-x86_64-debug.apk` installé. Captures
+  `android-tools/witness/dualdesk-grille-sans-morpheusly.png` et `dualdesk-menu-sans-morpheusly.png` :
+  barre d'action inchangée pour le reste, menu ⋮ à 8 entrées, « New RustDesk access » toujours entre
+  « New Connection » et « Help and share », `AndroidRuntime:E` vide.
+
+Toujours pas vérifié sur le POCO : le téléphone était branché mais `adb` le voyait `unauthorized`
+(l'invite « Autoriser le débogage USB » n'avait pas été acceptée sur l'appareil). L'émulateur dit que
+l'écran se construit et s'affiche ; il ne dit rien du Keystore ni du chemin RustDesk, qui restent à
+éprouver sur l'appareil.
+
+Note d'outillage : `./gradlew :dualdesk-app:assembleDebug` avec `JAVA_HOME` sur Zulu 21 suffit, sans
+patcher `common/build.gradle` — le fichier tel qu'il est versionné compile. `build-run.sh`, lui, ne
+peut pas aboutir : sa vérification cherche `jvmTarget = "21"` (valeur entre guillemets) alors que le
+fichier écrit `jvmTarget = 21`, donc il restaure et sort en code 2 avant Gradle. Constat de lecture,
+pas d'exécution.
+
+## Publication de la 1.10 (28/10/2026)
+
+- `dualdesk-app/src/main/AndroidManifest.xml` : `versionName` `1.10-dualdesk`, `versionCode` 2
+  (la 1.0.0 était en 1). Le suffixe `-dualdesk` est conservé : il fait partie de l'identité affichée,
+  pas du numéro.
+- Assets publiés, comme pour la 1.0.0 : `dualdesk-app-arm64-v8a-debug.apk` et
+  `dualdesk-app-universal-debug.apk`, copies dans `_released/v1.10/`.
+- `CHANGELOG.md` créé (bilingue, 1.10 puis 1.0.0) ; le README gagne une section « Version and
+  releases » / « Version et publications » qui pointe la page de release et le journal.
+
+**Piège majeur, à ne pas repayer : la clé de signature a changé.** `~/.android/debug.keystore` a été
+recréé le 28/10 à 20:31 (le dossier `~/.android` lui-même date de 18:14), donc la 1.10 est signée
+par un certificat différent de celui de la 1.0.0 publiée :
+
+| | certificat SHA-256 |
+|---|---|
+| 1.0.0 publiée | `021c5d573307945705af6c66e8cf3c361bec04cb926452efb04cb0c63df70a65` |
+| 1.10 | `9277aa137025267495f5e0bf64f89d70aae730875ac586d2666d63ec203e492f` |
+
+Conséquence mesurée, pas supposée : la 1.10 ne s'installe pas par-dessus une 1.0.0
+(`INSTALL_FAILED_UPDATE_INCOMPATIBLE`), et la désinstallation qui débloque la situation **détruit les
+clés du Keystore**, donc les mots de passe RustDesk scellés. C'est écrit dans le README et dans le
+journal des versions, avec le conseil d'exporter avec phrase de passe avant.
+
+La clé d'origine est perdue : aucune trace d'un `debug.keystore` ailleurs (ni dans le profil
+utilisateur ni sur le disque de travail, vérifié par recherche). Tant que la publication se fait avec
+la clé de débogage, **chaque nouvelle
+machine ou chaque nettoyage du profil casse la mise à jour**. Le remède — une clé de publication
+stable, conservée hors dépôt avec son mot de passe — n'a pas été créé ici : c'est une décision de
+garde de clé, pas un détail de build.

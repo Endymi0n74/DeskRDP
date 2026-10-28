@@ -464,7 +464,7 @@ a) RDP, ktorý sa pripája priamo k počítaču cez protokol RDP.
     <string name="more_apps">Viac aplikácií 📱</string>
     <string name="auto_x_disabled">Zakázané</string>
     <string name="pro_feature_mfa">Zdá sa, že váš server má povolenú viacfaktorovú autentifikáciu. Podporte projekt zakúpením verzie Pro, ktorá túto funkciu podporuje. V úvodnom dialógovom okne je k dispozícii odkaz na verziu Pro.</string>
-    <string name="no_application_to_handle_vpn">Toto pripojenie je nastavené na spustenie VPN cez externú aplikáciu. Na spustenie si musíte nainštalovať aplikáciu ako Morpheusly.</string>
+    <string name="no_application_to_handle_vpn">Toto pripojenie je nastavené na spustenie VPN cez externú aplikáciu. Na spustenie si musíte nainštalovať tú VPN aplikáciu.</string>
     <string name="port_caption_ssh">Port SSH</string>
     <string name="arrow_down">Šípka dole</string>
     <string name="pro_feature_spice">Zdá sa, že ste sa pokúsili otvoriť súbor .vv. Ak chcete uložiť pripojenia k Proxmox alebo oVirt priamo v aplikácii a tiež chcete otvárať súbory .vv, zvážte nákup Opaque. Ak potrebujete iba podporu pre súbory .vv, môžete získať aSPICE Pro. V úvodnom dialógovom okne nájdite odkazy na obe aplikácie.</string>
@@ -804,11 +804,6 @@ Aplikácia je už oslobodená od optimalizácie batérie.</string>
     <string name="svnc_encryption_offered_title">Server ponúka šifrovanie</string>
     <string name="svnc_encryption_offered_message">Server podporuje šifrovanie SecureVNCPlugin, ale nemáte ho povolené v nastaveniach pripojenia.\n\nPripojenie bez šifrovania znamená, že údaje relácie (vrátane prihlasovacích údajov) budú prenášané v otvorenom texte.\n\nPre povolenie šifrovania zrušte a zaškrtnite \'Vyžadovať šifrovanie SecureVNCPlugin\' v nastaveniach pripojenia.</string>
     <string name="error_securevncplugin_server_requires_encryption">Server ponúka iba šifrované typy pripojenia (SecureVNCPlugin), ale šifrovanie nie je povolené vo vašich nastaveniach pripojenia. Povoľte \'Vyžadovať šifrovanie SecureVNCPlugin\' pre pripojenie k tomuto serveru.</string>
-    <string name="morpheusly_cta_title">Oslovte svoje počítače odkiaľkoľvek</string>
-    <string name="morpheusly_cta_dismiss">Teraz nie</string>
-    <string name="action_morpheusly">Získajte Morpheusly</string>
-    <string name="morpheusly_cta_body">Bezpečný prístup k vzdialenej ploche cez internet s nulovou konfiguráciou siete.Nainštalujte si Morpheusly počítačovú aplikáciu na každý počítač, ku ktorému chcete mať prístup, prihláste sa a zistite, ktoré z nich sú online, a bezproblémovo sa pripojte z Morpheusly mobilnej aplikácie.</string>
-    <string name="morpheusly_cta_download">Získajte Morpheusly</string>
     <string name="connection_add_shortcut">Pridať na plochu</string>
     <string name="shortcut_not_supported">Tento spúšťač nepodporuje pripínanie skratiek.</string>
 </resources>

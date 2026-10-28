@@ -892,7 +892,7 @@ En dessous se trouve la configuration de votre connexion.
     <string name="pref_keyboard_type_label_TYPE_NULL">Par défaut (TYPE_NULL)</string>
     <string name="pref_keyboard_type_label_VISIBLE_PASSWORD">Texte/Chiffres sans suggestions (VISIBLE_PASSWORD)</string>
     <string name="pref_keyboard_type_label_TYPE_CLASS_TEXT">Texte avec suggestions (TYPE_CLASS_TEXT)</string>
-    <string name="no_application_to_handle_vpn">Cette connexion est configurée pour lancer un VPN via une application externe. Vous devez installer une application comme Morpheusly pour le lancer.</string>
+    <string name="no_application_to_handle_vpn">Cette connexion est configurée pour lancer un VPN via une application externe. Vous devez installer cette application VPN pour la lancer.</string>
     <string name="vnc_viewer_started">VNC Viewer démarré</string>
     <string name="enable_gateway">Activer RDP Gateway</string>
     <string name="scroll_speed">Vitesse de défilement tactile</string>
@@ -975,11 +975,6 @@ L\'application est déjà exemptée des optimisations de la batterie.</string>
     <string name="svnc_encryption_offered_title">Le serveur propose le chiffrement</string>
     <string name="svnc_encryption_offered_message">Le serveur prend en charge le chiffrement SecureVNCPlugin, mais vous ne l\'avez pas activé dans vos paramètres de connexion.\n\nSe connecter sans chiffrement signifie que les données de votre session (y compris les identifiants) seront transmises en clair.\n\nPour activer le chiffrement, annulez et cochez \'Exiger le chiffrement SecureVNCPlugin\' dans vos paramètres de connexion.</string>
     <string name="error_securevncplugin_server_requires_encryption">Le serveur ne propose que des types de connexion chiffrés (SecureVNCPlugin), mais le chiffrement n\'est pas activé dans vos paramètres de connexion. Activez \'Exiger le chiffrement SecureVNCPlugin\' pour vous connecter à ce serveur.</string>
-    <string name="morpheusly_cta_title">Accédez à vos ordinateurs où que vous soyez</string>
-    <string name="morpheusly_cta_dismiss">Pas maintenant</string>
-    <string name="action_morpheusly">Obtenez Morpheusly</string>
-    <string name="morpheusly_cta_body">Accès sécurisé au bureau à distance via Internet sans configuration réseau.Installez l\'application de bureau Morpheusly sur chaque ordinateur que vous souhaitez atteindre, connectez-vous et voyez lesquels sont en ligne et connectez-vous de manière transparente depuis l\'application mobile Morpheusly.</string>
-    <string name="morpheusly_cta_download">Obtenez Morpheusly</string>
     <string name="connection_add_shortcut">Ajouter à l\'écran d\'accueil</string>
     <string name="shortcut_not_supported">Ce lanceur ne prend pas en charge l\'épinglage des raccourcis.</string>
     <string name="action_new_rustdesk_connection">Nouvel accès RustDesk</string>

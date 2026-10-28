@@ -33,11 +33,6 @@
     <string name="action_export_settings">Export Settings</string>
     <string name="action_delete_connection">Delete Connection</string>
     <string name="action_rate_or_share_app">⭐ Get Help, Rate, Share</string>
-    <string name="action_morpheusly">Get Morpheusly</string>
-    <string name="morpheusly_cta_title">Reach your computers from anywhere</string>
-    <string name="morpheusly_cta_body">Secure remote-desktop access over the Internet with zero network configuration. Install the Morpheusly desktop app on every computer you want to reach, sign in, and see which ones are online and connect seamlessly from the Morpheusly mobile app.</string>
-    <string name="morpheusly_cta_download">Get Morpheusly</string>
-    <string name="morpheusly_cta_dismiss">Not now</string>
     <string name="get_help">Get Help</string>
     <string name="opaque_app_name" translatable="false">Opaque</string>
     <string name="opaque_app_name_beta" translatable="false">Opaque Beta</string>
@@ -1008,7 +1003,7 @@ Below that is where you configure your connection.
     <string name="pref_keyboard_type_label_TYPE_NULL">Default (TYPE_NULL)</string>
     <string name="pref_keyboard_type_label_VISIBLE_PASSWORD">Text/Numbers No Suggestions (VISIBLE_PASSWORD)</string>
     <string name="pref_keyboard_type_label_TYPE_CLASS_TEXT">Text With Suggestions (TYPE_CLASS_TEXT)</string>
-    <string name="no_application_to_handle_vpn">This connection is set to launch VPN via an external app. You need to install an app like Morpheusly to launch it.</string>
+    <string name="no_application_to_handle_vpn">This connection is set to launch VPN via an external app. You need to install that VPN app to launch it.</string>
     <string name="vnc_viewer_started">VNC Viewer started</string>
     <string name="enable_gateway">Enable RDP Gateway</string>
     <string name="scroll_speed">Touch Scroll Speed</string>

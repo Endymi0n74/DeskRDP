@@ -464,7 +464,7 @@ Các vấn đề đã biết:</string>
     <string name="more_apps">Nhiều ứng dụng hơn 📱</string>
     <string name="auto_x_disabled">Tàn tật</string>
     <string name="pro_feature_mfa">Có vẻ như máy chủ của bạn đã bật xác thực đa yếu tố. Vui lòng hỗ trợ dự án bằng cách mua phiên bản Pro có hỗ trợ tính năng này. Liên kết đến phiên bản Pro có sẵn trong hộp thoại bắt đầu.</string>
-    <string name="no_application_to_handle_vpn">Kết nối này được thiết lập để khởi chạy VPN thông qua một ứng dụng bên ngoài. Bạn cần cài đặt một ứng dụng như Morpheusly để khởi chạy nó.</string>
+    <string name="no_application_to_handle_vpn">Kết nối này được thiết lập để khởi chạy VPN thông qua một ứng dụng bên ngoài. Bạn cần cài đặt ứng dụng VPN đó để khởi chạy nó.</string>
     <string name="port_caption_ssh">Cổng SSH</string>
     <string name="arrow_down">Mũi tên xuống</string>
     <string name="pro_feature_spice">Có vẻ như bạn đã cố mở tệp .vv. Nếu bạn muốn lưu kết nối tới Proxmox hoặc oVirt ngay trong ứng dụng và cũng muốn mở tệp .vv, hãy cân nhắc mua Opaque. Nếu bạn chỉ cần hỗ trợ tệp .vv, bạn có thể tải aSPICE Pro. Tìm liên kết đến cả hai ứng dụng trong hộp thoại bắt đầu.</string>
@@ -804,11 +804,6 @@ Không thể mở cài đặt tối ưu hóa pin. Tắt tối ưu hóa pin theo 
     <string name="svnc_encryption_offered_title">Máy chủ cung cấp mã hóa</string>
     <string name="svnc_encryption_offered_message">Máy chủ hỗ trợ mã hóa SecureVNCPlugin, nhưng bạn chưa bật tính năng này trong cài đặt kết nối.\n\nKết nối không mã hóa nghĩa là dữ liệu phiên của bạn (bao gồm thông tin đăng nhập) sẽ được truyền dưới dạng văn bản thuần.\n\nĐể bật mã hóa, hãy hủy và đánh dấu \'Yêu cầu mã hóa SecureVNCPlugin\' trong cài đặt kết nối.</string>
     <string name="error_securevncplugin_server_requires_encryption">Máy chủ chỉ cung cấp các loại kết nối được mã hóa (SecureVNCPlugin), nhưng mã hóa chưa được bật trong cài đặt kết nối của bạn. Bật \'Yêu cầu mã hóa SecureVNCPlugin\' để kết nối đến máy chủ này.</string>
-    <string name="morpheusly_cta_title">Tiếp cận máy tính của bạn từ mọi nơi</string>
-    <string name="morpheusly_cta_dismiss">Không phải bây giờ</string>
-    <string name="action_morpheusly">Nhận Morpheusly</string>
-    <string name="morpheusly_cta_body">Bảo mật quyền truy cập máy tính từ xa qua Internet với cấu hình mạng bằng không.Cài đặt ứng dụng Morpheusly dành cho máy tính để bàn trên mọi máy tính mà bạn muốn tiếp cận, đăng nhập và xem máy tính nào đang trực tuyến và kết nối liền mạch từ ứng dụng Morpheusly dành cho thiết bị di động.</string>
-    <string name="morpheusly_cta_download">Nhận Morpheusly</string>
     <string name="connection_add_shortcut">Thêm vào Màn hình chính</string>
     <string name="shortcut_not_supported">Trình khởi chạy này không hỗ trợ ghim lối tắt.</string>
 </resources>

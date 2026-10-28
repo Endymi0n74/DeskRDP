@@ -464,7 +464,7 @@ Masuala yanayojulikana:</string>
     <string name="more_apps">Programu Zaidi 📱</string>
     <string name="auto_x_disabled">Imezimwa</string>
     <string name="pro_feature_mfa">Inaonekana seva yako imewezeshwa uthibitishaji wa vipengele vingi. Tafadhali saidia mradi kwa kununua toleo la Pro ambalo linaweza kutumika kwa kipengele hiki. Kiungo cha toleo la Pro kinapatikana kwenye kidirisha cha kuanza.</string>
-    <string name="no_application_to_handle_vpn">Muunganisho huu umewekwa ili kuzindua VPN kupitia programu ya nje. Unahitaji kusakinisha programu kama Morpheusly ili kuizindua.</string>
+    <string name="no_application_to_handle_vpn">Muunganisho huu umewekwa ili kuzindua VPN kupitia programu ya nje. Unahitaji kusakinisha programu hiyo ya VPN ili kuizindua.</string>
     <string name="port_caption_ssh">Mlango wa SSH</string>
     <string name="arrow_down">Mshale wa Chini</string>
     <string name="pro_feature_spice">Inaonekana ulijaribu kufungua faili ya .vv. Ikiwa ungependa kuhifadhi miunganisho kwenye Proxmox au oVirt moja kwa moja ndani ya programu na pia unataka kufungua faili za .vv, zingatia kununua Opaque. Ikiwa unahitaji tu usaidizi wa faili ya .vv, unaweza kupata aSPICE Pro. Pata viungo vya programu zote mbili kwenye kidirisha cha kuanza.</string>
@@ -804,11 +804,6 @@ Programu tayari imeondolewa kwenye uboreshaji wa betri.</string>
     <string name="svnc_encryption_offered_title">Seva inatoa usimbaji</string>
     <string name="svnc_encryption_offered_message">Seva inasaidia usimbaji wa SecureVNCPlugin, lakini hujawasha katika mipangilio yako ya muunganisho.\n\nKuunganisha bila usimbaji kunamaanisha data ya kipindi chako (ikiwa ni pamoja na vitambulisho) itatumwa bila kufichwa.\n\nIli kuwasha usimbaji, ghairi na uweke alama \'Hitaji usimbaji wa SecureVNCPlugin\' katika mipangilio yako ya muunganisho.</string>
     <string name="error_securevncplugin_server_requires_encryption">Seva inatoa aina za muunganisho zilizosimbwa (SecureVNCPlugin) pekee, lakini usimbaji haujawashwa katika mipangilio yako ya muunganisho. Wezesha \'Hitaji usimbaji wa SecureVNCPlugin\' ili kuunganisha na seva hii.</string>
-    <string name="morpheusly_cta_title">Fikia kompyuta zako kutoka popote</string>
-    <string name="morpheusly_cta_dismiss">Si sasa</string>
-    <string name="action_morpheusly">Pata Morpheusly</string>
-    <string name="morpheusly_cta_body">Salama ufikiaji wa eneo-kazi la mbali kupitia Mtandao na usanidi wa mtandao sufuri.Sakinisha programu ya Morpheusly ya eneo-kazi kwenye kila kompyuta unayotaka kufikia, ingia, na uone zipi ziko mtandaoni na uunganishe kwa urahisi kutoka kwa Morpheusly programu ya simu.</string>
-    <string name="morpheusly_cta_download">Pata Morpheusly</string>
     <string name="connection_add_shortcut">Ongeza kwenye Skrini ya Kwanza</string>
     <string name="shortcut_not_supported">Kizinduzi hiki hakitumii kubandika njia za mkato.</string>
 </resources>

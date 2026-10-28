@@ -818,7 +818,7 @@ Nedanför konfigurerar du din anslutning.
     <string name="pref_keyboard_type_label_TYPE_NULL">Standard (TYPE_NULL)</string>
     <string name="pref_keyboard_type_label_VISIBLE_PASSWORD">Text/Siffror utan förslag (VISIBLE_PASSWORD)</string>
     <string name="pref_keyboard_type_label_TYPE_CLASS_TEXT">Text med förslag (TYPE_CLASS_TEXT)</string>
-    <string name="no_application_to_handle_vpn">Denna anslutning är inställd att starta VPN via en extern app. Du behöver installera en app som Morpheusly för att starta den.</string>
+    <string name="no_application_to_handle_vpn">Denna anslutning är inställd att starta VPN via en extern app. Du behöver installera den VPN-appen för att starta den.</string>
     <string name="vnc_viewer_started">VNC-visare startad</string>
     <string name="enable_gateway">Aktivera RDP Gateway</string>
     <string name="scroll_speed">Pekrullningshastighet</string>
@@ -901,11 +901,6 @@ Appen är redan undantagen från batterioptimering.</string>
     <string name="svnc_encryption_offered_title">Servern erbjuder kryptering</string>
     <string name="svnc_encryption_offered_message">Servern stöder SecureVNCPlugin-kryptering, men du har inte aktiverat det i dina anslutningsinställningar.\n\nAtt ansluta utan kryptering innebär att dina sessionsdata (inklusive inloggningsuppgifter) skickas i klartext.\n\nFör att aktivera kryptering, avbryt och markera \'Kräv SecureVNCPlugin-kryptering\' i dina anslutningsinställningar.</string>
     <string name="error_securevncplugin_server_requires_encryption">Servern erbjuder endast krypterade anslutningstyper (SecureVNCPlugin), men kryptering är inte aktiverat i dina anslutningsinställningar. Aktivera \'Kräv SecureVNCPlugin-kryptering\' för att ansluta till den här servern.</string>
-    <string name="morpheusly_cta_title">Nå dina datorer var som helst</string>
-    <string name="morpheusly_cta_dismiss">Inte nu</string>
-    <string name="action_morpheusly">Skaffa Morpheusly</string>
-    <string name="morpheusly_cta_body">Säker fjärråtkomst till skrivbord över Internet utan nätverkskonfiguration.Installera Morpheusly skrivbordsappen på varje dator du vill nå, logga in och se vilka som är online och anslut sömlöst från Morpheusly mobilappen.</string>
-    <string name="morpheusly_cta_download">Skaffa Morpheusly</string>
     <string name="connection_add_shortcut">Lägg till på startskärmen</string>
     <string name="shortcut_not_supported">Det här startprogrammet stöder inte att fästa genvägar.</string>
 </resources>

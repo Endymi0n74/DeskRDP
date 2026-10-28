@@ -464,7 +464,7 @@
     <string name="more_apps">مزید ایپس 📱</string>
     <string name="auto_x_disabled">معذور</string>
     <string name="pro_feature_mfa">ایسا لگتا ہے کہ آپ کے سرور پر ملٹی فیکٹر توثیق فعال ہے۔براہ کرم پرو ورژن خرید کر پروجیکٹ کی حمایت کریں جس میں اس خصوصیت کی حمایت ہے۔پرو ورژن کا لنک اسٹارٹ ڈائیلاگ میں دستیاب ہے۔</string>
-    <string name="no_application_to_handle_vpn">یہ کنکشن ایک بیرونی ایپ کے ذریعے VPN لانچ کرنے کے لیے سیٹ کیا گیا ہے۔اسے لانچ کرنے کے لیے آپ کو Morpheusly جیسی ایپ انسٹال کرنے کی ضرورت ہے۔</string>
+    <string name="no_application_to_handle_vpn">یہ کنکشن ایک بیرونی ایپ کے ذریعے VPN لانچ کرنے کے لیے سیٹ کیا گیا ہے۔اسے لانچ کرنے کے لیے آپ کو وہ VPN ایپ انسٹال کرنے کی ضرورت ہے۔</string>
     <string name="port_caption_ssh">ایس ایس ایچ پورٹ</string>
     <string name="arrow_down">نیچے کا تیر</string>
     <string name="pro_feature_spice">ایسا لگتا ہے کہ آپ نے ایک .vv فائل کھولنے کی کوشش کی ہے۔اگر آپ Proxmox یا oVirt کے کنکشنز کو ایپ کے اندر ہی محفوظ کرنا چاہتے ہیں اور .vv فائلیں بھی کھولنا چاہتے ہیں تو اوپیک خریدنے پر غور کریں۔اگر آپ کو صرف .vv فائل سپورٹ کی ضرورت ہے، تو آپ اسپیس پرو حاصل کر سکتے ہیں۔اسٹارٹ ڈائیلاگ میں دونوں ایپس کے لنکس تلاش کریں۔</string>
@@ -769,11 +769,6 @@ ASPICE خصوصیات کی موجودہ فہرست میں شامل ہیں:
     <string name="svnc_encryption_offered_title">سرور خفیہ کاری پیش کرتا ہے</string>
     <string name="svnc_encryption_offered_message">سرور SecureVNCPlugin خفیہ کاری کی سہولت دیتا ہے، لیکن آپ نے اسے اپنی کنکشن سیٹنگز میں فعال نہیں کیا ہے۔\n\nخفیہ کاری کے بغیر منسلک ہونے کا مطلب ہے کہ آپ کے سیشن کا ڈیٹا (بشمول اسناد) سادہ متن میں بھیجا جائے گا۔\n\nخفیہ کاری فعال کرنے کے لیے، منسوخ کریں اور اپنی کنکشن سیٹنگز میں \'SecureVNCPlugin خفیہ کاری لازمی\' کو نشان زد کریں۔</string>
     <string name="error_securevncplugin_server_requires_encryption">سرور صرف خفیہ کردہ کنکشن اقسام (SecureVNCPlugin) پیش کرتا ہے، لیکن آپ کی کنکشن سیٹنگز میں خفیہ کاری فعال نہیں ہے۔ اس سرور سے منسلک ہونے کے لیے \'SecureVNCPlugin خفیہ کاری لازمی\' فعال کریں۔</string>
-    <string name="morpheusly_cta_title">کہیں سے بھی اپنے کمپیوٹر تک پہنچیں۔</string>
-    <string name="morpheusly_cta_dismiss">ابھی نہیں۔</string>
-    <string name="action_morpheusly">Morpheusly حاصل کریں۔</string>
-    <string name="morpheusly_cta_body">صفر نیٹ ورک کنفیگریشن کے ساتھ انٹرنیٹ پر ریموٹ ڈیسک ٹاپ تک رسائی کو محفوظ کریں۔ہر اس کمپیوٹر پر Morpheusly ڈیسک ٹاپ ایپ انسٹال کریں جس تک آپ پہنچنا چاہتے ہیں، سائن ان کریں، اور دیکھیں کہ کون سا آن لائن ہے اور Morpheusly موبائل ایپ سے بغیر کسی رکاوٹ کے جڑیں۔</string>
-    <string name="morpheusly_cta_download">Morpheusly حاصل کریں۔</string>
     <string name="connection_add_shortcut">ہوم اسکرین میں شامل کریں</string>
     <string name="shortcut_not_supported">یہ لانچر شارٹ کٹ پن کرنے کی حمایت نہیں کرتا۔</string>
 </resources>

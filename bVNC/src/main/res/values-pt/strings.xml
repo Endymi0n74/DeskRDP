@@ -893,7 +893,7 @@ Abaixo está onde configura a sua ligação.
     <string name="pref_keyboard_type_label_TYPE_NULL">Padrão (TYPE_NULL)</string>
     <string name="pref_keyboard_type_label_VISIBLE_PASSWORD">Texto/Números Sem Sugestões (VISIBLE_PASSWORD)</string>
     <string name="pref_keyboard_type_label_TYPE_CLASS_TEXT">Texto Com Sugestões (TYPE_CLASS_TEXT)</string>
-    <string name="no_application_to_handle_vpn">Esta ligação está configurada para iniciar VPN através de uma aplicação externa. Precisa de instalar uma aplicação como o Morpheusly para a iniciar.</string>
+    <string name="no_application_to_handle_vpn">Esta ligação está configurada para iniciar VPN através de uma aplicação externa. Precisa de instalar essa aplicação VPN para a iniciar.</string>
     <string name="vnc_viewer_started">Visualizador VNC iniciado</string>
     <string name="enable_gateway">Ativar RDP Gateway</string>
     <string name="scroll_speed">Velocidade de Deslocamento Táctil</string>
@@ -976,11 +976,6 @@ App já está isento de otimizações de bateria.</string>
     <string name="svnc_encryption_offered_title">O servidor oferece encriptação</string>
     <string name="svnc_encryption_offered_message">O servidor suporta encriptação SecureVNCPlugin, mas não a tem ativada nas suas definições de ligação.\n\nLigar sem encriptação significa que os dados da sessão (incluindo credenciais) serão transmitidos em texto simples.\n\nPara ativar a encriptação, cancele e marque \'Exigir encriptação SecureVNCPlugin\' nas suas definições de ligação.</string>
     <string name="error_securevncplugin_server_requires_encryption">O servidor oferece apenas tipos de ligação encriptados (SecureVNCPlugin), mas a encriptação não está ativada nas suas definições de ligação. Ative \'Exigir encriptação SecureVNCPlugin\' para ligar a este servidor.</string>
-    <string name="morpheusly_cta_title">Acesse seus computadores de qualquer lugar</string>
-    <string name="morpheusly_cta_dismiss">Agora não</string>
-    <string name="action_morpheusly">Obtenha Morpheusly</string>
-    <string name="morpheusly_cta_body">Acesso seguro à área de trabalho remota pela Internet sem configuração de rede.Instale o aplicativo Morpheusly para desktop em todos os computadores que você deseja acessar, faça login e veja quais estão online e conecte-se perfeitamente a partir do Morpheusly aplicativo móvel.</string>
-    <string name="morpheusly_cta_download">Obtenha Morpheusly</string>
     <string name="connection_add_shortcut">Adicionar ao ecrã principal</string>
     <string name="shortcut_not_supported">Este iniciador não suporta a fixação de atalhos.</string>
 </resources>

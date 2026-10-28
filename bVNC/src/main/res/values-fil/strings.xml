@@ -893,7 +893,7 @@ Sa ibaba nito ay kung saan ninyo iko-configure ang inyong koneksyon.
     <string name="pref_keyboard_type_label_TYPE_NULL">Default (TYPE_NULL)</string>
     <string name="pref_keyboard_type_label_VISIBLE_PASSWORD">Teksto/Mga Numero Walang Mungkahi (VISIBLE_PASSWORD)</string>
     <string name="pref_keyboard_type_label_TYPE_CLASS_TEXT">Teksto Na May Mga Mungkahi (TYPE_CLASS_TEXT)</string>
-    <string name="no_application_to_handle_vpn">Ang koneksyong ito ay naka-set upang ilunsad ang VPN sa pamamagitan ng panlabas na app. Kailangan ninyong mag-install ng app tulad ng Morpheusly upang ilunsad ito.</string>
+    <string name="no_application_to_handle_vpn">Ang koneksyong ito ay naka-set upang ilunsad ang VPN sa pamamagitan ng panlabas na app. Kailangan ninyong mag-install ng VPN app na iyon upang ilunsad ito.</string>
     <string name="vnc_viewer_started">Nasimulan ang VNC Viewer</string>
     <string name="enable_gateway">I-enable ang RDP Gateway</string>
     <string name="scroll_speed">Bilis ng Touch Scroll</string>
@@ -976,11 +976,6 @@ Exempt na ang app sa mga pag-optimize ng baterya.</string>
     <string name="svnc_encryption_offered_title">Nag-aalok ang server ng encryption</string>
     <string name="svnc_encryption_offered_message">Sinusuportahan ng server ang SecureVNCPlugin encryption, ngunit hindi mo ito naka-enable sa iyong connection settings.\n\nAng pagkonekta nang walang encryption ay nangangahulugang ang iyong session data (kasama ang mga credential) ay ipapadala nang walang proteksyon.\n\nPara i-enable ang encryption, mag-cancel at i-check ang \'Require SecureVNCPlugin encryption\' sa iyong connection settings.</string>
     <string name="error_securevncplugin_server_requires_encryption">Ang server ay nag-aalok lamang ng encrypted na mga uri ng koneksyon (SecureVNCPlugin), ngunit hindi naka-enable ang encryption sa iyong connection settings. I-enable ang \'Require SecureVNCPlugin encryption\' para makakonekta sa server na ito.</string>
-    <string name="morpheusly_cta_title">Abutin ang iyong mga computer mula sa kahit saan</string>
-    <string name="morpheusly_cta_dismiss">Hindi ngayon</string>
-    <string name="action_morpheusly">Kunin Morpheusly</string>
-    <string name="morpheusly_cta_body">I-secure ang remote-desktop na access sa Internet na may zero na configuration ng network.I-install ang Morpheusly desktop app sa bawat computer na gusto mong maabot, mag-sign in, at makita kung alin ang online at kumonekta nang walang putol mula sa Morpheusly mobile app.</string>
-    <string name="morpheusly_cta_download">Kunin Morpheusly</string>
     <string name="connection_add_shortcut">Idagdag sa Home screen</string>
     <string name="shortcut_not_supported">Hindi sinusuportahan ng launcher na ito ang pag-pin ng mga shortcut.</string>
 </resources>

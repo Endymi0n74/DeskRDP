@@ -465,7 +465,7 @@
     <string name="more_apps">Більше програм 📱</string>
     <string name="auto_x_disabled">Вимкнено</string>
     <string name="pro_feature_mfa">Здається, на вашому сервері ввімкнено багатофакторну автентифікацію. Будь ласка, підтримайте проект, придбавши версію Pro, яка підтримує цю функцію. Посилання на версію Pro доступне в діалоговому вікні запуску.</string>
-    <string name="no_application_to_handle_vpn">Це підключення налаштовано на запуск VPN через зовнішню програму. Щоб запустити його, потрібно встановити програму на зразок Morpheusly.</string>
+    <string name="no_application_to_handle_vpn">Це підключення налаштовано на запуск VPN через зовнішню програму. Щоб запустити його, потрібно встановити цю VPN-програму.</string>
     <string name="port_caption_ssh">Порт SSH</string>
     <string name="arrow_down">Стрілка вниз</string>
     <string name="pro_feature_spice">Схоже, ви намагалися відкрити файл .vv. Якщо ви бажаєте зберегти підключення до Proxmox або oVirt безпосередньо в програмі, а також хочете відкривати файли .vv, подумайте про придбання Opaque. Якщо вам потрібна лише підтримка файлів .vv, ви можете отримати aSPICE Pro. Знайдіть посилання на обидві програми в початковому діалоговому вікні.</string>
@@ -797,11 +797,6 @@
     <string name="svnc_encryption_offered_title">Сервер пропонує шифрування</string>
     <string name="svnc_encryption_offered_message">Сервер підтримує шифрування SecureVNCPlugin, але ви не увімкнули його в налаштуваннях з\'єднання.\n\nПідключення без шифрування означає, що дані сеансу (включно з обліковими даними) будуть передаватися у відкритому вигляді.\n\nЩоб увімкнути шифрування, скасуйте та позначте \'Вимагати шифрування SecureVNCPlugin\' у налаштуваннях з\'єднання.</string>
     <string name="error_securevncplugin_server_requires_encryption">Сервер пропонує лише зашифровані типи з\'єднання (SecureVNCPlugin), але шифрування не увімкнено у налаштуваннях з\'єднання. Увімкніть \'Вимагати шифрування SecureVNCPlugin\' для підключення до цього сервера.</string>
-    <string name="morpheusly_cta_title">Досягайте своїх комп’ютерів з будь-якого місця</string>
-    <string name="morpheusly_cta_dismiss">Не зараз</string>
-    <string name="action_morpheusly">Отримати Morpheusly</string>
-    <string name="morpheusly_cta_body">Безпечний доступ до віддаленого робочого столу через Інтернет без конфігурації мережі.Установіть програму Morpheusly для настільних комп’ютерів на кожному комп’ютері, до якого ви хочете отримати доступ, увійдіть і подивіться, які з них підключені до Інтернету, а також легко підключіться з Morpheusly мобільної програми.</string>
-    <string name="morpheusly_cta_download">Отримати Morpheusly</string>
     <string name="connection_add_shortcut">Додати на головний екран</string>
     <string name="shortcut_not_supported">Ця програма запуску не підтримує закріплення ярликів.</string>
 </resources>

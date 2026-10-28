@@ -817,7 +817,7 @@ Ngezansi kungalapho ulungisa khona uxhumano lwakho.
     <string name="pref_keyboard_type_label_TYPE_NULL">Okuvamile (TYPE_NULL)</string>
     <string name="pref_keyboard_type_label_VISIBLE_PASSWORD">Umbhalo/Izinombolo Ngaphandle Kweziphakamiso (VISIBLE_PASSWORD)</string>
     <string name="pref_keyboard_type_label_TYPE_CLASS_TEXT">Umbhalo Oneziphakamiso (TYPE_CLASS_TEXT)</string>
-    <string name="no_application_to_handle_vpn">Lolu xhumano lusetelwe ukuqalisa i-VPN ngohlelo zokusebenza lwangaphandle. Udinga ukufaka uhlelo zokusebenza olufana ne-Morpheusly ukuluqalisa.</string>
+    <string name="no_application_to_handle_vpn">Lolu xhumano lusetelwe ukuqalisa i-VPN ngohlelo zokusebenza lwangaphandle. Udinga ukufaka lolo hlelo zokusebenza lwe-VPN ukuluqalisa.</string>
     <string name="vnc_viewer_started">Isibukeli se-VNC siqalisiwe</string>
     <string name="enable_gateway">Vumela i-RDP Gateway</string>
     <string name="scroll_speed">Isivinini Sokuskrola Ngokuthinta</string>
@@ -899,11 +899,6 @@ Uhlelo lokusebenza seluvele lukhululiwe ekulungiselelweni kwebhethri.</string>
     <string name="svnc_encryption_offered_title">Iseva inikeza ukubethela</string>
     <string name="svnc_encryption_offered_message">Iseva isekela ukubethela kwe-SecureVNCPlugin, kodwa awukuvulanga ezilungiselelweni zakho zokuxhumana.\n\nUkuxhuma ngaphandle kokubethela kusho ukuthi idatha yeseshini yakho (kufaka phakathi iziqinisekiso) izodluliswa ngombhalo ocacile.\n\nUkuze uvule ukubethela, khansela bese umaka \'Dinga ukubethela kwe-SecureVNCPlugin\' ezilungiselelweni zakho zokuxhumana.</string>
     <string name="error_securevncplugin_server_requires_encryption">Iseva inikeza izinhlobo zokuxhumana ezibethelwe (SecureVNCPlugin) kuphela, kodwa ukubethela akuvuliwe ezilungiselelweni zakho zokuxhumana. Vula \'Dinga ukubethela kwe-SecureVNCPlugin\' ukuze uxhume kule seva.</string>
-    <string name="morpheusly_cta_title">Finyelela amakhompyutha akho noma yikuphi</string>
-    <string name="morpheusly_cta_dismiss">Hhayi manje</string>
-    <string name="action_morpheusly">Thola Morpheusly</string>
-    <string name="morpheusly_cta_body">Vikela ukufinyelela kwe-remote-desktop nge-inthanethi ngokucushwa kwenethiwekhi okuyiziro.Faka Morpheusly uhlelo lokusebenza lwedeskithophu kuyo yonke ikhompuyutha ofuna ukuyifinyelela, ngena ngemvume, futhi ubone ukuthi yimaphi eku-inthanethi futhi uxhume kalula Morpheusly kuhlelo lokusebenza lweselula.</string>
-    <string name="morpheusly_cta_download">Thola Morpheusly</string>
     <string name="connection_add_shortcut">Engeza kusikrini sasekhaya</string>
     <string name="shortcut_not_supported">Lolu lokuqalisa aluxhasi ukuphina izinqamuleli.</string>
 </resources>

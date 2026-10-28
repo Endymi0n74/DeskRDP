@@ -464,7 +464,7 @@ aRDP বৈশিষ্ট্যের বর্তমান তালিকা�
     <string name="more_apps">আরও অ্যাপ 📱</string>
     <string name="auto_x_disabled">অক্ষম</string>
     <string name="pro_feature_mfa">মনে হচ্ছে আপনার সার্ভারে মাল্টি-ফ্যাক্টর প্রমাণীকরণ সক্ষম হয়েছে।অনুগ্রহ করে এই বৈশিষ্ট্যটির জন্য সমর্থন রয়েছে এমন প্রো সংস্করণটি কিনে প্রকল্পটিকে সমর্থন করুন৷প্রো সংস্করণের একটি লিঙ্ক স্টার্ট ডায়ালগে উপলব্ধ।</string>
-    <string name="no_application_to_handle_vpn">এই সংযোগটি একটি বহিরাগত অ্যাপের মাধ্যমে VPN চালু করতে সেট করা হয়েছে৷এটি চালু করতে আপনাকে Morpheusly এর মতো একটি অ্যাপ ইনস্টল করতে হবে।</string>
+    <string name="no_application_to_handle_vpn">এই সংযোগটি একটি বহিরাগত অ্যাপের মাধ্যমে VPN চালু করতে সেট করা হয়েছে৷এটি চালু করতে আপনাকে সেই VPN অ্যাপটি ইনস্টল করতে হবে।</string>
     <string name="port_caption_ssh">এসএসএইচ পোর্ট</string>
     <string name="arrow_down">নিচের তীর</string>
     <string name="pro_feature_spice">মনে হচ্ছে আপনি একটি .vv ফাইল খোলার চেষ্টা করেছেন৷আপনি যদি অ্যাপের মধ্যেই Proxmox বা oVirt-এর সাথে সংযোগগুলি সংরক্ষণ করতে চান এবং .vv ফাইলগুলিও খুলতে চান, তাহলে অস্বচ্ছ কেনার কথা বিবেচনা করুন৷আপনার যদি শুধুমাত্র .vv ফাইল সমর্থনের প্রয়োজন হয়, আপনি aSPICE Pro পেতে পারেন।স্টার্ট ডায়ালগে উভয় অ্যাপের লিঙ্ক খুঁজুন।</string>
@@ -804,11 +804,6 @@ ASPICE বৈশিষ্ট্যগুলির বর্তমান তা�
     <string name="svnc_encryption_offered_title">সার্ভার এনক্রিপশন প্রদান করে</string>
     <string name="svnc_encryption_offered_message">সার্ভার SecureVNCPlugin এনক্রিপশন সমর্থন করে, কিন্তু আপনি এটি আপনার সংযোগ সেটিংসে সক্রিয় করেননি।\n\nএনক্রিপশন ছাড়া সংযোগ করলে আপনার সেশন ডেটা (শংসাপত্র সহ) সরল পাঠ্যে প্রেরিত হবে।\n\nএনক্রিপশন সক্রিয় করতে, বাতিল করুন এবং আপনার সংযোগ সেটিংসে \'SecureVNCPlugin এনক্রিপশন প্রয়োজন\' চেক করুন।</string>
     <string name="error_securevncplugin_server_requires_encryption">সার্ভার শুধুমাত্র এনক্রিপ্ট করা সংযোগ প্রকার (SecureVNCPlugin) অফার করে, কিন্তু আপনার সংযোগ সেটিংসে এনক্রিপশন সক্রিয় নেই। এই সার্ভারে সংযোগ করতে \'SecureVNCPlugin এনক্রিপশন প্রয়োজন\' সক্রিয় করুন।</string>
-    <string name="morpheusly_cta_title">যেকোনো জায়গা থেকে আপনার কম্পিউটারে পৌঁছান</string>
-    <string name="morpheusly_cta_dismiss">এখন না</string>
-    <string name="action_morpheusly">পান Morpheusly</string>
-    <string name="morpheusly_cta_body">শূন্য নেটওয়ার্ক কনফিগারেশন সহ ইন্টারনেটে দূরবর্তী-ডেস্কটপ অ্যাক্সেস সুরক্ষিত করুন।আপনি যে কম্পিউটারে পৌঁছাতে চান, সাইন ইন করতে চান এবং কোনটি অনলাইনে তা দেখতে চান প্রতিটি কম্পিউটারে Morpheusly ডেস্কটপ অ্যাপটি ইনস্টল করুন এবং Morpheusly মোবাইল অ্যাপ থেকে নির্বিঘ্নে সংযোগ করুন।</string>
-    <string name="morpheusly_cta_download">পান Morpheusly</string>
     <string name="connection_add_shortcut">হোম স্ক্রিনে যোগ করুন</string>
     <string name="shortcut_not_supported">এই লঞ্চারটি শর্টকাট পিন করা সমর্থন করে না।</string>
 </resources>

@@ -464,7 +464,7 @@
     <string name="more_apps">Још апликација 📱</string>
     <string name="auto_x_disabled">Онемогућено</string>
     <string name="pro_feature_mfa">Чини се да је на вашем серверу омогућена вишефакторска аутентикација. Молимо подржите пројекат куповином Про верзије која има подршку за ову функцију. Веза до Про верзије је доступна у почетном дијалогу.</string>
-    <string name="no_application_to_handle_vpn">Ова веза је подешена за покретање ВПН-а преко спољне апликације. Морате да инсталирате апликацију као што је Морпхеусли да бисте је покренули.</string>
+    <string name="no_application_to_handle_vpn">Ова веза је подешена за покретање ВПН-а преко спољне апликације. Морате да инсталирате ту ВПН апликацију да бисте је покренули.</string>
     <string name="port_caption_ssh">ССХ Порт</string>
     <string name="arrow_down">Стрелица надоле</string>
     <string name="pro_feature_spice">Изгледа да сте покушали да отворите .вв датотеку. Ако желите да сачувате везе са Прокмок-ом или оВирт-ом директно унутар апликације и такође желите да отворите .вв датотеке, размислите о куповини Опакуе-а. Ако вам је потребна само подршка за .вв датотеку, можете добити аСПИЦЕ Про. Пронађите везе до обе апликације у почетном дијалогу.</string>
@@ -804,11 +804,6 @@
     <string name="svnc_encryption_offered_title">Сервер нуди шифровање</string>
     <string name="svnc_encryption_offered_message">Сервер подржава SecureVNCPlugin шифровање, али га нисте омогућили у подешавањима везе.\n\nПовезивање без шифровања значи да ће подаци ваше сесије (укључујући акредитиве) бити пренети у отвореном тексту.\n\nДа бисте омогућили шифровање, откажите и означите \'Захтевај SecureVNCPlugin шифровање\' у подешавањима везе.</string>
     <string name="error_securevncplugin_server_requires_encryption">Сервер нуди само шифроване типове везе (SecureVNCPlugin), али шифровање није омогућено у вашим подешавањима везе. Омогућите \'Захтевај SecureVNCPlugin шифровање\' да бисте се повезали са овим сервером.</string>
-    <string name="morpheusly_cta_title">Дођите до рачунара са било ког места</string>
-    <string name="morpheusly_cta_dismiss">Не сада</string>
-    <string name="action_morpheusly">Узми Morpheusly</string>
-    <string name="morpheusly_cta_body">Безбедан приступ удаљеној радној површини преко Интернета са нултом мрежном конфигурацијом.Инсталирајте Morpheusly десктоп апликацију на сваки рачунар на који желите да приступите, пријавите се и видите који су онлајн и беспрекорно се повежите из Morpheusly мобилне апликације.</string>
-    <string name="morpheusly_cta_download">Узми Morpheusly</string>
     <string name="connection_add_shortcut">Додај на почетни екран</string>
     <string name="shortcut_not_supported">Овај покретач не подржава качење пречица.</string>
 </resources>

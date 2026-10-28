@@ -895,7 +895,7 @@ Daaronder is waar u u verbinding instel.
     <string name="pref_keyboard_type_label_TYPE_NULL">Verstek (TYPE_NULL)</string>
     <string name="pref_keyboard_type_label_VISIBLE_PASSWORD">Teks/syfers sonder voorstelle (VISIBLE_PASSWORD)</string>
     <string name="pref_keyboard_type_label_TYPE_CLASS_TEXT">Teks met voorstelle (TYPE_CLASS_TEXT)</string>
-    <string name="no_application_to_handle_vpn">Hierdie verbinding is ingestel om VPN via \'n eksterne program te loods. U moet \'n program soos Morpheusly installeer om dit te loods.</string>
+    <string name="no_application_to_handle_vpn">Hierdie verbinding is ingestel om VPN via \'n eksterne program te loods. U moet daardie VPN-program installeer om dit te loods.</string>
     <string name="vnc_viewer_started">VNC-kyker begin</string>
     <string name="enable_gateway">Aktiveer RDP Gateway</string>
     <string name="scroll_speed">Aanraking-rolspoed</string>
@@ -977,11 +977,6 @@ Die toepassing is reeds vrygestel van batteryoptimalisering.</string>
     <string name="svnc_encryption_offered_title">Bediener bied enkripsie aan</string>
     <string name="svnc_encryption_offered_message">Die bediener ondersteun SecureVNCPlugin-enkripsie, maar jy het dit nie in jou verbindingsinstellings geaktiveer nie.\n\nOm sonder enkripsie te verbind, beteken jou sessiedata (insluitend aanmeldbesonderhede) sal in duidelike teks versend word.\n\nOm enkripsie te aktiveer, kanselleer en merk \'Vereis SecureVNCPlugin-enkripsie\' in jou verbindingsinstellings.</string>
     <string name="error_securevncplugin_server_requires_encryption">Die bediener bied slegs geënkripteerde verbindingstipes (SecureVNCPlugin) aan, maar enkripsie is nie in jou verbindingsinstellings geaktiveer nie. Aktiveer \'Vereis SecureVNCPlugin-enkripsie\' om met hierdie bediener te verbind.</string>
-    <string name="morpheusly_cta_title">Bereik jou rekenaars van enige plek af</string>
-    <string name="morpheusly_cta_dismiss">Nie nou nie</string>
-    <string name="action_morpheusly">Kry Morpheusly</string>
-    <string name="morpheusly_cta_body">Veilige afgeleë rekenaartoegang oor die internet met geen netwerkkonfigurasie nie.Installeer die Morpheusly rekenaartoepassing op elke rekenaar wat jy wil bereik, meld aan en kyk watter aanlyn is en koppel naatloos vanaf die Morpheusly mobiele toepassing.</string>
-    <string name="morpheusly_cta_download">Kry Morpheusly</string>
     <string name="connection_add_shortcut">Voeg by tuisskerm</string>
     <string name="shortcut_not_supported">Hierdie laaier ondersteun nie die vasspeld van kortpaaie nie.</string>
 </resources>

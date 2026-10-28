@@ -464,7 +464,7 @@
     <string name="more_apps">אפליקציות נוספות 📱</string>
     <string name="auto_x_disabled">נָכֶה</string>
     <string name="pro_feature_mfa">נראה שבשרת שלך מופעל אימות מרובה גורמים.אנא תמכו בפרויקט על ידי רכישת גרסת ה-Pro שיש לה תמיכה בתכונה זו.קישור לגרסת ה-Pro זמין בתיבת הדו-שיח \'התחל\'.</string>
-    <string name="no_application_to_handle_vpn">חיבור זה מוגדר להפעיל VPN דרך אפליקציה חיצונית.אתה צריך להתקין אפליקציה כמו Morpheusly כדי להפעיל אותה.</string>
+    <string name="no_application_to_handle_vpn">חיבור זה מוגדר להפעיל VPN דרך אפליקציה חיצונית.אתה צריך להתקין את אפליקציית ה-VPN הזו כדי להפעיל אותה.</string>
     <string name="port_caption_ssh">יציאת SSH</string>
     <string name="arrow_down">חץ למטה</string>
     <string name="pro_feature_spice">נראה שניסית לפתוח קובץ ‎.vv.אם תרצו לשמור חיבורים ל-Proxmox או oVirt ממש בתוך האפליקציה וברצונכם גם לפתוח קבצי .vv, שקול לרכוש את Opaque.אם אתה צריך רק תמיכה בקבצי ‎.vv, אתה יכול לקבל aSPICE Pro.מצא קישורים לשתי האפליקציות בתיבת הדו-שיח \'התחל\'.</string>
@@ -769,11 +769,6 @@
     <string name="svnc_encryption_offered_title">השרת מציע הצפנה</string>
     <string name="svnc_encryption_offered_message">השרת תומך בהצפנת SecureVNCPlugin, אך לא הפעלת אותה בהגדרות החיבור שלך.\n\nהתחברות ללא הצפנה פירושה שנתוני ההפעלה שלך (כולל אישורים) ישודרו בטקסט גלוי.\n\nכדי להפעיל הצפנה, בטל וסמן \'דרוש הצפנת SecureVNCPlugin\' בהגדרות החיבור.</string>
     <string name="error_securevncplugin_server_requires_encryption">השרת מציע רק סוגי חיבור מוצפנים (SecureVNCPlugin), אך ההצפנה אינה מופעלת בהגדרות החיבור שלך. הפעל \'דרוש הצפנת SecureVNCPlugin\' כדי להתחבר לשרת זה.</string>
-    <string name="morpheusly_cta_title">הגע למחשבים שלך מכל מקום</string>
-    <string name="morpheusly_cta_dismiss">לא עכשיו</string>
-    <string name="action_morpheusly">קבל Morpheusly</string>
-    <string name="morpheusly_cta_body">גישה מאובטחת לשולחן עבודה מרחוק דרך האינטרנט עם אפס תצורת רשת.התקן את אפליקציית Morpheusly שולחן העבודה בכל מחשב שאליו ברצונך להגיע, היכנס וראה אילו מהם מקוונים והתחבר בצורה חלקה מהאפליקציה Morpheusly לנייד.</string>
-    <string name="morpheusly_cta_download">קבל Morpheusly</string>
     <string name="connection_add_shortcut">הוסף למסך הבית</string>
     <string name="shortcut_not_supported">משגר זה אינו תומך בהצמדת קיצורי דרך.</string>
 </resources>

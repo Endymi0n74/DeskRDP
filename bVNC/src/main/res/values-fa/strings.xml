@@ -464,7 +464,7 @@
     <string name="more_apps">برنامه های بیشتر 📱</string>
     <string name="auto_x_disabled">از کار افتاده است</string>
     <string name="pro_feature_mfa">به نظر می رسد سرور شما احراز هویت چند عاملی را فعال کرده است.لطفاً با خرید نسخه Pro که از این ویژگی پشتیبانی می کند، از پروژه حمایت کنید.پیوندی به نسخه Pro در گفتگوی شروع موجود است.</string>
-    <string name="no_application_to_handle_vpn">این اتصال برای راه اندازی VPN از طریق یک برنامه خارجی تنظیم شده است.برای راه اندازی باید اپلیکیشنی مانند Morpheusly را نصب کنید.</string>
+    <string name="no_application_to_handle_vpn">این اتصال برای راه اندازی VPN از طریق یک برنامه خارجی تنظیم شده است.برای راه اندازی باید آن اپلیکیشن VPN را نصب کنید.</string>
     <string name="port_caption_ssh">پورت SSH</string>
     <string name="arrow_down">فلش رو به پایین</string>
     <string name="pro_feature_spice">به نظر می رسد سعی کرده اید یک فایل .vv را باز کنید.اگر می‌خواهید اتصالات را به Proxmox یا oVirt درست در داخل برنامه ذخیره کنید و همچنین می‌خواهید فایل‌های vv. را باز کنید، Opaque را خریداری کنید.اگر فقط به پشتیبانی از فایل .vv نیاز دارید، می توانید aSPICE Pro را دریافت کنید.پیوندهای هر دو برنامه را در گفتگوی شروع پیدا کنید.</string>
@@ -804,11 +804,6 @@
     <string name="svnc_encryption_offered_title">سرور رمزنگاری ارائه می‌دهد</string>
     <string name="svnc_encryption_offered_message">سرور از رمزنگاری SecureVNCPlugin پشتیبانی می‌کند، اما شما آن را در تنظیمات اتصال خود فعال نکرده‌اید.\n\nاتصال بدون رمزنگاری به این معنی است که داده‌های جلسه شما (از جمله اعتبارنامه‌ها) به صورت متن ساده ارسال خواهند شد.\n\nبرای فعال کردن رمزنگاری، لغو کنید و \'الزام رمزنگاری SecureVNCPlugin\' را در تنظیمات اتصال فعال کنید.</string>
     <string name="error_securevncplugin_server_requires_encryption">سرور فقط انواع اتصال رمزنگاری‌شده (SecureVNCPlugin) ارائه می‌دهد، اما رمزنگاری در تنظیمات اتصال شما فعال نیست. برای اتصال به این سرور \'الزام رمزنگاری SecureVNCPlugin\' را فعال کنید.</string>
-    <string name="morpheusly_cta_title">از هر کجا به رایانه های خود دسترسی پیدا کنید</string>
-    <string name="morpheusly_cta_dismiss">الان نه</string>
-    <string name="action_morpheusly">دریافت Morpheusly</string>
-    <string name="morpheusly_cta_body">دسترسی ایمن به دسکتاپ از راه دور از طریق اینترنت با پیکربندی شبکه صفر.برنامه دسکتاپ Morpheusly را روی هر رایانه ای که می خواهید به آن دسترسی داشته باشید، نصب کنید، وارد شوید و ببینید کدام یک آنلاین هستند و به طور یکپارچه از برنامه تلفن همراه متصل شوید.</string>
-    <string name="morpheusly_cta_download">دریافت Morpheusly</string>
     <string name="connection_add_shortcut">افزودن به صفحه اصلی</string>
     <string name="shortcut_not_supported">این لانچر از سنجاق کردن میان‌برها پشتیبانی نمی‌کند.</string>
 </resources>

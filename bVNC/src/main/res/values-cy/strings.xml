@@ -893,7 +893,7 @@ O dan hynny mae lle rydych chi\'n ffurfweddu eich cysylltiad.
     <string name="pref_keyboard_type_label_TYPE_NULL">Rhagosodedig (TYPE_NULL)</string>
     <string name="pref_keyboard_type_label_VISIBLE_PASSWORD">Testun/Rhifau Dim Awgrymiadau (VISIBLE_PASSWORD)</string>
     <string name="pref_keyboard_type_label_TYPE_CLASS_TEXT">Testun Gydag Awgrymiadau (TYPE_CLASS_TEXT)</string>
-    <string name="no_application_to_handle_vpn">Mae\'r cysylltiad hwn wedi\'i osod i lansio VPN drwy ap allanol. Mae angen i chi osod ap fel Morpheusly i\'w lansio.</string>
+    <string name="no_application_to_handle_vpn">Mae\'r cysylltiad hwn wedi\'i osod i lansio VPN drwy ap allanol. Mae angen i chi osod yr ap VPN hwnnw i\'w lansio.</string>
     <string name="vnc_viewer_started">Gwyliwr VNC wedi\'i gychwyn</string>
     <string name="enable_gateway">Galluogi RDP Gateway</string>
     <string name="scroll_speed">Buanedd Sgrolio Cyffwrdd</string>
@@ -976,11 +976,6 @@ Mae ap eisoes wedi\'i eithrio rhag optimeiddio batri.</string>
     <string name="svnc_encryption_offered_title">Mae\'r gweinydd yn cynnig amgryptio</string>
     <string name="svnc_encryption_offered_message">Mae\'r gweinydd yn cefnogi amgryptio SecureVNCPlugin, ond nid ydych wedi\'i alluogi yn eich gosodiadau cysylltiad.\n\nMae cysylltu heb amgryptio yn golygu y bydd data eich sesiwn (gan gynnwys manylion mewngofnodi) yn cael ei drosglwyddo\'n glir.\n\nI alluogi amgryptio, canslwch a thiciwch \'Gofyn am amgryptio SecureVNCPlugin\' yn eich gosodiadau cysylltiad.</string>
     <string name="error_securevncplugin_server_requires_encryption">Dim ond mathau o gysylltiad wedi\'u hamgryptio (SecureVNCPlugin) mae\'r gweinydd yn eu cynnig, ond nid yw amgryptio wedi\'i alluogi yn eich gosodiadau cysylltiad. Galluogwch \'Gofyn am amgryptio SecureVNCPlugin\' i gysylltu â\'r gweinydd hwn.</string>
-    <string name="morpheusly_cta_title">Cyrraedd eich cyfrifiaduron o unrhyw le</string>
-    <string name="morpheusly_cta_dismiss">Ddim nawr</string>
-    <string name="action_morpheusly">Cael Morpheusly</string>
-    <string name="morpheusly_cta_body">Sicrhau mynediad penbwrdd o bell dros y Rhyngrwyd gyda dim cyfluniad rhwydwaith.Gosodwch yr ap bwrdd gwaith Morpheusly ar bob cyfrifiadur rydych am ei gyrraedd, mewngofnodwch, a gweld pa rai sydd ar-lein ac yn cysylltu\'n ddi-dor o\'r ap symudol Morpheusly.</string>
-    <string name="morpheusly_cta_download">Cael Morpheusly</string>
     <string name="connection_add_shortcut">Ychwanegu at y Sgrin Gartref</string>
     <string name="shortcut_not_supported">Nid yw\'r lansiwr hwn yn cefnogi pinio llwybrau byr.</string>
 </resources>

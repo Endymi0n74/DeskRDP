@@ -5,6 +5,31 @@ This repository is a fork of [iiordanov/remote-desktop-clients](https://github.c
 RustDesk accesses as well. The state of each feature and the measurements behind it are in
 [RAPPORT.md](RAPPORT.md) (French); known traps and tooling are in [memory.md](memory.md).
 
+## Version and releases
+
+The current version is **1.10** (`versionName` `1.10-dualdesk`, `versionCode` 2), published on the
+[Releases](https://github.com/Endymi0n74/ardp/releases/tag/v1.10) page with two assets:
+`dualdesk-app-arm64-v8a-debug.apk` for any recent phone, and `dualdesk-app-universal-debug.apk` when
+the ABI is unknown. What changed since the previous milestone is in [CHANGELOG.md](CHANGELOG.md).
+
+One thing to know before upgrading: both versions are signed with a **debug key**, and the key is not
+the same one — 1.10 cannot be installed over an existing 1.0.0 (`INSTALL_FAILED_UPDATE_INCOMPATIBLE`).
+Uninstalling first **destroys the Keystore keys, hence the sealed RustDesk passwords**: export with a
+passphrase before doing it.
+
+## Version et publications
+
+La version courante est la **1.10** (`versionName` `1.10-dualdesk`, `versionCode` 2), publiée sur la
+page [Releases](https://github.com/Endymi0n74/ardp/releases/tag/v1.10) avec deux fichiers :
+`dualdesk-app-arm64-v8a-debug.apk` pour tout téléphone récent, et `dualdesk-app-universal-debug.apk`
+quand l'ABI est inconnue. Ce qui a changé depuis le jalon précédent est dans
+[CHANGELOG.md](CHANGELOG.md).
+
+Une chose à savoir avant de mettre à jour : les deux versions sont signées avec une **clé de
+débogage**, et ce n'est pas la même — la 1.10 ne s'installe pas par-dessus une 1.0.0 existante
+(`INSTALL_FAILED_UPDATE_INCOMPATIBLE`). Désinstaller d'abord **détruit les clés du Keystore, donc les
+mots de passe RustDesk scellés** : exportez avec une phrase de passe avant de le faire.
+
 ## Exporting the access list: what happens to the RustDesk password
 
 A RustDesk password is stored **sealed** under a key of the Android Keystore. That key never leaves

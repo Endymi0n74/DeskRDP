@@ -893,7 +893,7 @@ Di bawahnya adalah tempat Anda mengonfigurasi koneksi Anda.
     <string name="pref_keyboard_type_label_TYPE_NULL">Default (TYPE_NULL)</string>
     <string name="pref_keyboard_type_label_VISIBLE_PASSWORD">Teks/Angka Tanpa Saran (VISIBLE_PASSWORD)</string>
     <string name="pref_keyboard_type_label_TYPE_CLASS_TEXT">Teks Dengan Saran (TYPE_CLASS_TEXT)</string>
-    <string name="no_application_to_handle_vpn">Koneksi ini diatur untuk meluncurkan VPN melalui aplikasi eksternal. Anda perlu menginstal aplikasi seperti Morpheusly untuk meluncurkannya.</string>
+    <string name="no_application_to_handle_vpn">Koneksi ini diatur untuk meluncurkan VPN melalui aplikasi eksternal. Anda perlu menginstal aplikasi VPN tersebut untuk meluncurkannya.</string>
     <string name="vnc_viewer_started">Penampil VNC dimulai</string>
     <string name="enable_gateway">Aktifkan RDP Gateway</string>
     <string name="scroll_speed">Kecepatan Gulir Sentuh</string>
@@ -976,11 +976,6 @@ Aplikasi sudah dikecualikan dari pengoptimalan baterai.</string>
     <string name="svnc_encryption_offered_title">Server menawarkan enkripsi</string>
     <string name="svnc_encryption_offered_message">Server mendukung enkripsi SecureVNCPlugin, tetapi Anda belum mengaktifkannya di pengaturan koneksi.\n\nMenghubungkan tanpa enkripsi berarti data sesi Anda (termasuk kredensial) akan dikirimkan dalam teks biasa.\n\nUntuk mengaktifkan enkripsi, batalkan dan centang \'Wajibkan enkripsi SecureVNCPlugin\' di pengaturan koneksi Anda.</string>
     <string name="error_securevncplugin_server_requires_encryption">Server hanya menawarkan jenis koneksi terenkripsi (SecureVNCPlugin), tetapi enkripsi tidak diaktifkan di pengaturan koneksi Anda. Aktifkan \'Wajibkan enkripsi SecureVNCPlugin\' untuk terhubung ke server ini.</string>
-    <string name="morpheusly_cta_title">Jangkau komputer Anda dari mana saja</string>
-    <string name="morpheusly_cta_dismiss">Tidak sekarang</string>
-    <string name="action_morpheusly">Dapatkan Morpheusly</string>
-    <string name="morpheusly_cta_download">Dapatkan Morpheusly</string>
-    <string name="morpheusly_cta_body">Akses desktop jarak jauh yang aman melalui Internet tanpa konfigurasi jaringan. Pasang aplikasi desktop Morpheusly di setiap komputer yang ingin Anda jangkau, masuk, dan lihat mana yang online lalu sambungkan dengan mulus dari aplikasi seluler Morpheusly.</string>
     <string name="connection_add_shortcut">Tambahkan ke Layar Utama</string>
     <string name="shortcut_not_supported">Peluncur ini tidak mendukung penyematan pintasan.</string>
 </resources>

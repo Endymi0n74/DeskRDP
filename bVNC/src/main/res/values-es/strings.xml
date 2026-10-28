@@ -883,7 +883,7 @@ Debajo es donde configura su conexión.
     <string name="rdp_adv_gfx">RDP Gfx</string>
     <string name="audio_initialized">Audio inicializado</string>
     <string name="rdp_adv_gfxh264">RDP Gfx H264</string>
-    <string name="no_application_to_handle_vpn">Esta conexión está configurada para iniciar VPN a través de una aplicación externa.</string>
+    <string name="no_application_to_handle_vpn">Esta conexión está configurada para iniciar VPN a través de una aplicación externa. Necesitas instalar esa aplicación VPN para iniciarla.</string>
     <string name="rdp_adv_glyph_cache">Habilitar caché de glifos</string>
 
     <string name="disable_battery_optimizations_failed">
@@ -960,11 +960,6 @@ La aplicación ya está exenta de optimizaciones de batería.</string>
     <string name="svnc_encryption_offered_title">El servidor ofrece cifrado</string>
     <string name="svnc_encryption_offered_message">El servidor admite cifrado SecureVNCPlugin, pero no lo tiene habilitado en su configuración de conexión.\n\nConectarse sin cifrado significa que los datos de su sesión (incluidas las credenciales) se transmitirán en texto claro.\n\nPara habilitar el cifrado, cancele y marque \'Requerir cifrado SecureVNCPlugin\' en su configuración de conexión.</string>
     <string name="error_securevncplugin_server_requires_encryption">El servidor solo ofrece tipos de conexión cifrados (SecureVNCPlugin), pero el cifrado no está habilitado en su configuración de conexión. Habilite \'Requerir cifrado SecureVNCPlugin\' para conectarse a este servidor.</string>
-    <string name="morpheusly_cta_title">Llegue a sus computadoras desde cualquier lugar</string>
-    <string name="morpheusly_cta_dismiss">Ahora no</string>
-    <string name="action_morpheusly">Obtener Morpheusly</string>
-    <string name="morpheusly_cta_body">Acceso seguro a escritorio remoto a través de Internet sin configuración de red.Instale la aplicación de escritorio Morpheusly en cada computadora a la que desee acceder, inicie sesión y vea cuáles están en línea y conéctese sin problemas desde la aplicación móvil Morpheusly.</string>
-    <string name="morpheusly_cta_download">Obtener Morpheusly</string>
     <string name="connection_add_shortcut">Añadir a la pantalla de inicio</string>
     <string name="shortcut_not_supported">Este lanzador no admite fijar accesos directos.</string>
 </resources>

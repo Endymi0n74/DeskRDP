@@ -464,7 +464,7 @@
     <string name="more_apps">अधिक ॲप्स 📱</string>
     <string name="auto_x_disabled">अक्षम</string>
     <string name="pro_feature_mfa">तुमच्या सर्व्हरवर बहु-घटक प्रमाणीकरण सक्षम केलेले दिसते.कृपया या वैशिष्ट्यासाठी समर्थन असलेली प्रो आवृत्ती खरेदी करून प्रकल्पास समर्थन द्या.प्रो आवृत्तीची लिंक स्टार्ट डायलॉगमध्ये उपलब्ध आहे.</string>
-    <string name="no_application_to_handle_vpn">हे कनेक्शन बाह्य ॲपद्वारे VPN लाँच करण्यासाठी सेट केले आहे.ते लाँच करण्यासाठी तुम्हाला Morpheusly सारखे ॲप इंस्टॉल करावे लागेल.</string>
+    <string name="no_application_to_handle_vpn">हे कनेक्शन बाह्य ॲपद्वारे VPN लाँच करण्यासाठी सेट केले आहे.ते लाँच करण्यासाठी तुम्हाला ते VPN ॲप इंस्टॉल करावे लागेल.</string>
     <string name="port_caption_ssh">SSH पोर्ट</string>
     <string name="arrow_down">खाली बाण</string>
     <string name="pro_feature_spice">तुम्ही .vv फाइल उघडण्याचा प्रयत्न केला आहे असे दिसते.तुम्हाला Proxmox किंवा oVirt ची कनेक्शन्स ॲपमध्ये सेव्ह करायची असल्यास आणि .vv फाइल्स देखील उघडायच्या असल्यास, अपारदर्शक खरेदी करण्याचा विचार करा.तुम्हाला फक्त .vv फाइल सपोर्टची आवश्यकता असल्यास, तुम्ही aSPICE Pro मिळवू शकता.प्रारंभ संवादामध्ये दोन्ही ॲप्सचे दुवे शोधा.</string>
@@ -804,11 +804,6 @@ aSPICE वैशिष्ट्यांच्या वर्तमान स�
     <string name="svnc_encryption_offered_title">सर्व्हर एन्क्रिप्शन ऑफर करतो</string>
     <string name="svnc_encryption_offered_message">सर्व्हर SecureVNCPlugin एन्क्रिप्शनला समर्थन देतो, परंतु तुम्ही ते तुमच्या कनेक्शन सेटिंग्जमध्ये सक्षम केलेले नाही.\n\nएन्क्रिप्शनशिवाय कनेक्ट केल्यास तुमचा सत्र डेटा (ओळखपत्रांसह) स्पष्ट मजकुरात प्रसारित होईल.\n\nएन्क्रिप्शन सक्षम करण्यासाठी, रद्द करा आणि तुमच्या कनेक्शन सेटिंग्जमध्ये \'SecureVNCPlugin एन्क्रिप्शन आवश्यक\' तपासा.</string>
     <string name="error_securevncplugin_server_requires_encryption">सर्व्हर फक्त एन्क्रिप्टेड कनेक्शन प्रकार (SecureVNCPlugin) देतो, परंतु तुमच्या कनेक्शन सेटिंग्जमध्ये एन्क्रिप्शन सक्षम नाही. या सर्व्हरशी कनेक्ट करण्यासाठी \'SecureVNCPlugin एन्क्रिप्शन आवश्यक\' सक्षम करा.</string>
-    <string name="morpheusly_cta_title">कुठूनही तुमच्या संगणकांपर्यंत पोहोचा</string>
-    <string name="morpheusly_cta_dismiss">आता नाही</string>
-    <string name="action_morpheusly">Morpheusly मिळवा</string>
-    <string name="morpheusly_cta_body">शून्य नेटवर्क कॉन्फिगरेशनसह इंटरनेटवर रिमोट-डेस्कटॉप प्रवेश सुरक्षित करा.तुम्ही पोहोचू इच्छित असलेल्या प्रत्येक संगणकावर Morpheusly डेस्कटॉप ॲप स्थापित करा, साइन इन करा आणि कोणते ऑनलाइन आहेत ते पहा आणि Morpheusly मोबाइल ॲपवरून अखंडपणे कनेक्ट करा.</string>
-    <string name="morpheusly_cta_download">Morpheusly मिळवा</string>
     <string name="connection_add_shortcut">होम स्क्रीनवर जोडा</string>
     <string name="shortcut_not_supported">हे लाँचर शॉर्टकट पिन करण्यास समर्थन देत नाही.</string>
 </resources>

@@ -816,7 +816,7 @@ Under det konfigurerer du tilkoblingen din.
     <string name="pref_keyboard_type_label_TYPE_NULL">Standard (TYPE_NULL)</string>
     <string name="pref_keyboard_type_label_VISIBLE_PASSWORD">Tekst/tall uten forslag (VISIBLE_PASSWORD)</string>
     <string name="pref_keyboard_type_label_TYPE_CLASS_TEXT">Tekst med forslag (TYPE_CLASS_TEXT)</string>
-    <string name="no_application_to_handle_vpn">Denne tilkoblingen er satt til a starte VPN via en ekstern app. Du ma installere en app som Morpheusly for a starte den.</string>
+    <string name="no_application_to_handle_vpn">Denne tilkoblingen er satt til a starte VPN via en ekstern app. Du ma installere den VPN-appen for a starte den.</string>
     <string name="vnc_viewer_started">VNC-viser startet</string>
     <string name="enable_gateway">Aktiver RDP Gateway</string>
     <string name="scroll_speed">Beroeringsvise rullehastighet</string>
@@ -899,11 +899,6 @@ Appen er allerede unntatt fra batterioptimalisering.</string>
     <string name="svnc_encryption_offered_title">Serveren tilbyr kryptering</string>
     <string name="svnc_encryption_offered_message">Serveren støtter SecureVNCPlugin-kryptering, men du har ikke aktivert det i tilkoblingsinnstillingene.\n\nÅ koble til uten kryptering betyr at øktdataene dine (inkludert legitimasjon) vil overføres i klartekst.\n\nFor å aktivere kryptering, avbryt og merk av \'Krev SecureVNCPlugin-kryptering\' i tilkoblingsinnstillingene.</string>
     <string name="error_securevncplugin_server_requires_encryption">Serveren tilbyr kun krypterte tilkoblingstyper (SecureVNCPlugin), men kryptering er ikke aktivert i tilkoblingsinnstillingene. Aktiver \'Krev SecureVNCPlugin-kryptering\' for å koble til denne serveren.</string>
-    <string name="morpheusly_cta_title">Nå datamaskinene dine fra hvor som helst</string>
-    <string name="morpheusly_cta_dismiss">Ikke nå</string>
-    <string name="action_morpheusly">Få Morpheusly</string>
-    <string name="morpheusly_cta_body">Sikker ekstern stasjonær tilgang over Internett uten nettverkskonfigurasjon.Installer Morpheusly skrivebordsappen på hver datamaskin du ønsker å nå, logg på og se hvilke som er online og koble til sømløst fra Morpheusly mobilappen.</string>
-    <string name="morpheusly_cta_download">Få Morpheusly</string>
     <string name="connection_add_shortcut">Legg til på startskjermen</string>
     <string name="shortcut_not_supported">Denne oppstarteren støtter ikke festing av snarveier.</string>
 </resources>

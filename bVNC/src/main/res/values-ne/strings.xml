@@ -464,7 +464,7 @@
     <string name="more_apps">थप एपहरू 📱</string>
     <string name="auto_x_disabled">असक्षम</string>
     <string name="pro_feature_mfa">तपाईको सर्भरमा बहु-कारक प्रमाणीकरण सक्षम भएको देखिन्छ।कृपया यो सुविधाको लागि समर्थन भएको प्रो संस्करण खरिद गरेर परियोजनालाई समर्थन गर्नुहोस्।प्रो संस्करणको लिङ्क सुरु संवादमा उपलब्ध छ।</string>
-    <string name="no_application_to_handle_vpn">यो जडान बाह्य एप मार्फत VPN सुरु गर्न सेट गरिएको छ।तपाईंले यसलाई सुरु गर्न Morpheusly जस्तो एप स्थापना गर्न आवश्यक छ।</string>
+    <string name="no_application_to_handle_vpn">यो जडान बाह्य एप मार्फत VPN सुरु गर्न सेट गरिएको छ।तपाईंले यसलाई सुरु गर्न त्यो VPN एप स्थापना गर्न आवश्यक छ।</string>
     <string name="port_caption_ssh">SSH पोर्ट</string>
     <string name="arrow_down">तल तीर</string>
     <string name="pro_feature_spice">तपाईंले .vv फाइल खोल्ने प्रयास गर्नुभयो जस्तो देखिन्छ।यदि तपाइँ Proxmox वा oVirt मा जडानहरू एप भित्रै सुरक्षित गर्न चाहनुहुन्छ र .vv फाइलहरू खोल्न चाहनुहुन्छ भने, अपारदर्शी खरिद गर्ने बारे विचार गर्नुहोस्।यदि तपाईंलाई .vv फाइल समर्थन मात्र चाहिन्छ भने, तपाईंले asPICE प्रो प्राप्त गर्न सक्नुहुन्छ।सुरु संवादमा दुवै एपका लिङ्कहरू फेला पार्नुहोस्।</string>
@@ -804,11 +804,6 @@ ASPICE सुविधाहरूको हालको सूचीमा स�
     <string name="svnc_encryption_offered_title">सर्भरले इन्क्रिप्सन प्रस्ताव गर्दछ</string>
     <string name="svnc_encryption_offered_message">सर्भरले SecureVNCPlugin इन्क्रिप्सन समर्थन गर्दछ, तर तपाईंले यसलाई आफ्नो जडान सेटिङहरूमा सक्षम गर्नुभएको छैन।\n\nइन्क्रिप्सन बिना जडान गर्नुको अर्थ तपाईंको सत्र डेटा (प्रमाणपत्रहरू सहित) सादा पाठमा प्रसारित हुनेछ।\n\nइन्क्रिप्सन सक्षम गर्न, रद्द गर्नुहोस् र तपाईंको जडान सेटिङहरूमा \'SecureVNCPlugin इन्क्रिप्सन आवश्यक\' जाँच गर्नुहोस्।</string>
     <string name="error_securevncplugin_server_requires_encryption">सर्भरले इन्क्रिप्ट गरिएका जडान प्रकारहरू (SecureVNCPlugin) मात्र प्रस्ताव गर्दछ, तर तपाईंको जडान सेटिङहरूमा इन्क्रिप्सन सक्षम छैन। यो सर्भरमा जडान गर्न \'SecureVNCPlugin इन्क्रिप्सन आवश्यक\' सक्षम गर्नुहोस्।</string>
-    <string name="morpheusly_cta_title">जहाँबाट पनि आफ्नो कम्प्युटरमा पुग्नुहोस्</string>
-    <string name="morpheusly_cta_dismiss">अहिले होइन</string>
-    <string name="action_morpheusly">Morpheusly प्राप्त गर्नुहोस्</string>
-    <string name="morpheusly_cta_body">शून्य नेटवर्क कन्फिगरेसनको साथ इन्टरनेटमा रिमोट-डेस्कटप पहुँच सुरक्षित गर्नुहोस्।तपाईंले पहुँच गर्न, साइन इन गर्न, र कुन कुन अनलाइन छन् हेर्नुहोस् र Morpheusly मोबाइल एपबाट निर्बाध जडान गर्न चाहनुभएको प्रत्येक कम्प्युटरमा Morpheusly डेस्कटप एप स्थापना गर्नुहोस्।</string>
-    <string name="morpheusly_cta_download">Morpheusly प्राप्त गर्नुहोस्</string>
     <string name="connection_add_shortcut">गृह स्क्रिनमा थप्नुहोस्</string>
     <string name="shortcut_not_supported">यो लन्चरले सर्टकटहरू पिन गर्न समर्थन गर्दैन।</string>
 </resources>

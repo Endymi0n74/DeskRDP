@@ -464,7 +464,7 @@
     <string name="more_apps">अधिक ऐप्स 📱</string>
     <string name="auto_x_disabled">अक्षम</string>
     <string name="pro_feature_mfa">ऐसा प्रतीत होता है कि आपके सर्वर में बहु-कारक प्रमाणीकरण सक्षम है।कृपया प्रो संस्करण खरीदकर परियोजना का समर्थन करें जिसमें इस सुविधा का समर्थन है।प्रो संस्करण का एक लिंक प्रारंभ संवाद में उपलब्ध है।</string>
-    <string name="no_application_to_handle_vpn">यह कनेक्शन किसी बाहरी ऐप के माध्यम से वीपीएन लॉन्च करने के लिए सेट है।इसे लॉन्च करने के लिए आपको मॉर्फियसली जैसा ऐप इंस्टॉल करना होगा।</string>
+    <string name="no_application_to_handle_vpn">यह कनेक्शन किसी बाहरी ऐप के माध्यम से वीपीएन लॉन्च करने के लिए सेट है।इसे लॉन्च करने के लिए आपको वह वीपीएन ऐप इंस्टॉल करना होगा।</string>
     <string name="port_caption_ssh">एसएसएच पोर्ट</string>
     <string name="arrow_down">नीचे वाला तीर</string>
     <string name="pro_feature_spice">ऐसा लगता है जैसे आपने एक .vv फ़ाइल खोलने का प्रयास किया है।यदि आप सीधे ऐप के अंदर Proxmox या oVirt से कनेक्शन सहेजना चाहते हैं और .vv फ़ाइलें भी खोलना चाहते हैं, तो Opaque खरीदने पर विचार करें।यदि आपको केवल .vv फ़ाइल समर्थन की आवश्यकता है, तो आप aSPICE प्रो प्राप्त कर सकते हैं।प्रारंभ संवाद में दोनों ऐप्स के लिंक ढूंढें।</string>
@@ -804,11 +804,6 @@
     <string name="svnc_encryption_offered_title">सर्वर एन्क्रिप्शन प्रदान करता है</string>
     <string name="svnc_encryption_offered_message">सर्वर SecureVNCPlugin एन्क्रिप्शन का समर्थन करता है, लेकिन आपने इसे अपनी कनेक्शन सेटिंग्स में सक्षम नहीं किया है।\n\nएन्क्रिप्शन के बिना कनेक्ट करने का अर्थ है कि आपका सत्र डेटा (क्रेडेंशियल सहित) स्पष्ट पाठ में प्रसारित होगा।\n\nएन्क्रिप्शन सक्षम करने के लिए, रद्द करें और अपनी कनेक्शन सेटिंग्स में \'SecureVNCPlugin एन्क्रिप्शन आवश्यक\' चेक करें।</string>
     <string name="error_securevncplugin_server_requires_encryption">सर्वर केवल एन्क्रिप्टेड कनेक्शन प्रकार (SecureVNCPlugin) प्रदान करता है, लेकिन आपकी कनेक्शन सेटिंग्स में एन्क्रिप्शन सक्षम नहीं है। इस सर्वर से कनेक्ट करने के लिए \'SecureVNCPlugin एन्क्रिप्शन आवश्यक\' सक्षम करें।</string>
-    <string name="morpheusly_cta_title">कहीं से भी अपने कंप्यूटर तक पहुंचें</string>
-    <string name="morpheusly_cta_dismiss">अभी नहीं</string>
-    <string name="action_morpheusly">प्राप्त करें Morpheusly</string>
-    <string name="morpheusly_cta_body">शून्य नेटवर्क कॉन्फ़िगरेशन के साथ इंटरनेट पर सुरक्षित रिमोट-डेस्कटॉप पहुंच।जिस भी कंप्यूटर तक आप पहुंचना चाहते हैं उस पर Morpheusly डेस्कटॉप ऐप इंस्टॉल करें, साइन इन करें और देखें कि कौन सा ऑनलाइन है और Morpheusly मोबाइल ऐप से निर्बाध रूप से कनेक्ट करें।</string>
-    <string name="morpheusly_cta_download">प्राप्त करें Morpheusly</string>
     <string name="connection_add_shortcut">होम स्क्रीन पर जोड़ें</string>
     <string name="shortcut_not_supported">यह लॉन्चर शॉर्टकट पिन करने का समर्थन नहीं करता।</string>
 </resources>

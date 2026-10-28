@@ -893,7 +893,7 @@ Nedenfor konfigurerer du din forbindelse.
     <string name="pref_keyboard_type_label_TYPE_NULL">Standard (TYPE_NULL)</string>
     <string name="pref_keyboard_type_label_VISIBLE_PASSWORD">Tekst/tal uden forslag (VISIBLE_PASSWORD)</string>
     <string name="pref_keyboard_type_label_TYPE_CLASS_TEXT">Tekst med forslag (TYPE_CLASS_TEXT)</string>
-    <string name="no_application_to_handle_vpn">Denne forbindelse er indstillet til at starte VPN via en ekstern app. Du skal installere en app som Morpheusly for at starte den.</string>
+    <string name="no_application_to_handle_vpn">Denne forbindelse er indstillet til at starte VPN via en ekstern app. Du skal installere denne VPN-app for at starte den.</string>
     <string name="vnc_viewer_started">VNC-fremviser startet</string>
     <string name="enable_gateway">Aktiver RDP Gateway</string>
     <string name="scroll_speed">Berøringsrulhastighed</string>
@@ -976,11 +976,6 @@ Appen er allerede fritaget for batterioptimering.</string>
     <string name="svnc_encryption_offered_title">Serveren tilbyder kryptering</string>
     <string name="svnc_encryption_offered_message">Serveren understøtter SecureVNCPlugin-kryptering, men du har det ikke aktiveret i dine forbindelsesindstillinger.\n\nAt forbinde uden kryptering betyder, at dine sessionsdata (inklusive legitimationsoplysninger) vil blive sendt i klartekst.\n\nFor at aktivere kryptering, annuller og markér \'Kræv SecureVNCPlugin-kryptering\' i dine forbindelsesindstillinger.</string>
     <string name="error_securevncplugin_server_requires_encryption">Serveren tilbyder kun krypterede forbindelsestyper (SecureVNCPlugin), men kryptering er ikke aktiveret i dine forbindelsesindstillinger. Aktivér \'Kræv SecureVNCPlugin-kryptering\' for at oprette forbindelse til denne server.</string>
-    <string name="morpheusly_cta_title">Nå dine computere fra hvor som helst</string>
-    <string name="morpheusly_cta_dismiss">Ikke nu</string>
-    <string name="action_morpheusly">Få Morpheusly</string>
-    <string name="morpheusly_cta_body">Sikker fjernadgang til skrivebordet over internettet uden netværkskonfiguration.Installer Morpheusly desktop-appen på hver computer, du ønsker at nå, log ind og se, hvilke der er online, og tilslut problemfrit fra Morpheusly mobilappen.</string>
-    <string name="morpheusly_cta_download">Få Morpheusly</string>
     <string name="connection_add_shortcut">Føj til startskærm</string>
     <string name="shortcut_not_supported">Denne launcher understøtter ikke fastgørelse af genveje.</string>
 </resources>

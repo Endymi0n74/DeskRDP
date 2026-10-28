@@ -463,7 +463,7 @@ Núverandi listi yfir aRDP eiginleika inniheldur:
     <string name="more_apps">Fleiri forrit 📱</string>
     <string name="auto_x_disabled">Öryrkjar</string>
     <string name="pro_feature_mfa">Það virðist sem þjónninn þinn sé með fjölþætta auðkenningu virka. Vinsamlegast styðjið verkefnið með því að kaupa Pro útgáfuna sem styður þennan eiginleika. Tengill á Pro útgáfuna er fáanlegur í upphafsglugganum.</string>
-    <string name="no_application_to_handle_vpn">Þessi tenging er stillt til að ræsa VPN í gegnum utanaðkomandi app. Þú þarft að setja upp app eins og Morpheusly til að ræsa það.</string>
+    <string name="no_application_to_handle_vpn">Þessi tenging er stillt til að ræsa VPN í gegnum utanaðkomandi app. Þú þarft að setja upp það VPN-app til að ræsa það.</string>
     <string name="port_caption_ssh">SSH höfn</string>
     <string name="arrow_down">Ör niður</string>
     <string name="pro_feature_spice">Það lítur út fyrir að þú hafir reynt að opna .vv skrá. Ef þú vilt vista tengingar við Proxmox eða oVirt beint inni í appinu og vilt líka opna .vv skrár skaltu íhuga að kaupa Opaque. Ef þú þarft aðeins .vv skráarstuðning geturðu fengið aSPICE Pro. Finndu tengla á bæði forritin í upphafsglugganum.</string>
@@ -769,11 +769,6 @@ Forritið er nú þegar undanþegið hagræðingu rafhlöðunnar.</string>
     <string name="svnc_encryption_offered_title">Þjónninn býður dulkóðun</string>
     <string name="svnc_encryption_offered_message">Þjónninn styður SecureVNCPlugin dulkóðun, en þú hefur ekki virkjað hana í tengistillingunum.\n\nEf þú tengist án dulkóðunar verða setugögn þín (þ.m.t. aðgangsorð) send í ódulkóðuðu formi.\n\nTil að virkja dulkóðun, hættu við og merktu við \'Krefjast SecureVNCPlugin dulkóðunar\' í tengistillingunum.</string>
     <string name="error_securevncplugin_server_requires_encryption">Þjónninn býður aðeins upp á dulkóðaðar tengigerðir (SecureVNCPlugin), en dulkóðun er ekki virkjuð í tengistillingunum þínum. Virkjaðu \'Krefjast SecureVNCPlugin dulkóðunar\' til að tengjast þessum þjóni.</string>
-    <string name="morpheusly_cta_title">Náðu í tölvurnar þínar hvar sem er</string>
-    <string name="morpheusly_cta_dismiss">Ekki núna</string>
-    <string name="action_morpheusly">Fáðu Morpheusly</string>
-    <string name="morpheusly_cta_body">Öruggur fjarlægur skrifborðsaðgangur í gegnum internetið án netstillingar.Settu upp Morpheusly skrifborðsforritið á hverri tölvu sem þú vilt ná í, skráðu þig inn og sjáðu hverjar eru á netinu og tengdu óaðfinnanlega úr Morpheusly farsímaappinu.</string>
-    <string name="morpheusly_cta_download">Fáðu Morpheusly</string>
     <string name="connection_add_shortcut">Bæta við á heimaskjá</string>
     <string name="shortcut_not_supported">Þessi ræsir styður ekki að festa flýtileiðir.</string>
 </resources>

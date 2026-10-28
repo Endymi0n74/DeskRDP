@@ -819,7 +819,7 @@ Daaronder configureert u uw verbinding.
     <string name="pref_keyboard_type_label_TYPE_NULL">Standaard (TYPE_NULL)</string>
     <string name="pref_keyboard_type_label_VISIBLE_PASSWORD">Tekst/Cijfers zonder suggesties (VISIBLE_PASSWORD)</string>
     <string name="pref_keyboard_type_label_TYPE_CLASS_TEXT">Tekst met suggesties (TYPE_CLASS_TEXT)</string>
-    <string name="no_application_to_handle_vpn">Deze verbinding is ingesteld om VPN te starten via een externe app. U moet een app zoals Morpheusly installeren om deze te starten.</string>
+    <string name="no_application_to_handle_vpn">Deze verbinding is ingesteld om VPN te starten via een externe app. U moet die VPN-app installeren om deze te starten.</string>
     <string name="vnc_viewer_started">VNC Viewer gestart</string>
     <string name="enable_gateway">RDP Gateway inschakelen</string>
     <string name="scroll_speed">Scrollsnelheid bij aanraking</string>
@@ -902,11 +902,6 @@ App is al vrijgesteld van batterij-optimalisaties.</string>
     <string name="svnc_encryption_offered_title">Server biedt versleuteling aan</string>
     <string name="svnc_encryption_offered_message">De server ondersteunt SecureVNCPlugin-versleuteling, maar u hebt deze niet ingeschakeld in uw verbindingsinstellingen.\n\nVerbinden zonder versleuteling betekent dat uw sessiegegevens (inclusief inloggegevens) in platte tekst worden verzonden.\n\nOm versleuteling in te schakelen, annuleer en vink \'SecureVNCPlugin-versleuteling vereisen\' aan in uw verbindingsinstellingen.</string>
     <string name="error_securevncplugin_server_requires_encryption">De server biedt alleen versleutelde verbindingstypen (SecureVNCPlugin) aan, maar versleuteling is niet ingeschakeld in uw verbindingsinstellingen. Schakel \'SecureVNCPlugin-versleuteling vereisen\' in om verbinding te maken met deze server.</string>
-    <string name="morpheusly_cta_title">Bereik uw computers waar u ook bent</string>
-    <string name="morpheusly_cta_dismiss">Niet nu</string>
-    <string name="action_morpheusly">Verkrijg Morpheusly</string>
-    <string name="morpheusly_cta_body">Veilige externe desktoptoegang via internet zonder netwerkconfiguratie.Installeer de Morpheusly desktop-app op elke computer die u wilt bereiken, meld u aan en kijk welke online zijn en maak naadloos verbinding via de Morpheusly mobiele app.</string>
-    <string name="morpheusly_cta_download">Verkrijg Morpheusly</string>
     <string name="connection_add_shortcut">Toevoegen aan startscherm</string>
     <string name="shortcut_not_supported">Deze launcher ondersteunt het vastzetten van snelkoppelingen niet.</string>
 </resources>

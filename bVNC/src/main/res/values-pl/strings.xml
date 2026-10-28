@@ -719,7 +719,7 @@ Znane problemy:
     <string name="report_bug">Zgłoś błąd 🐛</string>
     <string name="cursor_mode">Tryb kursora:</string>
     <string name="error_x509_could_not_generate_encoding">Nie można wygenerować kodowania certyfikatu.</string>
-    <string name="no_application_to_handle_vpn">To połączenie jest skonfigurowane do uruchamiania VPN za pośrednictwem aplikacji zewnętrznej. Aby ją uruchomić, musisz zainstalować aplikację taką jak Morpheusly.</string>
+    <string name="no_application_to_handle_vpn">To połączenie jest skonfigurowane do uruchamiania VPN za pośrednictwem aplikacji zewnętrznej. Aby ją uruchomić, musisz zainstalować tę aplikację VPN.</string>
     <string name="ok">OK</string>
     <string name="custom_ca_paste">Wklej tutaj (jeśli nie importujesz) urząd certyfikacji</string>
     <string name="single_cancel">Tryb jednoręczny anulowany</string>
@@ -873,11 +873,6 @@ Aplikacja jest już wyłączona z optymalizacji baterii.</string>
     <string name="svnc_encryption_offered_title">Serwer oferuje szyfrowanie</string>
     <string name="svnc_encryption_offered_message">Serwer obsługuje szyfrowanie SecureVNCPlugin, ale nie zostało ono włączone w ustawieniach połączenia.\n\nPołączenie bez szyfrowania oznacza, że dane sesji (w tym dane uwierzytelniające) będą przesyłane jawnym tekstem.\n\nAby włączyć szyfrowanie, anuluj i zaznacz \'Wymagaj szyfrowania SecureVNCPlugin\' w ustawieniach połączenia.</string>
     <string name="error_securevncplugin_server_requires_encryption">Serwer oferuje tylko zaszyfrowane typy połączeń (SecureVNCPlugin), ale szyfrowanie nie jest włączone w ustawieniach połączenia. Włącz \'Wymagaj szyfrowania SecureVNCPlugin\', aby połączyć się z tym serwerem.</string>
-    <string name="morpheusly_cta_title">Dotrzyj do swoich komputerów z dowolnego miejsca</string>
-    <string name="morpheusly_cta_dismiss">Nie teraz</string>
-    <string name="action_morpheusly">Zdobądź Morpheusly</string>
-    <string name="morpheusly_cta_body">Bezpieczny dostęp do pulpitu zdalnego przez Internet przy zerowej konfiguracji sieci.Zainstaluj aplikację komputerową Morpheusly na każdym komputerze, z którym chcesz się połączyć, zaloguj się, sprawdź, które z nich są online i bezproblemowo połącz się z aplikacją mobilną Morpheusly.</string>
-    <string name="morpheusly_cta_download">Zdobądź Morpheusly</string>
     <string name="connection_add_shortcut">Dodaj do ekranu głównego</string>
     <string name="shortcut_not_supported">Ten launcher nie obsługuje przypinania skrótów.</string>
 </resources>

@@ -464,7 +464,7 @@ aRDP அம்சங்களின் தற்போதைய பட்டி�
     <string name="more_apps">மேலும் பயன்பாடுகள் 📱</string>
     <string name="auto_x_disabled">முடக்கப்பட்டது</string>
     <string name="pro_feature_mfa">உங்கள் சர்வரில் பல காரணி அங்கீகாரம் இயக்கப்பட்டிருப்பது போல் தெரிகிறது.இந்த அம்சத்திற்கான ஆதரவைக் கொண்ட ப்ரோ பதிப்பை வாங்குவதன் மூலம் திட்டத்தை ஆதரிக்கவும்.புரோ பதிப்பிற்கான இணைப்பு தொடக்க உரையாடலில் கிடைக்கிறது.</string>
-    <string name="no_application_to_handle_vpn">இந்த இணைப்பு வெளிப்புற ஆப்ஸ் மூலம் VPN ஐ தொடங்கும் வகையில் அமைக்கப்பட்டுள்ளது.அதைத் தொடங்க Morpheusly போன்ற பயன்பாட்டை நிறுவ வேண்டும்.</string>
+    <string name="no_application_to_handle_vpn">இந்த இணைப்பு வெளிப்புற ஆப்ஸ் மூலம் VPN ஐ தொடங்கும் வகையில் அமைக்கப்பட்டுள்ளது.அதைத் தொடங்க அந்த VPN பயன்பாட்டை நிறுவ வேண்டும்.</string>
     <string name="port_caption_ssh">SSH போர்ட்</string>
     <string name="arrow_down">கீழ் அம்பு</string>
     <string name="pro_feature_spice">நீங்கள் .vv கோப்பைத் திறக்க முயற்சித்தது போல் தெரிகிறது.பயன்பாட்டிற்குள்ளேயே Proxmox அல்லது oVirt இணைப்புகளைச் சேமிக்க விரும்பினால், மேலும் .vv கோப்புகளைத் திறக்க விரும்பினால், ஒளிபுகாவை வாங்கவும்.உங்களுக்கு .vv கோப்பு ஆதரவு மட்டுமே தேவைப்பட்டால், நீங்கள் aSPICE Pro ஐப் பெறலாம்.தொடக்க உரையாடலில் இரண்டு பயன்பாடுகளுக்கான இணைப்புகளைக் கண்டறியவும்.</string>
@@ -804,11 +804,6 @@ aSPICE அம்சங்களின் தற்போதைய பட்ட�
     <string name="svnc_encryption_offered_title">சேவையகம் மறையாக்கத்தை வழங்குகிறது</string>
     <string name="svnc_encryption_offered_message">சேவையகம் SecureVNCPlugin மறையாக்கத்தை ஆதரிக்கிறது, ஆனால் உங்கள் இணைப்பு அமைப்புகளில் இது இயக்கப்படவில்லை.\n\nமறையாக்கம் இல்லாமல் இணைவது என்றால் உங்கள் அமர்வு தரவு (நற்சான்றிதழ்கள் உட்பட) வெளிப்படையான உரையில் அனுப்பப்படும்.\n\nமறையாக்கத்தை இயக்க, ரத்துசெய்து உங்கள் இணைப்பு அமைப்புகளில் \'SecureVNCPlugin மறையாக்கம் தேவை\' என்பதைத் தேர்வு செய்யவும்.</string>
     <string name="error_securevncplugin_server_requires_encryption">சேவையகம் மறையாக்கப்பட்ட இணைப்பு வகைகளை (SecureVNCPlugin) மட்டுமே வழங்குகிறது, ஆனால் உங்கள் இணைப்பு அமைப்புகளில் மறையாக்கம் இயக்கப்படவில்லை. இந்த சேவையகத்துடன் இணைக்க \'SecureVNCPlugin மறையாக்கம் தேவை\' என்பதை இயக்கவும்.</string>
-    <string name="morpheusly_cta_title">எங்கிருந்தும் உங்கள் கணினிகளை அணுகவும்</string>
-    <string name="morpheusly_cta_dismiss">இப்போது இல்லை</string>
-    <string name="morpheusly_cta_body">பூஜ்ஜிய நெட்வொர்க் உள்ளமைவுடன் இணையத்தில் பாதுகாப்பான ரிமோட்-டெஸ்க்டாப் அணுகல்.நீங்கள் அணுக விரும்பும் ஒவ்வொரு கணினியிலும் Morpheusly டெஸ்க்டாப் பயன்பாட்டை நிறுவவும், உள்நுழையவும் மற்றும் ஆன்லைனில் உள்ளவைகளைப் பார்க்கவும் மற்றும் Morpheusly மொபைல் பயன்பாட்டிலிருந்து தடையின்றி இணைக்கவும்.</string>
-    <string name="action_morpheusly">Morpheusly பெறுக</string>
-    <string name="morpheusly_cta_download">Morpheusly பெறுக</string>
     <string name="connection_add_shortcut">முகப்புத் திரையில் சேர்</string>
     <string name="shortcut_not_supported">இந்த லாஞ்சர் குறுக்குவழிகளைப் பொருத்துவதை ஆதரிக்கவில்லை.</string>
 </resources>

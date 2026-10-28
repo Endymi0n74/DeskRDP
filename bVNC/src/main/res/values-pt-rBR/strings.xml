@@ -888,7 +888,7 @@ Abaixo, é onde você configura sua conexão.
     <string name="show_menu">Show Menu</string>
     <string name="hide_connection_thumbnails">Hide Connection Thumbnails</string>
     <string name="rate_app">Rate ⭐⭐⭐⭐⭐</string>
-    <string name="no_application_to_handle_vpn">This connection is set to launch VPN via an external app. You need to install an app like Morpheusly to launch it.</string>
+    <string name="no_application_to_handle_vpn">Esta conexão está configurada para iniciar VPN por meio de um aplicativo externo. Você precisa instalar esse aplicativo VPN para iniciá-la.</string>
     <string name="audio_will_be_initialized">Audio will be initialized in about 15 seconds, please stop any running video or audio playback before then</string>
     <string name="pref_keyboard_type_label_TYPE_CLASS_TEXT">Text With Suggestions (TYPE_CLASS_TEXT)</string>
     <string name="keyboard_type">Software Keyboard Type</string>
@@ -971,11 +971,6 @@ App is already exempt from battery optimizations.</string>
     <string name="svnc_encryption_offered_title">O servidor oferece criptografia</string>
     <string name="svnc_encryption_offered_message">O servidor suporta criptografia SecureVNCPlugin, mas você não a ativou nas suas configurações de conexão.\n\nConectar sem criptografia significa que os dados da sessão (incluindo credenciais) serão transmitidos em texto simples.\n\nPara ativar a criptografia, cancele e marque \'Exigir criptografia SecureVNCPlugin\' nas suas configurações de conexão.</string>
     <string name="error_securevncplugin_server_requires_encryption">O servidor oferece apenas tipos de conexão criptografados (SecureVNCPlugin), mas a criptografia não está ativada nas suas configurações de conexão. Ative \'Exigir criptografia SecureVNCPlugin\' para conectar a este servidor.</string>
-    <string name="morpheusly_cta_title">Acesse seus computadores de qualquer lugar</string>
-    <string name="morpheusly_cta_dismiss">Agora não</string>
-    <string name="action_morpheusly">Obtenha Morpheusly</string>
-    <string name="morpheusly_cta_body">Acesso seguro à área de trabalho remota pela Internet sem configuração de rede.Instale o aplicativo Morpheusly para desktop em todos os computadores que você deseja acessar, faça login e veja quais estão online e conecte-se perfeitamente a partir do Morpheusly aplicativo móvel.</string>
-    <string name="morpheusly_cta_download">Obtenha Morpheusly</string>
     <string name="connection_add_shortcut">Adicionar à tela inicial</string>
     <string name="shortcut_not_supported">Este inicializador não é compatível com a fixação de atalhos.</string>
 </resources>

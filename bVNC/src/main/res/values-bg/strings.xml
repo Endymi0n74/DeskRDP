@@ -683,7 +683,7 @@ aRDP: Интуитивен, защитен RDP клиент</string>
     <string name="auto_x_cancel">
 Отказ</string>
     <string name="no_application_to_handle_vpn">
-Тази връзка е настроена да стартира VPN чрез външно приложение. Трябва да инсталирате приложение като Morpheusly, за да го стартирате.</string>
+Тази връзка е настроена да стартира VPN чрез външно приложение. Трябва да инсталирате това VPN приложение, за да го стартирате.</string>
     <string name="single_cancel">
 Режимът с една ръка е отменен</string>
     <string name="pro_feature_generic">
@@ -1136,11 +1136,6 @@ Direct, Swipe Pan: Плъзнете, за да се движите наокол�
     <string name="svnc_encryption_offered_title">Сървърът предлага криптиране</string>
     <string name="svnc_encryption_offered_message">Сървърът поддържа криптиране чрез SecureVNCPlugin, но то не е активирано в настройките ви за свързване.\n\nСвързването без криптиране означава, че данните от сесията ви (включително идентификационните данни) ще се предават в открит текст.\n\nЗа да активирате криптирането, откажете и отбележете \'Изисквай SecureVNCPlugin криптиране\' в настройките за свързване.</string>
     <string name="error_securevncplugin_server_requires_encryption">Сървърът предлага само криптирани типове връзка (SecureVNCPlugin), но криптирането не е активирано в настройките ви за свързване. Активирайте \'Изисквай SecureVNCPlugin криптиране\', за да се свържете с този сървър.</string>
-    <string name="morpheusly_cta_title">Достигнете до компютрите си отвсякъде</string>
-    <string name="morpheusly_cta_dismiss">Не сега</string>
-    <string name="action_morpheusly">Вземете Morpheusly</string>
-    <string name="morpheusly_cta_body">Сигурен достъп до отдалечен работен плот през интернет с нулева мрежова конфигурация.Инсталирайте Morpheusly настолното приложение на всеки компютър, до който искате да достигнете, влезте и вижте кои са онлайн и се свържете безпроблемно от Morpheusly мобилното приложение.</string>
-    <string name="morpheusly_cta_download">Вземете Morpheusly</string>
     <string name="connection_add_shortcut">Добавяне към началния екран</string>
     <string name="shortcut_not_supported">Този стартер не поддържа закачване на преки пътища.</string>
 </resources>
