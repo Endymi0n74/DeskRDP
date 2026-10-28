@@ -73,7 +73,8 @@ sans appareil :
 
 # Intro
 
-The upstream project's own documentation follows, unchanged.
+The upstream project's own documentation follows, apart from one reversed link made clickable.
+La documentation de l'amont suit, à un lien inversé près, rétabli en lien cliquable.
 
 This is the source code for bVNC, aRDP, aSPICE and Opaque, four remote desktop
 clients for Android.
@@ -246,7 +247,7 @@ It is possible to programmatically build additional customized clients based on 
 without altering any of the source code of the project.
 
 - Pick a unique identifier for your app. It will become part of the
-  (application ID)[https://developer.android.com/studio/build/application-id] of the app. For example,
+  [application ID](https://developer.android.com/studio/build/application-id) of the app. For example,
   say you pick YourVncClient. The application ID will be com.iiordanov.YourVncClient.
 
 - Place a configuration file in yaml format (note - with filename matching your resulting application ID) at
