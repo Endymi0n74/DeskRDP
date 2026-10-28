@@ -758,8 +758,11 @@ pas d'exécution.
 - `dualdesk-app/src/main/AndroidManifest.xml` : `versionName` `1.10-dualdesk`, `versionCode` 2
   (la 1.0.0 était en 1). Le suffixe `-dualdesk` est conservé : il fait partie de l'identité affichée,
   pas du numéro.
-- Assets publiés, comme pour la 1.0.0 : `dualdesk-app-arm64-v8a-debug.apk` et
-  `dualdesk-app-universal-debug.apk`, copies dans `_released/v1.10/`.
+- Release `v1.10` publiée (https://github.com/Endymi0n74/ardp/releases/tag/v1.10), tag poussé sur
+  `origin/master`. Assets, comme pour la 1.0.0 : `dualdesk-app-arm64-v8a-debug.apk` (67 617 368 o) et
+  `dualdesk-app-universal-debug.apk` (190 782 557 o), copies dans `_released/v1.10/` ; les tailles
+  lues sur la release correspondent à celles du disque. `_released/` est désormais dans
+  `.gitignore` : 245 Mo de binaires n'ont rien à faire dans l'historique.
 - `CHANGELOG.md` créé (bilingue, 1.10 puis 1.0.0) ; le README gagne une section « Version and
   releases » / « Version et publications » qui pointe la page de release et le journal.
 

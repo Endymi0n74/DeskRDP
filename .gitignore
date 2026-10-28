@@ -219,4 +219,8 @@ check_elf_alignment*
 
 remote-desktop-clients-libs-*
 
+# APK et notes de publication produits localement (plusieurs centaines de Mo) :
+# ils vont dans une release GitHub, pas dans l'historique.
+_released/
+
 venv
