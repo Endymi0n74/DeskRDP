@@ -123,6 +123,64 @@ class RustDeskExportSanitizerTest {
     }
 
     @Test
+    fun `with a passphrase the password is carried as a portable value`() {
+        val source = document(rustDeskRow("1", "ks1:aa:bb"))
+        val exporter = RustDeskExportSanitizer.PasswordExporter { stored ->
+            RustDeskPortableSeal.seal("phrase", stored)
+        }
+
+        val result = RustDeskExportSanitizer.protectRustDeskPasswords(source, exporter)
+
+        assertNotNull(result)
+        assertEquals(1, result!!.passwordsCarried)
+        assertEquals(0, result.passwordsRemoved)
+        assertTrue(!result.document.contains("ks1:"))
+        val carried = result.document.substringAfter("PASSWORD=\"").substringBefore("\"")
+        assertTrue(RustDeskPortableSeal.isPortable(carried))
+        assertEquals("ks1:aa:bb", RustDeskPortableSeal.open("phrase", carried))
+    }
+
+    @Test
+    fun `a password the exporter declines is left out rather than kept`() {
+        val source = document(rustDeskRow("1", "ks1:aa:bb"))
+        val exporter = RustDeskExportSanitizer.PasswordExporter { null }
+
+        val result = RustDeskExportSanitizer.protectRustDeskPasswords(source, exporter)
+
+        assertNotNull(result)
+        assertEquals(0, result!!.passwordsCarried)
+        assertEquals(1, result.passwordsRemoved)
+        assertTrue(result.document.contains("PASSWORD=\"\""))
+    }
+
+    @Test
+    fun `an exporter returning an attribute-breaking value is refused, not written`() {
+        val source = document(rustDeskRow("1", "ks1:aa:bb"))
+        val exporter = RustDeskExportSanitizer.PasswordExporter { stored -> "pw1:\" $stored" }
+
+        val result = RustDeskExportSanitizer.protectRustDeskPasswords(source, exporter)
+
+        // La valeur casse le document : elle n'est pas écrite, le mot de passe est simplement retiré.
+        assertNotNull(result)
+        assertEquals(0, result!!.passwordsCarried)
+        assertEquals(1, result.passwordsRemoved)
+    }
+
+    @Test
+    fun `with a passphrase an rdp password is still left untouched`() {
+        val source = document(rdpRow("1", "s3cret"))
+        val exporter = RustDeskExportSanitizer.PasswordExporter { stored ->
+            RustDeskPortableSeal.seal("phrase", stored)
+        }
+
+        val result = RustDeskExportSanitizer.protectRustDeskPasswords(source, exporter)
+
+        assertNotNull(result)
+        assertEquals(0, result!!.passwordsCarried)
+        assertTrue(result.document.contains("PASSWORD=\"s3cret\""))
+    }
+
+    @Test
     fun `a sealed value outside any row refuses the export`() {
         // Forme inattendue : mieux vaut refuser d'écrire que d'écrire sans avoir su nettoyer.
         val source = "<database><table table_name=\"CONNECTION_BEAN\" PASSWORD=\"ks1:aa:bb\"></table></database>"

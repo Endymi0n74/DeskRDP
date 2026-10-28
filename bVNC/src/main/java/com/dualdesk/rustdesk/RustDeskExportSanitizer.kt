@@ -1,27 +1,29 @@
 package com.dualdesk.rustdesk
 
 /**
- * Removes the RustDesk passwords from the settings document before it is written to a file.
+ * Rewrites the RustDesk passwords of the settings document before it is written to a file.
  *
- * Why remove them at all: a stored password is sealed under a key of this device's Android
- * Keystore (see [RustDeskSecretCodec]), and that key never leaves the device. Exporting the seal
- * would only carry a value that no other installation can open — and that the same device cannot
- * open either after a reinstall, since uninstalling the application destroys its keystore keys.
- * The honest option is therefore to leave the password where it lives and say so, instead of
- * putting an unreadable blob in a file meant to move between devices.
+ * A stored password is sealed under a key of this device's keystore (see [RustDeskSecretCodec]),
+ * and that key never leaves the device — not even across a reinstall, since uninstalling the
+ * application destroys its keys. Writing that seal to a file meant to move between devices would
+ * carry a value nothing can open. Two behaviours follow from it:
+ *
+ *  - without a passphrase, the password is **removed** from the document ([blankRustDeskPasswords]);
+ *  - with one, it is **re-sealed under the passphrase** ([protectRustDeskPasswords]) and becomes
+ *    readable on any device the file reaches, by whoever knows the phrase.
  *
  * The document produced by `SqliteElement.exportDbAsXmlToStream` is a list of
  * `<row ATTRIBUTE="value" ...>` elements, one per database record: the columns are attributes, and
  * their values are escaped, so a raw `<` or `"` never appears inside one. That is what makes a
- * textual pass safe here — no XML parser is needed to find an attribute value's end, and no row
- * can be confused with another. `RustDeskSecretCodec` values are recognisable by their `ks1:`
- * prefix; a RustDesk access saved before sealing existed (or on API 21/22, where no keystore key
- * can be generated) carries a clear password instead, which is why the row's connection type is
- * checked as well.
+ * textual pass safe here — no XML parser is needed to find an attribute value's end, and no row can
+ * be confused with another. RustDesk seals are recognisable by their `ks1:` prefix; an access saved
+ * before sealing existed (or on API 21/22, where no keystore key can be generated) carries a clear
+ * password instead, which is why the row's connection type is checked as well.
  *
- * The result is verified before it is returned: if a sealed value or a non-empty RustDesk password
- * survived the pass, the document is refused (null) rather than written. A file that silently kept
- * a secret would be worse than no export.
+ * The result is verified before it is returned: if a device seal (`ks1:`) survived the pass, or a
+ * RustDesk password is neither empty nor portable, the document is refused (null) rather than
+ * written. A file that silently kept a secret the caller did not ask to carry would be worse than
+ * no export.
  */
 object RustDeskExportSanitizer {
 
@@ -30,19 +32,40 @@ object RustDeskExportSanitizer {
     private const val CONNECTION_TYPE_ATTRIBUTE = "CONNECTIONTYPE"
     private const val RUSTDESK_CONNECTION_TYPE = "6"
 
-    /** The document to write, and how many RustDesk passwords were left out of it. */
-    class Sanitized(val document: String, val passwordsRemoved: Int)
+    /** Turns a stored password into what the file should carry, or null to leave it out. */
+    fun interface PasswordExporter {
+        fun export(stored: String): String?
+    }
+
+    /** The document to write, and what became of its RustDesk passwords. */
+    class Sanitized(
+        val document: String,
+        val passwordsCarried: Int,
+        val passwordsRemoved: Int,
+    )
+
+    /** Removes every RustDesk password: the export carries none. */
+    @JvmStatic
+    fun blankRustDeskPasswords(document: String): Sanitized? =
+        protectRustDeskPasswords(document, null)
 
     /**
-     * Blanks every RustDesk password in `document`.
+     * Rewrites every RustDesk password through `exporter`.
+     *
+     * A password the exporter declines (null) is left out, not kept as is: the exporter is the only
+     * code that knows how to make a value readable elsewhere, and a value it could not read is
+     * worth nothing in the file.
      *
      * Returns null when the document could not be cleaned, in which case the caller must not write
-     * anything: the shape of the file changed and this pass can no longer guarantee the secrets are
-     * gone.
+     * anything: the shape of the file changed and this pass can no longer guarantee what it holds.
      */
     @JvmStatic
-    fun blankRustDeskPasswords(document: String): Sanitized? {
+    fun protectRustDeskPasswords(
+        document: String,
+        exporter: PasswordExporter?,
+    ): Sanitized? {
         val output = StringBuilder(document.length)
+        var carried = 0
         var removed = 0
         var index = 0
         while (true) {
@@ -59,9 +82,12 @@ object RustDeskExportSanitizer {
                 break
             }
             val tag = document.substring(rowStart, tagEnd + 1)
-            val cleaned = blankInRow(tag)
-            output.append(cleaned)
-            if (cleaned.length != tag.length) {
+            val rewrite = rewriteRow(tag, exporter)
+            output.append(rewrite.tag)
+            if (rewrite.carried) {
+                carried++
+            }
+            if (rewrite.removed) {
                 removed++
             }
             index = tagEnd + 1
@@ -71,18 +97,37 @@ object RustDeskExportSanitizer {
         if (!isClean(cleanedDocument)) {
             return null
         }
-        return Sanitized(cleanedDocument, removed)
+        return Sanitized(cleanedDocument, carried, removed)
     }
 
-    /** The row with its password attribute emptied, or the row untouched. */
-    private fun blankInRow(tag: String): String {
-        val holdsSealedPassword = RustDeskSecretCodec.isSealed(attributeValue(tag, PASSWORD_ATTRIBUTE))
+    private class Rewrite(val tag: String, val carried: Boolean, val removed: Boolean)
+
+    /** The row with its password either replaced, emptied, or untouched. */
+    private fun rewriteRow(tag: String, exporter: PasswordExporter?): Rewrite {
+        val stored = attributeValue(tag, PASSWORD_ATTRIBUTE)
+        val holdsSealedPassword = RustDeskSecretCodec.isSealed(stored)
         val isRustDesk = attributeValue(tag, CONNECTION_TYPE_ATTRIBUTE) == RUSTDESK_CONNECTION_TYPE
         if (!holdsSealedPassword && !isRustDesk) {
-            return tag
+            return Rewrite(tag, false, false)
         }
-        return emptyAttribute(tag, PASSWORD_ATTRIBUTE)
+        if (stored.isNullOrEmpty()) {
+            return Rewrite(tag, false, false)
+        }
+
+        val portable = exporter?.export(stored)
+        if (portable != null && isSafeAttributeValue(portable)) {
+            return Rewrite(setAttribute(tag, PASSWORD_ATTRIBUTE, portable), true, false)
+        }
+        return Rewrite(setAttribute(tag, PASSWORD_ATTRIBUTE, ""), false, true)
     }
+
+    /**
+     * True when the text can sit inside a double-quoted attribute without breaking or escaping it:
+     * the values this fork writes are hexadecimal with colons, and anything else is a bug worth
+     * refusing rather than writing.
+     */
+    private fun isSafeAttributeValue(value: String): Boolean =
+        value.isNotEmpty() && value.none { it == '"' || it == '<' || it == '>' || it == '&' }
 
     /** The value of `name` in this row, or null when the attribute is absent or unterminated. */
     private fun attributeValue(tag: String, name: String): String? {
@@ -98,8 +143,8 @@ object RustDeskExportSanitizer {
         return tag.substring(valueStart, valueEnd)
     }
 
-    /** Replaces the value of `name` with nothing, keeping the attribute in place. */
-    private fun emptyAttribute(tag: String, name: String): String {
+    /** Replaces the value of `name`, keeping the attribute in place. */
+    private fun setAttribute(tag: String, name: String, value: String): String {
         val start = attributeStart(tag, name)
         if (start < 0) {
             return tag
@@ -109,7 +154,7 @@ object RustDeskExportSanitizer {
         if (valueEnd < 0) {
             return tag
         }
-        return tag.substring(0, valueStart) + tag.substring(valueEnd)
+        return tag.substring(0, valueStart) + value + tag.substring(valueEnd)
     }
 
     /**
@@ -133,12 +178,12 @@ object RustDeskExportSanitizer {
     }
 
     /**
-     * True when no RustDesk password is left in the document.
+     * True when nothing this class was meant to handle is left in the document.
      *
-     * Two blunt checks close the ways this pass could silently do nothing: a sealed value left
-     * anywhere in the document fails it, and a password attribute found while no row tag was
-     * recognised fails it too — that shape is not the one this class knows how to read, so writing
-     * the file would mean writing it unchecked.
+     * Three checks close the ways the pass could silently do nothing: a device seal (`ks1:`) left
+     * anywhere fails it — that is the value only this device can open; a RustDesk password that is
+     * neither empty nor portable fails it; and a password attribute found while no row tag was
+     * recognised fails it too, since that shape is not the one this class knows how to read.
      */
     private fun isClean(document: String): Boolean {
         if (document.contains(RustDeskSecretCodec.PREFIX)) {
@@ -158,21 +203,20 @@ object RustDeskExportSanitizer {
                 return false
             }
             val tag = document.substring(rowStart, tagEnd + 1)
-            if (attributeStart(tag, PASSWORD_ATTRIBUTE) >= 0) {
-                val value = attributeValue(tag, PASSWORD_ATTRIBUTE)
-                if (value == null) {
-                    return false
-                }
-                if (RustDeskSecretCodec.isSealed(value)) {
-                    return false
-                }
-                val isRustDesk =
-                    attributeValue(tag, CONNECTION_TYPE_ATTRIBUTE) == RUSTDESK_CONNECTION_TYPE
-                if (isRustDesk && value.isNotEmpty()) {
-                    return false
-                }
+            val value = attributeValue(tag, PASSWORD_ATTRIBUTE)
+            if (value != null && !isCleanValue(tag, value)) {
+                return false
             }
             index = tagEnd + 1
         }
+    }
+
+    private fun isCleanValue(tag: String, value: String): Boolean {
+        if (value.isEmpty() || RustDeskPortableSeal.isPortable(value)) {
+            return true
+        }
+        // A clear password on a row that is not a RustDesk access belongs to another protocol and
+        // is none of this class's business.
+        return attributeValue(tag, CONNECTION_TYPE_ATTRIBUTE) != RUSTDESK_CONNECTION_TYPE
     }
 }

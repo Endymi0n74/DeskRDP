@@ -1,4 +1,79 @@
+# DualDesk — fork of aRDP
+
+This repository is a fork of [iiordanov/remote-desktop-clients](https://github.com/iiordanov/remote-desktop-clients)
+(GPLv3). It adds a `DualDesk` variant (package `com.dualdesk.rdp`) that keeps aRDP and gives it
+RustDesk accesses as well. The state of each feature and the measurements behind it are in
+[RAPPORT.md](RAPPORT.md) (French); known traps and tooling are in [memory.md](memory.md).
+
+## Exporting the access list: what happens to the RustDesk password
+
+A RustDesk password is stored **sealed** under a key of the Android Keystore. That key never leaves
+the device, and uninstalling the application destroys it — so the device seal cannot travel. The
+export therefore offers **two modes**, chosen on screen at export time:
+
+- **no passphrase** — the exported file contains no RustDesk password at all. The access, its device
+  id and its nickname are kept, the secret stays on the device, and the number of accesses left
+  behind is announced.
+- **with a passphrase** — each password is reopened and re-sealed under that passphrase
+  (`pw1:<iterations>:<salt>:<IV>:<ciphertext>`, PBKDF2 then AES-GCM). The file can then be restored
+  on another device: import asks for the passphrase, reopens the values and seals them again with
+  the arriving device's key.
+
+The passphrase is stored nowhere. **If it is lost, the passwords in that file are unrecoverable** —
+the file stays readable, and its accesses can still be restored, without their passwords.
+
+Whatever is not reopened at import (import cancelled, passphrase refused) is dropped rather than
+kept: such an access opens without a password, to be typed again, and the number of affected
+accesses is announced. A value that could not be reopened can never be mistaken for a password: it
+is neither shown in the edit form nor handed to RustDesk.
+
+The rewriting is verified **before** the file is written: if a device seal (`ks1:`) survives, or if
+the document does not have the expected shape, the export is refused instead of written as is. The
+code lives in `bVNC/src/main/java/com/dualdesk/rustdesk/` (`RustDeskSecretCodec`,
+`RustDeskSecretStore`, `RustDeskPortableSeal`, `RustDeskExportSanitizer`), and its JVM tests run
+without a device:
+
+```bash
+./gradlew :bVNC:testDebugUnitTest --tests "com.dualdesk.rustdesk.*" --offline
+```
+
+## Export des accès : ce que devient le mot de passe RustDesk
+
+Un mot de passe RustDesk est enregistré **scellé** sous une clé du Keystore Android. Cette clé ne
+quitte jamais l'appareil, et une désinstallation détruit les clés de l'application : le scellement
+local ne voyage donc pas. L'export de la liste d'accès propose en conséquence **deux modes**, choisis
+à l'écran au moment de l'export :
+
+- **sans phrase de passe** — le fichier exporté ne contient aucun mot de passe RustDesk. L'accès, son
+  identifiant et son surnom sont conservés, le secret reste sur l'appareil, et le nombre d'accès qui
+  en sont privés est annoncé.
+- **avec une phrase de passe** — chaque mot de passe est rouvert puis rescellé sous cette phrase
+  (`pw1:<itérations>:<sel>:<IV>:<chiffré>`, PBKDF2 puis AES-GCM). Le fichier devient restaurable sur
+  un autre appareil : l'import redemande la phrase, rouvre les valeurs et les resselle avec la clé du
+  téléphone d'arrivée.
+
+La phrase n'est enregistrée nulle part. **Perdue, elle rend les mots de passe de ce fichier
+définitivement irrécupérables** — le fichier reste lisible, et ses accès restaurables, sans leurs mots
+de passe.
+
+Ce qui n'est pas rouvert à l'import (import annulé, phrase refusée) est retiré plutôt que conservé :
+l'accès s'ouvre alors sans mot de passe, à ressaisir, et le nombre d'accès concernés est annoncé. Une
+valeur qui n'a pas pu être rouverte ne peut jamais être prise pour un mot de passe : elle n'est ni
+affichée dans le formulaire, ni transmise à RustDesk.
+
+Le nettoyage est vérifié **avant** l'écriture : si un scellement propre à l'appareil (`ks1:`) subsiste,
+ou si le document n'a pas la forme attendue, l'export est refusé au lieu d'être écrit tel quel. Le
+code est dans `bVNC/src/main/java/com/dualdesk/rustdesk/` (`RustDeskSecretCodec`,
+`RustDeskSecretStore`, `RustDeskPortableSeal`, `RustDeskExportSanitizer`), et ses tests JVM se lancent
+sans appareil :
+
+```bash
+./gradlew :bVNC:testDebugUnitTest --tests "com.dualdesk.rustdesk.*" --offline
+```
+
 # Intro
+
+The upstream project's own documentation follows, unchanged.
 
 This is the source code for bVNC, aRDP, aSPICE and Opaque, four remote desktop
 clients for Android.

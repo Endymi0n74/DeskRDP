@@ -90,14 +90,22 @@ au premier chargement de la grille — et si le Keystore refuse, l'accès n'est 
 de l'être en clair, avec un message qui le dit. Cinq tests JVM couvrent le format : aller-retour, deux
 sceaux différents, mauvaise clé, enregistrement altéré, ancienne valeur en clair.
 
-**Le mot de passe ne quitte pas l'appareil.** L'export d'accès écrit la base entière : il emportait le
-sceau dans un fichier destiné à changer d'appareil, alors que la clé, elle, ne le peut pas — et qu'une
-réinstallation détruit les clés du Keystore. Le fichier exporté ne contient donc plus aucun mot de
-passe RustDesk : la valeur est retirée du document au moment de l'écriture, la base n'est pas touchée,
-et un message dit combien d'accès en sont privés. Le retrait est vérifié avant écriture, et si le
-document n'a pas la forme attendue l'export est **refusé** au lieu d'être écrit tel quel. À l'import,
-un sceau créé ailleurs (ancien fichier, autre téléphone) est illisible ici : il est retiré et le nombre
-d'accès à ressaisir est annoncé, plutôt que de laisser une carte dont le mot de passe est du charabia.
+**Le mot de passe ne sort plus de l'appareil par accident, et il en sort par choix.** L'export d'accès
+écrit la base entière : il emportait le sceau dans un fichier destiné à changer d'appareil, alors que
+la clé, elle, ne peut pas suivre — une réinstallation détruit les clés du Keystore. Il y a donc deux
+chemins, tous deux annoncés à l'écran au moment de l'export :
+
+- **sans phrase de passe**, le fichier ne contient aucun mot de passe RustDesk — la valeur est retirée
+du document à l'écriture, la base n'est pas touchée, et le nombre d'accès privés est annoncé ;
+- **avec une phrase de passe**, chaque mot de passe est rouvert puis **scellé sous cette phrase**
+(`pw1:<itérations>:<sel>:<IV>:<chiffré>`, PBKDF2 puis AES-GCM) et redevient lisible sur l'autre
+appareil, par qui connaît la phrase. Elle n'est enregistrée nulle part et redemandée à l'import.
+
+Le résultat est vérifié **avant** l'écriture : aucune valeur scellée par l'appareil (`ks1:`) ne doit
+subsister, et si le document n'a pas la forme attendue l'export est **refusé** plutôt qu'écrit tel
+quel. À l'import, le fichier livre des valeurs sous phrase : elles sont rouvertes et rescellées sur
+l'appareil ; ce qui n'a pas été rouvert (import annulé, phrase refusée) est retiré et le nombre
+d'accès à ressaisir est annoncé, plutôt que de laisser une carte au mot de passe faux.
 
 ### 1.4 Rien ne renvoie plus vers l'application d'origine
 
@@ -324,11 +332,12 @@ points ci-dessous.
 il reste à provoquer un repli réel sur le téléphone, en désactivant temporairement le filtre du deep
 link, pour voir RustDesk accepter l'activité — c'est le seul maillon que le banc ne peut pas couvrir.
 
-**L'export ne transporte plus les mots de passe RustDesk** (cf. § 1.3), et c'est une décision, pas un
-reste : un sceau lié à l'appareil n'a de valeur sur aucun autre. Reste à voir ce que l'utilisateur en
-pense à l'usage — deux messages l'en informent (à l'export, à l'import d'un sceau étranger) ; si la
-restauration sur un appareil neuf devient un besoin courant, c'est une phrase de passe à ajouter,
-pas un sceau à exporter.
+**L'export des mots de passe est un choix explicite** (cf. § 1.3) : sans phrase de passe il n'emporte
+rien, avec une phrase il emporte tout. Ce qui reste à éprouver est le parcours réel — saisie de la
+phrase à l'export, fichier relu sur un appareil neuf, phrase ressaisie à l'import — car le banc couvre
+la cryptographie et le document, pas les dialogues ni le Keystore. Un point de conception à surveiller
+à l'usage : une phrase perdue rend le fichier définitif et ses mots de passe irrécupérables, ce que
+les deux messages disent sans le dire vraiment (formule à durcir si l'usage s'installe).
 
 **Trois résidus d'identité, sans effet visible** mais vérifiables : le bouton **Morpheusly** de la
 barre d'action, qui fait la promotion d'un produit tiers du même auteur ; l'étiquette de carte qui

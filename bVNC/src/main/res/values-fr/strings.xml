@@ -997,4 +997,10 @@ L\'application est déjà exemptée des optimisations de la batterie.</string>
     <string name="rustdesk_export_refused">Export annulé : un mot de passe RustDesk n\'a pas pu être retiré du fichier.</string>
     <string name="rustdesk_export_without_password">Le mot de passe de %1$d accès RustDesk n\'est pas dans l\'export : il reste sur cet appareil.</string>
     <string name="rustdesk_password_dropped">%1$d accès RustDesk : le mot de passe enregistré n\'est pas lisible ici, il a été retiré. Saisissez-le de nouveau.</string>
+    <string name="rustdesk_passphrase_hint">Phrase de passe (laisser vide pour ne pas emporter les mots de passe)</string>
+    <string name="rustdesk_export_passphrase_title">Protéger les mots de passe exportés ?</string>
+    <string name="rustdesk_export_passphrase_message">Un mot de passe RustDesk ne peut pas quitter cet appareil tel qu\'il est enregistré. Donnez une phrase de passe pour l\'emporter : elle sera redemandée à l\'import, sur l\'autre appareil. Laissez vide pour exporter sans les mots de passe.</string>
+    <string name="rustdesk_export_with_passphrase">Export écrit : le mot de passe de %1$d accès RustDesk est scellé sous votre phrase.</string>
+    <string name="rustdesk_import_passphrase_title">Phrase de passe de l\'export</string>
+    <string name="rustdesk_import_passphrase_message">Ce fichier contient %1$d mot de passe RustDesk scellé sous une phrase. Saisissez la phrase utilisée à l\'export pour les restaurer sur cet appareil.</string>
 </resources>

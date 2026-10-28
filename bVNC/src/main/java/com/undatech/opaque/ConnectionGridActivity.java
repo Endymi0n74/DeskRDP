@@ -65,7 +65,9 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.dualdesk.rustdesk.LaunchOutcome;
+import com.dualdesk.rustdesk.RustDeskExportSanitizer;
 import com.dualdesk.rustdesk.RustDeskLauncher;
+import com.dualdesk.rustdesk.RustDeskPortableSeal;
 import com.dualdesk.rustdesk.RustDeskSecretStore;
 import com.google.android.material.snackbar.Snackbar;
 import com.iiordanov.bVNC.App;
@@ -470,45 +472,71 @@ public class ConnectionGridActivity extends AppCompatActivity implements GetText
     }
 
     /**
+     * The password to hand out for an access: nothing when the stored value cannot be opened here.
+     *
+     * A value sealed under a passphrase belongs to an exported file, not to this device: showing it
+     * in the edit form or handing it to RustDesk would present a blob as a password. The load pass
+     * drops those before the list is even built, so this is the second lock on the same door.
+     */
+    private String usablePassword(String stored) {
+        String clear = RustDeskSecretStore.open(stored);
+        return RustDeskPortableSeal.isPortable(clear) ? null : clear;
+    }
+
+    /** The RustDesk accesses of the list, in loading order. */
+    private List<ConnectionBean> rustDeskAccesses() {
+        List<ConnectionBean> accesses = new ArrayList<>();
+        for (Connection connection : getConnectionLoader(this).loadConnectionsById().values()) {
+            if (!(connection instanceof ConnectionBean)) {
+                continue;
+            }
+            ConnectionBean bean = (ConnectionBean) connection;
+            if (bean.getConnectionType() == Constants.CONN_TYPE_RUSTDESK) {
+                accesses.add(bean);
+            }
+        }
+        return accesses;
+    }
+
+    /**
      * Brings the stored RustDesk passwords in line with the way they are kept, once, on load.
      *
-     * Two older states are repaired here:
+     * Three states are repaired here:
      *  - a password saved before sealing existed is clear in the shared database until the user
      *    edits it, so it is sealed on first load; without this "sealed" would only be true for
      *    accesses created after the change;
      *  - a seal created on another device (or before a reinstall, which destroys the keystore key)
      *    cannot be opened here. Keeping it would leave an access whose password is garbage, so it
-     *    is dropped and the user is told how many must be typed again.
+     *    is dropped and the user is told how many must be typed again;
+     *  - a portable value from an imported file that was never reopened (import cancelled, or the
+     *    passphrase refused) is useless here too, and is dropped the same way. It is announced by
+     *    the same message, which is exactly what the user has to do about it.
      *
      * A seal that opens is left untouched, so this runs cheaply on every load, and the message is
      * shown only on the load that actually drops something.
      */
     private void sealStoredRustDeskPasswords() {
         int dropped = 0;
-        for (Connection connection : getConnectionLoader(this).loadConnectionsById().values()) {
-            if (!(connection instanceof ConnectionBean)) {
-                continue;
-            }
-            ConnectionBean bean = (ConnectionBean) connection;
-            if (bean.getConnectionType() != Constants.CONN_TYPE_RUSTDESK) {
-                continue;
-            }
+        for (ConnectionBean bean : rustDeskAccesses()) {
             String stored = bean.getPassword();
             if (stored == null || stored.isEmpty()) {
                 continue;
             }
-            if (RustDeskSecretStore.isSealed(stored)) {
-                if (RustDeskSecretStore.open(stored) != null) {
-                    continue;
-                }
+            boolean usableHere = RustDeskSecretStore.isSealed(stored)
+                    ? RustDeskSecretStore.open(stored) != null
+                    : !RustDeskPortableSeal.isPortable(stored);
+            if (!usableHere) {
                 try {
                     bean.setPassword("");
                     bean.setKeepPassword(true);
                     bean.save(this);
                     dropped++;
                 } catch (RuntimeException e) {
-                    Log.w(TAG, "Unreadable RustDesk password could not be cleared: " + e);
+                    Log.w(TAG, "Unusable RustDesk password could not be cleared: " + e);
                 }
+                continue;
+            }
+            if (RustDeskSecretStore.isSealed(stored)) {
                 continue;
             }
             try {
@@ -520,10 +548,120 @@ public class ConnectionGridActivity extends AppCompatActivity implements GetText
             }
         }
         if (dropped > 0) {
-            Log.i(TAG, dropped + " unreadable RustDesk password(s) cleared.");
+            Log.i(TAG, dropped + " unusable RustDesk password(s) cleared.");
             Snackbar.make(gridView, getString(R.string.rustdesk_password_dropped, dropped),
                     Snackbar.LENGTH_LONG).show();
         }
+    }
+
+    /**
+     * Asks for an optional passphrase, then writes the settings export.
+     *
+     * The passphrase is stored nowhere: it re-seals the RustDesk passwords for the file, and has to
+     * be typed again to reopen them. An empty answer is allowed and means "leave the passwords on
+     * this device", which is what happens without the feature.
+     */
+    private void askPassphraseAndExport(Uri uri) {
+        EditText passphrase = new EditText(this);
+        passphrase.setHint(R.string.rustdesk_passphrase_hint);
+        passphrase.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        excludeFromAutofill(passphrase);
+
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.rustdesk_export_passphrase_title)
+                .setMessage(R.string.rustdesk_export_passphrase_message)
+                .setView(passphrase)
+                .setPositiveButton(android.R.string.ok, (dialog, which) ->
+                        writeExport(uri, passphrase.getText().toString()))
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    /** Writes the export, sealing the RustDesk passwords under `passphrase` when there is one. */
+    private void writeExport(Uri uri, String passphrase) {
+        RustDeskExportSanitizer.PasswordExporter exporter = passphrase.isEmpty() ? null : stored -> {
+            String clear = RustDeskSecretStore.open(stored);
+            if (clear == null || clear.isEmpty()) {
+                return null;
+            }
+            return RustDeskPortableSeal.seal(passphrase, clear);
+        };
+
+        OutputStream out = FileUtils.getOutputStreamFromUri(getContentResolver(), uri);
+        RustDeskExportSanitizer.Sanitized result =
+                Utils.exportSettingsToXml(out, database.getReadableDatabase(), exporter);
+        if (result == null) {
+            Snackbar.make(gridView, R.string.rustdesk_export_refused, Snackbar.LENGTH_LONG).show();
+        } else if (result.getPasswordsCarried() > 0) {
+            Snackbar.make(gridView,
+                    getString(R.string.rustdesk_export_with_passphrase, result.getPasswordsCarried()),
+                    Snackbar.LENGTH_LONG).show();
+        } else if (result.getPasswordsRemoved() > 0) {
+            Snackbar.make(gridView,
+                    getString(R.string.rustdesk_export_without_password, result.getPasswordsRemoved()),
+                    Snackbar.LENGTH_LONG).show();
+        }
+    }
+
+    /**
+     * Offers to reopen the RustDesk passwords an imported file carries under a passphrase.
+     *
+     * The file holds them sealed under the passphrase, not under this device's key: without this
+     * step they would be dropped by the load pass and every imported access would ask for its
+     * password again. Whatever is not reopened here is dropped there, with the count announced.
+     */
+    private void restorePortableRustDeskPasswords() {
+        int pending = 0;
+        for (ConnectionBean bean : rustDeskAccesses()) {
+            if (RustDeskPortableSeal.isPortable(bean.getPassword())) {
+                pending++;
+            }
+        }
+        if (pending == 0) {
+            recreate();
+            return;
+        }
+
+        EditText passphrase = new EditText(this);
+        passphrase.setHint(R.string.rustdesk_passphrase_hint);
+        passphrase.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        excludeFromAutofill(passphrase);
+
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.rustdesk_import_passphrase_title)
+                .setMessage(getString(R.string.rustdesk_import_passphrase_message, pending))
+                .setView(passphrase)
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                    reopenPortablePasswords(passphrase.getText().toString());
+                    recreate();
+                })
+                .setNegativeButton(android.R.string.cancel, (dialog, which) -> recreate())
+                .show();
+    }
+
+    /** Opens the portable passwords with `passphrase` and seals them on this device. */
+    private void reopenPortablePasswords(String passphrase) {
+        int restored = 0;
+        for (ConnectionBean bean : rustDeskAccesses()) {
+            String stored = bean.getPassword();
+            if (!RustDeskPortableSeal.isPortable(stored)) {
+                continue;
+            }
+            String clear = RustDeskPortableSeal.open(passphrase, stored);
+            if (clear == null) {
+                Log.w(TAG, "A portable RustDesk password did not open with the passphrase given.");
+                continue;
+            }
+            try {
+                bean.setPassword(RustDeskSecretStore.seal(clear));
+                bean.setKeepPassword(true);
+                bean.save(this);
+                restored++;
+            } catch (RuntimeException e) {
+                Log.w(TAG, "A portable RustDesk password could not be sealed: " + e);
+            }
+        }
+        Log.i(TAG, restored + " portable RustDesk password(s) reopened.");
     }
 
     /**
@@ -612,7 +750,7 @@ public class ConnectionGridActivity extends AppCompatActivity implements GetText
         excludeFromAutofill(password);
         if (editing) {
             // Le champ affiche le mot de passe en clair : la valeur enregistrée est scellée.
-            password.setText(RustDeskSecretStore.open(existing.getPassword()));
+            password.setText(usablePassword(existing.getPassword()));
         }
         layout.addView(password);
 
@@ -720,7 +858,7 @@ public class ConnectionGridActivity extends AppCompatActivity implements GetText
     /** Hands the session to the installed RustDesk application. */
     private void launchRustDesk(ConnectionBean connection) {
         LaunchOutcome outcome = new RustDeskLauncher(this)
-                .launch(connection.getAddress(), RustDeskSecretStore.open(connection.getPassword()));
+                .launch(connection.getAddress(), usablePassword(connection.getPassword()));
         if (outcome.getMessage() != null) {
             Snackbar.make(gridView, outcome.getMessage(), Snackbar.LENGTH_LONG).show();
         }
@@ -848,6 +986,8 @@ public class ConnectionGridActivity extends AppCompatActivity implements GetText
                             ConnectionSettings.importSettingsFromJsonToSharedPrefs(in, this);
                         } else {
                             Utils.importSettingsFromXml(in, database.getWritableDatabase());
+                            restorePortableRustDeskPasswords();
+                            break;
                         }
                         recreate();
                     } else {
@@ -860,23 +1000,12 @@ public class ConnectionGridActivity extends AppCompatActivity implements GetText
             case RemoteClientLibConstants.EXPORT_SETTINGS_REQUEST_CODE:
                 if (resultCode == Activity.RESULT_OK) {
                     if (data != null && data.getData() != null) {
-                        ContentResolver resolver = getContentResolver();
-
-                        boolean connectionsInSharedPrefs = Utils.isOpaque(this);
-                        OutputStream out = FileUtils.getOutputStreamFromUri(resolver, data.getData());
-                        if (connectionsInSharedPrefs) {
+                        if (Utils.isOpaque(this)) {
+                            OutputStream out = FileUtils.getOutputStreamFromUri(
+                                    getContentResolver(), data.getData());
                             ConnectionSettings.exportSettingsFromSharedPrefsToJson(out, this);
                         } else {
-                            int removed = Utils.exportSettingsToXml(
-                                    out, database.getReadableDatabase());
-                            if (removed < 0) {
-                                Snackbar.make(gridView, R.string.rustdesk_export_refused,
-                                        Snackbar.LENGTH_LONG).show();
-                            } else if (removed > 0) {
-                                Snackbar.make(gridView,
-                                        getString(R.string.rustdesk_export_without_password, removed),
-                                        Snackbar.LENGTH_LONG).show();
-                            }
+                            askPassphraseAndExport(data.getData());
                         }
                     } else {
                         Log.e(TAG, "File uri not found, not exporting settings");

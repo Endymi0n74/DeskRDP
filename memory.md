@@ -151,8 +151,8 @@ utilisé, `am start` ne reprenait pas le premier plan (le verrou n'est pas conto
   supprimé, la liste ne contient que le modèle `:3389` fourni par aRDP.
 - Le mot de passe RustDesk est désormais **scellé sous une clé Keystore** (voir « Mot de passe
   RustDesk scellé sous Keystore » en fin de fichier), donc lisible sans dépendre du mot de passe
-  maître. Et il **ne quitte pas l'appareil** : l'export le retire du fichier, l'import retire un
-  sceau créé ailleurs (voir « L'export ne transporte pas les mots de passe RustDesk »).
+  maître. À l'export, il ne sort que si l'utilisateur donne une phrase de passe ; sinon le fichier
+  n'en contient aucun (voir « L'export des mots de passe RustDesk »).
 - Icône, nom d'application et traductions restent ceux d'aRDP (`icon_ardp`, chaînes en anglais).
 - Douze tests JVM couvrent deux logiques pures (chaîne de repli du lanceur, format du sceau) ; le
   reste n'est couvert que par les parcours `_check`, qui mesurent l'application installée.
@@ -638,24 +638,34 @@ clé rend `null`, enregistrement altéré rend `null`, ancienne valeur en clair 
 soit **12 tests, 0 échec** avec la chaîne de repli. `:bVNC:assembleDebug` et
 `:dualdesk-app:assembleDebug` passent.
 
-## L'export ne transporte pas les mots de passe RustDesk (décidée le 28/10/2026)
+## L'export des mots de passe RustDesk (décidée le 28/10/2026, phrase de passe ajoutée le même jour)
 
 Le point laissé ouvert par le scellement : la clé est liée à l'appareil, et `Utils.exportSettingsToXml`
 écrit la base **entière** — le sceau partait donc dans un fichier fait pour changer d'appareil, alors
 qu'aucune autre installation (ni la même après une réinstallation, qui détruit les clés du Keystore)
 ne peut l'ouvrir.
 
-Décision : **le mot de passe reste sur l'appareil**, l'export ne le transporte pas.
+Décision initiale : le mot de passe reste sur l'appareil. Puis la question « et si je veux vraiment
+restaurer sur un autre téléphone ? » a sa réponse propre, ajoutée le même jour : **une phrase de passe
+facultative**. L'export a donc deux modes, et c'est l'utilisateur qui choisit à l'écran :
 
-- `RustDeskExportSanitizer` (pur) retire les mots de passe du **document**, pas de la base : le
-  fichier exporté garde l'accès, son identifiant, son surnom, sans le secret ;
-- l'écriture passe par un tampon (`Utils.exportSettingsToXml` rend le nombre de mots de passe
-  retirés, ou `-1` en échec) pour pouvoir vérifier le document **avant** de le poser sur le disque ;
-- le retrait est vérifié, et l'export est **refusé** si un sceau subsiste ou si un attribut `PASSWORD`
-  apparaît dans une forme que le nettoyage ne sait pas lire — un fichier qui garde un secret en
-  silence serait pire que pas d'export ;
-- à l'import, un sceau créé ailleurs est illisible : `sealStoredRustDeskPasswords` le retire et
-  annonce combien d'accès sont à ressaisir, plutôt que d'afficher une carte au mot de passe faux.
+- `RustDeskExportSanitizer` (pur) réécrit les mots de passe du **document**, pas de la base : le
+  fichier garde l'accès, son identifiant, son surnom ;
+- sans phrase, chaque valeur est retirée (`PASSWORD=""`) ; avec une phrase, elle est remplacée par un
+  sceau portable `pw1:<itérations>:<sel hex>:<IV hex>:<chiffré hex>` ;
+- `RustDeskPortableSeal` porte la cryptographie : PBKDF2 (**HMAC-SHA1**, 120 000 tours) puis AES-GCM
+  128 bits de tag, sel de 16 octets et IV de 12 octets neufs à chaque scellement. **Pas de SHA-256 :**
+  `PBKDF2WithHmacSHA256` n'existe qu'à partir de l'API 26, et le projet supporte l'API 21 — HMAC-SHA1
+  reste un PRF correct malgré les collisions de SHA-1 ;
+- l'écriture passe par un tampon (`Utils.exportSettingsToXml` rend un `Sanitized` ou `null`) pour
+  vérifier le document **avant** de le poser sur le disque ; l'export est **refusé** si un `ks1:`
+  subsiste, si un mot de passe RustDesk n'est ni vide ni portable, ou si un attribut `PASSWORD`
+  apparaît dans une forme que le nettoyage ne sait pas lire ;
+- à l'import, `restorePortableRustDeskPasswords` demande la phrase, rouvre et rescellle sur
+  l'appareil ; ce qui n'a pas été rouvert est retiré par `sealStoredRustDeskPasswords` (même message
+  que pour un sceau illisible) plutôt que d'afficher une carte au mot de passe faux ;
+- `usablePassword` verrouille une seconde fois : une valeur portable ne doit jamais partir vers
+  RustDesk ni s'afficher dans le formulaire, même si le chargement ne l'avait pas encore retirée.
 
 Détail de format qui rend le passage sûr : l'export de `SqliteElement` écrit une ligne par
 enregistrement, colonnes en **attributs** (`DatabaseUtils.cursorRowToContentValues` puis
@@ -663,11 +673,16 @@ enregistrement, colonnes en **attributs** (`DatabaseUtils.cursorRowToContentValu
 Le nettoyage lit donc `PASSWORD="…"` et `CONNECTIONTYPE="6"` sans analyseur XML, et refuse tout
 `ks1:` qui subsisterait.
 
-Mesure : **23 tests, 0 échec** (`RustDeskExportSanitizerTest` 11, chaîne de repli 7, codec 5).
-`:dualdesk-app:assembleDebug` passe et produit l'APK.
+Mesure : **39 tests, 0 échec** (`RustDeskExportSanitizerTest` 15, `RustDeskPortableSealTest` 9,
+`RustDeskLaunchChainTest` 7, `RustDeskExportRoundTripTest` 3, `RustDeskSecretCodecTest` 5).
+`:dualdesk-app:assembleDebug` passe, et `pw1:` est présent dans `classes2.dex` de l'APK produit —
+le code embarqué est bien celui-là, pas seulement celui qui compile.
 
 Ce qui reste non prouvé : l'export et l'import **réels sur un appareil** (le document est reconstitué
-en test à partir du format lu dans la bibliothèque, pas produit par une base SQLCipher sous Android).
+en test à partir du format lu dans la bibliothèque, pas produit par une base SQLCipher sous Android),
+et les dialogues de phrase de passe — jamais affichés hors téléphone. Le test de bout en bout
+`RustDeskExportRoundTripTest` couvre le trajet des données avec une clé AES ordinaire à la place du
+Keystore, ce qui valide le format et la composition, pas le magasin de clés d'Android.
 
 Ce qui n'est pas prouvé : le comportement **sur le POCO** (création, modification, relance d'un accès
 scellé, et migration d'un accès existant). Le banc JVM couvre le format et l'aller-retour, pas le
