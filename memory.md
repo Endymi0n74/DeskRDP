@@ -117,7 +117,8 @@ aSPICE, Opaque) ne changent donc pas de comportement.
 
 Pour DualDesk : bogues et partage pointent vers `https://github.com/Endymi0n74/DualDesk`
 (+ `/issues`), le dépôt d'où le fork est réellement construit et publié — et non vers
-`DualDeskOld` (ex-`dualdesk`), qui est la réécriture Compose, un autre projet (autre paquet :
+`DualDeskOld` (ex-`dualdesk`, **dépôt supprimé le 28/10/2026** — le banc a été absorbé), qui était la
+réécriture Compose, un autre projet (autre paquet :
 `com.dualdesk` contre `com.dualdesk.rdp`). Depuis le 28/10/2026 le dépôt est **public** : ces deux
 liens s'ouvrent donc pour tout le monde (ils étaient réservés au propriétaire tant qu'il était
 privé).

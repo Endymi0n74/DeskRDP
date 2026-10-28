@@ -8,44 +8,51 @@ RustDesk accesses as well. The state of each feature and the measurements behind
 ## This repository is the product
 
 **DualDesk ships from here.** This fork is where versions are built, signed with the project's
-publication key and published — 1.10 today. It was called `ardp` until 28/10/2026: GitHub redirects
+publication key and published — 1.10 on the
+[Releases](https://github.com/Endymi0n74/DualDesk/releases) page, 1.11 committed and not yet
+released. It was called `ardp` until 28/10/2026: GitHub redirects
 the old URL, so existing clones keep fetching. It is also the one whose export carries the sealed
-RustDesk passwords behind a passphrase, so they can be restored on another device; the bench's own
-export deliberately carries no secret at all, not even after transferring.
+RustDesk passwords behind a passphrase, so they can be restored on another device.
 
-The sibling repository [DualDeskOld](https://github.com/Endymi0n74/DualDeskOld) (`com.dualdesk`,
-AGPL-3.0) is the **research bench**: a Compose rewrite on FreeRDP 3.x, where the GFX/H.264 path and
-the embedded RustDesk session are measured against real hosts. It ships no stable release; what it
-proves comes back here as a measurement, not as shipped code. Copying *code* from it would move this
-fork from GPLv3 to AGPL-3.0, so by default only knowledge crosses.
+The **research bench** that used to live in a separate repository (`DualDeskOld`, a Compose rewrite
+on FreeRDP 3.x, package `com.dualdesk`) has been absorbed and removed on 28/10/2026. Its RustDesk
+core now runs inside this application — see
+[docs/RUSTDESK-NATIF.md](docs/RUSTDESK-NATIF.md) — and its measurements are kept in this
+repository's documentation. Embedding that core is exactly what
+moves this build to AGPL-3.0; a build without it stays GPLv3.
 
-Two applications both named `DualDesk` can sit side by side on one phone, since their packages
-differ. The icon users install is the one built here.
+An older build of the bench, still installed on a phone, sits side by side with this one because
+the packages differ (`com.dualdesk` against `com.dualdesk.rdp`). The icon to install is the one built
+here.
 
 ## Ce dépôt est le produit
 
 **DualDesk est livré d'ici.** Ce fork est l'endroit où les versions sont construites, signées avec la
-clé de publication du projet et publiées — la 1.10 aujourd'hui. Il s'appelait `ardp` jusqu'au
-28/10/2026 : GitHub redirige l'ancienne URL, les clones existants continuent donc de fonctionner. C'est aussi celui dont l'export
-emporte les mots de passe RustDesk scellés derrière une phrase de passe, donc restaurables sur un
-autre appareil ; l'export du banc, lui, ne contient aucun secret, même pas de façon transférable.
+clé de publication du projet et publiées — la 1.10 sur la page
+[Releases](https://github.com/Endymi0n74/DualDesk/releases), la 1.11 commitée et pas encore publiée.
+Il s'appelait `ardp` jusqu'au 28/10/2026 : GitHub redirige l'ancienne URL, les clones existants
+continuent donc de fonctionner. C'est aussi celui dont l'export emporte les mots de passe RustDesk
+scellés derrière une phrase de passe, donc restaurables sur un autre appareil.
 
-Le dépôt voisin [DualDeskOld](https://github.com/Endymi0n74/DualDeskOld) (`com.dualdesk`, AGPL-3.0) est le
-**banc d'essai** : une réécriture Compose sur FreeRDP 3.x, où la voie GFX/H.264 et la session
-RustDesk embarquée sont mesurées contre de vrais postes. Il ne publie aucune version stable ; ce
-qu'il prouve revient ici sous forme de mesure, pas de code livré. Copier du *code* depuis lui ferait
-passer ce fork de GPLv3 à AGPL-3.0 : par défaut, seul le savoir traverse.
+Le **banc d'essai** qui vivait dans un dépôt séparé (`DualDeskOld`, réécriture Compose sur
+FreeRDP 3.x, paquet `com.dualdesk`) a été absorbé puis supprimé le 28/10/2026 : son cœur RustDesk
+tourne désormais dans cette application — voir [docs/RUSTDESK-NATIF.md](docs/RUSTDESK-NATIF.md) — et
+ses mesures restent dans la documentation de ce dépôt. C'est précisément l'embarquement de ce cœur
+qui fait passer cette build en AGPL-3.0 ; sans lui, elle reste en GPLv3.
 
 Deux applications nommées `DualDesk` peuvent cohabiter sur un même téléphone, leurs paquets
 différant. Celle que les utilisateurs installent est celle construite ici.
 
 ## Version and releases
 
-The current version is **1.10** (`versionName` `1.10-dualdesk`, `versionCode` 2), published on the
+The published version is **1.10** (`versionName` `1.10-dualdesk`, `versionCode` 2), on the
 [Releases](https://github.com/Endymi0n74/DualDesk/releases/tag/v1.10) page with two assets:
 `dualdesk-app-arm64-v8a-release.apk` for any recent phone, and `dualdesk-app-universal-release.apk`
 when the ABI is unknown. What changed since the previous milestone is in
 [CHANGELOG.md](CHANGELOG.md).
+
+The tree is now **1.11** (`versionName` `1.11-dualdesk`, `versionCode` 3) — the version that embeds
+the RustDesk core — compiled and committed, not yet released.
 
 1.10 is the first version signed with the **project's publication key** (see below), and every later
 release will use the same one — so from 1.10 onwards, an update installs over the previous version.
@@ -55,11 +62,14 @@ the sealed RustDesk passwords**: export with a passphrase before doing it.
 
 ## Version et publications
 
-La version courante est la **1.10** (`versionName` `1.10-dualdesk`, `versionCode` 2), publiée sur la
-page [Releases](https://github.com/Endymi0n74/DualDesk/releases/tag/v1.10) avec deux fichiers :
+La version publiée est la **1.10** (`versionName` `1.10-dualdesk`, `versionCode` 2), sur la page
+[Releases](https://github.com/Endymi0n74/DualDesk/releases/tag/v1.10) avec deux fichiers :
 `dualdesk-app-arm64-v8a-release.apk` pour tout téléphone récent, et
 `dualdesk-app-universal-release.apk` quand l'ABI est inconnue. Ce qui a changé depuis le jalon
 précédent est dans [CHANGELOG.md](CHANGELOG.md).
+
+L'arbre est désormais en **1.11** (`versionName` `1.11-dualdesk`, `versionCode` 3) — la version qui
+embarque le cœur RustDesk — compilée et commitée, pas encore publiée.
 
 La 1.10 est la première version signée par la **clé de publication du projet** (voir ci-dessous), et
 toutes les suivantes s'appuieront sur la même — à partir de là, une mise à jour s'installe par-dessus
