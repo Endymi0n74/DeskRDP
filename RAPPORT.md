@@ -81,6 +81,15 @@ visibilité d'Android 11+ rend RustDesk invisible (`getPackageInfo` lève, `reso
 dans `dualdesk-app/src/main/AndroidManifest.xml`. Ce défaut ne se voyait ni à la compilation ni à la
 lecture : il fallait installer RustDesk et appuyer sur une carte.
 
+**Le mot de passe n'est plus écrit en clair.** Il occupait la colonne `PASSWORD` telle quelle, et
+cette base n'est chiffrée que si le mot de passe maître de l'application est activé : sur une
+installation par défaut, une sauvegarde `adb` ou un appareil rooté le lisait. Il est désormais scellé
+par une clé AES-GCM du Keystore Android (`ks1:<iv>:<chiffré>`, IV neuf à chaque sceau), sans dépendre
+de ce réglage. Les accès créés avant le correctif restent lisibles — leur valeur en clair est scellée
+au premier chargement de la grille — et si le Keystore refuse, l'accès n'est pas enregistré plutôt que
+de l'être en clair, avec un message qui le dit. Cinq tests JVM couvrent le format : aller-retour, deux
+sceaux différents, mauvaise clé, enregistrement altéré, ancienne valeur en clair.
+
 ### 1.4 Rien ne renvoie plus vers l'application d'origine
 
 L'écran « ⭐ Aide, évaluer, partager » pointait encore vers le projet amont : forum, dépôt des bogues,
@@ -175,12 +184,18 @@ sur cet appareil » et il n'y avait rien à mesurer. RustDesk 1.5.0 a depuis ét
 l'installation avec `INSTALL_FAILED_USER_RESTRICTED`), et **tout le cycle de la greffe a été exercé
 avec lui en place**. Ce point est clos, preuve à l'appui.
 
-**Les chemins de repli du lanceur ne sont pas exercés.** Le lanceur prévoit trois stratégies : le deep
-link, l'activité explicite, et le presse-papiers. Seul le **deep link** a été prouvé — il aboutit à
-chaque essai, donc les deux replis ne se déclenchent jamais. Ils ne sont ni validés ni invalidés : il
-faut les provoquer (en désactivant le filtre du deep link) ou les retirer. Tant que ce n'est pas fait,
-la promesse « l'accès fonctionne même si le deep link échoue » n'est pas tenue, elle est seulement
-écrite.
+**Les chemins de repli sont exercés sur banc, pas encore sur le téléphone.** Le lanceur prévoit trois
+stratégies : le deep link, l'activité explicite, et le presse-papiers. Jusqu'ici seul le **deep link**
+avait tourné — il aboutit à chaque essai, donc les deux replis ne se déclenchaient jamais. L'ordre des
+tentatives a été sorti du code Android (`RustDeskLaunchChain`, sans import Android) et exercé par sept
+tests JVM, avec un transport factice qui enregistre la séquence des appels : **7 tests, 0 échec**. La
+promesse est donc vérifiée pour la logique, et un défaut en est sorti — le message annonçait
+« identifiant copié » même lorsque le presse-papiers était indisponible, corrigé par un troisième état
+et sa chaîne (anglais et français).
+
+Ce qui reste non prouvé : que RustDesk installé **accueille** l'intent d'activité. Le banc dit que
+DualDesk essaie ce qu'il annonce, dans l'ordre annoncé, et rend compte de ce qu'il obtient ; l'autre
+bout de la chaîne ne se voit que sur l'appareil, une fois le téléphone rebranché.
 
 **Le paquet réel ne peut plus servir de témoin pour la saisie automatique.** Le refus mémorisé par le
 gestionnaire de mots de passe pour ce nom de paquet rend la feuille muette : la démonstration repose
@@ -296,10 +311,16 @@ désormais documentées par des faits, pas par des intentions :
 C'est cette décision qui commande la suite : chacune des trois implique un travail différent sur les
 points ci-dessous.
 
-**Exercer ou retirer les stratégies de repli** de la greffe (cf. § 2).
+**Faire accueillir les stratégies de repli par l'appareil.** La logique est désormais testée (cf. § 2) ;
+il reste à provoquer un repli réel sur le téléphone, en désactivant temporairement le filtre du deep
+link, pour voir RustDesk accepter l'activité — c'est le seul maillon que le banc ne peut pas couvrir.
 
-**Le mot de passe RustDesk** est rangé dans la base commune, protégée seulement si le mot de passe
-maître de l'application est activé. À décider : le sceller systématiquement, ou assumer et le dire.
+**Le mot de passe RustDesk est scellé, mais le sceau est lié à l'appareil** (cf. § 1.3). La clé ne
+quitte pas le Keystore : une réinstallation, une restauration sur un autre téléphone, ou un
+export/import d'accès — l'export écrit la base entière — transporte le sceau sans la clé, et le mot
+de passe devient illisible (l'accès s'ouvre alors sans mot de passe, à ressaisir). À trancher :
+refuser d'exporter un mot de passe scellé, l'exporter en l'annonçant à l'import, ou accepter la perte
+et le documenter pour l'utilisateur.
 
 **Trois résidus d'identité, sans effet visible** mais vérifiables : le bouton **Morpheusly** de la
 barre d'action, qui fait la promotion d'un produit tiers du même auteur ; l'étiquette de carte qui
@@ -307,10 +328,12 @@ porte un **saut de ligne final** (le rendu tient sur une ligne, c'est cosmétiqu
 traductions autres que l'anglais et le français, qui gardent les libellés d'origine pour l'écran
 d'aide — des étiquettes, pas des liens.
 
-**Aucun test automatisé propre au fork.** Les parcours de `_check` mesurent l'application installée,
-ce qui est le bon outil pour ce genre de défaut, mais rien ne protège d'une régression à la
-compilation. À trancher : garder la mesure comme seule vérification, ou ajouter un test qui ne
-dépend pas d'un appareil.
+**Les tests automatisés couvrent une seule logique, et c'est assumé.** La chaîne de repli du lanceur a
+sept tests JVM (cf. § 2), premier source set de test du dépôt. Le reste — écrans, greffe, identité —
+n'est couvert que par les parcours `_check`, qui mesurent l'application installée : c'est le bon outil
+pour ces défauts, mais rien ne protège d'une régression à la compilation. À trancher : étendre le même
+banc aux autres logiques pures (formulaire d'accès, validation des champs), ou garder la mesure comme
+seule vérification ailleurs.
 
 ---
 
@@ -320,6 +343,12 @@ dépend pas d'un appareil.
 export JAVA_HOME=<un JDK 21>      # le java du PATH était un 1.8, ce qui échoue
 export GRADLE_USER_HOME=<un dossier Gradle dédié>
 ./gradlew :dualdesk-app:assembleDebug
+```
+
+Les tests de la chaîne de repli se lancent sans appareil ni réseau (JUnit est déjà dans le cache) :
+
+```bash
+./gradlew :bVNC:testDebugUnitTest --tests "com.dualdesk.rustdesk.*" --console=plain --offline
 ```
 
 La sortie est `dualdesk-app/build/outputs/apk/debug/dualdesk-app-arm64-v8a-debug.apk` (67 Mo, cinq

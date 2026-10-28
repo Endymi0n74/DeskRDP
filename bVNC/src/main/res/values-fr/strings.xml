@@ -992,4 +992,6 @@ L\'application est déjà exemptée des optimisations de la batterie.</string>
     <string name="rustdesk_no_response">RustDesk n\'a pas répondu à l\'ouverture.</string>
     <string name="rustdesk_clipboard_id_only">Identifiant copié dans le presse-papiers : collez-le dans RustDesk.</string>
     <string name="rustdesk_clipboard_with_password">Identifiant et mot de passe copiés dans le presse-papiers : collez-les dans RustDesk.</string>
+    <string name="rustdesk_clipboard_unavailable">RustDesk ouvert, mais le presse-papiers est indisponible : saisissez l\'identifiant.</string>
+    <string name="rustdesk_password_not_sealed">Le mot de passe n\'a pas pu être protégé : rien n\'a été enregistré.</string>
 </resources>

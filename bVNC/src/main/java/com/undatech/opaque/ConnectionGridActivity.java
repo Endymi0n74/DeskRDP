@@ -66,6 +66,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.dualdesk.rustdesk.LaunchOutcome;
 import com.dualdesk.rustdesk.RustDeskLauncher;
+import com.dualdesk.rustdesk.RustDeskSecretStore;
 import com.google.android.material.snackbar.Snackbar;
 import com.iiordanov.bVNC.App;
 import com.iiordanov.bVNC.ConnectionBean;
@@ -464,7 +465,38 @@ public class ConnectionGridActivity extends AppCompatActivity implements GetText
     }
 
     private void loadSavedConnections() {
+        sealStoredRustDeskPasswords();
         createAndSetLabeledImageAdapterAndNumberOfColumns();
+    }
+
+    /**
+     * Seals the RustDesk passwords saved before sealing existed, once, on load.
+     *
+     * Without this, an access created earlier keeps its clear password in the shared database
+     * until the user edits it: "sealed" would only be true for new accesses. A record that is
+     * already sealed is left untouched, so this runs cheaply on every load.
+     */
+    private void sealStoredRustDeskPasswords() {
+        for (Connection connection : getConnectionLoader(this).loadConnectionsById().values()) {
+            if (!(connection instanceof ConnectionBean)) {
+                continue;
+            }
+            ConnectionBean bean = (ConnectionBean) connection;
+            if (bean.getConnectionType() != Constants.CONN_TYPE_RUSTDESK) {
+                continue;
+            }
+            String stored = bean.getPassword();
+            if (stored == null || stored.isEmpty() || RustDeskSecretStore.isSealed(stored)) {
+                continue;
+            }
+            try {
+                bean.setPassword(RustDeskSecretStore.seal(stored));
+                bean.save(this);
+                Log.i(TAG, "RustDesk password of a stored access sealed.");
+            } catch (RuntimeException e) {
+                Log.w(TAG, "Stored RustDesk password could not be sealed: " + e);
+            }
+        }
     }
 
     /**
@@ -552,7 +584,8 @@ public class ConnectionGridActivity extends AppCompatActivity implements GetText
         password.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
         excludeFromAutofill(password);
         if (editing) {
-            password.setText(existing.getPassword());
+            // Le champ affiche le mot de passe en clair : la valeur enregistrée est scellée.
+            password.setText(RustDeskSecretStore.open(existing.getPassword()));
         }
         layout.addView(password);
 
@@ -631,10 +664,20 @@ public class ConnectionGridActivity extends AppCompatActivity implements GetText
                     .show();
             return;
         }
+        String storedPassword;
+        try {
+            storedPassword = RustDeskSecretStore.seal(password);
+        } catch (RuntimeException e) {
+            // Mieux vaut ne rien enregistrer que d'écrire un secret en clair : on le dit et on s'arrête.
+            Log.w(TAG, "RustDesk password could not be sealed: " + e);
+            Snackbar.make(gridView, R.string.rustdesk_password_not_sealed, Snackbar.LENGTH_LONG)
+                    .show();
+            return;
+        }
         ConnectionBean connection = existing != null ? existing : new ConnectionBean(this);
         connection.setNickname(deviceId);
         connection.setAddress(deviceId);
-        connection.setPassword(password);
+        connection.setPassword(storedPassword);
         // Without this the shared save path blanks PASSWORD for every connection.
         connection.setKeepPassword(true);
         if (existing == null) {
@@ -650,7 +693,7 @@ public class ConnectionGridActivity extends AppCompatActivity implements GetText
     /** Hands the session to the installed RustDesk application. */
     private void launchRustDesk(ConnectionBean connection) {
         LaunchOutcome outcome = new RustDeskLauncher(this)
-                .launch(connection.getAddress(), connection.getPassword());
+                .launch(connection.getAddress(), RustDeskSecretStore.open(connection.getPassword()));
         if (outcome.getMessage() != null) {
             Snackbar.make(gridView, outcome.getMessage(), Snackbar.LENGTH_LONG).show();
         }

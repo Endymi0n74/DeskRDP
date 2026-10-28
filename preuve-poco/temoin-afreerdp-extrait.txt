@@ -1,0 +1,43 @@
+Temoin GFX — aFreeRDP 3.32.1 (moteur FreeRDP 3.x) — 28/10/2026
+Source : logcat du client, niveau DEBUG. Poste = la machine de test.
+
+== capacites : annonce du client, puis confirmation du poste ==
+[rdpgfx_send_caps_advertise_pdu]: SendCapsAdvertisePdu 11
+[rdpgfx_send_caps_advertise_pdu]: Sending RDPGFX_CAPVERSION_8 [0x00080004] flags=0x00000002
+[rdpgfx_send_caps_advertise_pdu]: Sending RDPGFX_CAPVERSION_81 [0x00080105] flags=0x00000012
+[rdpgfx_send_caps_advertise_pdu]: Sending RDPGFX_CAPVERSION_10 [0x000a0002] flags=0x00000002
+[rdpgfx_send_caps_advertise_pdu]: Sending RDPGFX_CAPVERSION_101 [0x000a0100] flags=0x00000000
+[rdpgfx_send_caps_advertise_pdu]: Sending RDPGFX_CAPVERSION_102 [0x000a0200] flags=0x00000002
+[rdpgfx_send_caps_advertise_pdu]: Sending RDPGFX_CAPVERSION_103 [0x000a0301] flags=0x00000000
+[rdpgfx_send_caps_advertise_pdu]: Sending RDPGFX_CAPVERSION_104 [0x000a0400] flags=0x00000002
+[rdpgfx_send_caps_advertise_pdu]: Sending RDPGFX_CAPVERSION_105 [0x000a0502] flags=0x00000002
+[rdpgfx_send_caps_advertise_pdu]: Sending RDPGFX_CAPVERSION_106 [0x000a0600] flags=0x00000002
+[rdpgfx_send_caps_advertise_pdu]: Sending RDPGFX_CAPVERSION_106_ERR [0x000a0601] flags=0x00000002
+[rdpgfx_send_caps_advertise_pdu]: Sending RDPGFX_CAPVERSION_107 [0x000a0701] flags=0x00000002
+[rdpgfx_recv_caps_confirm_pdu]: RecvCapsConfirmPdu: version: RDPGFX_CAPVERSION_107 [0x000A0701] flags: 0x00000002
+
+== surfaces ouvertes par le poste ==
+[rdpgfx_recv_reset_graphics_pdu]: RecvResetGraphicsPdu: width: 1220 height: 2530 count: 1
+[rdpgfx_recv_create_surface_pdu]: RecvCreateSurfacePdu: surfaceId: 0 width: 1220 height: 2530 pixelFormat: 0x21
+[rdpgfx_recv_map_surface_to_scaled_output_pdu]: RecvMapSurfaceToScaledOutputPdu: surfaceId: 0 outputOriginX: 0 outputOriginY: 0 targetWidth: 1220 targetHeight: 2530
+[rdpgfx_recv_reset_graphics_pdu]: RecvResetGraphicsPdu: width: 1220 height: 2530 count: 1
+[rdpgfx_recv_create_surface_pdu]: RecvCreateSurfacePdu: surfaceId: 0 width: 1220 height: 2530 pixelFormat: 0x21
+[rdpgfx_recv_map_surface_to_scaled_output_pdu]: RecvMapSurfaceToScaledOutputPdu: surfaceId: 0 outputOriginX: 0 outputOriginY: 0 targetWidth: 1220 targetHeight: 2530
+
+== commandes graphiques recues, fenetre 07:03:50 -> 07:04:00 ==
+   RDPGFX_CODECID_CLEARCODEC : 1774
+   RDPGFX_CODECID_CAPROGRESSIVE : 13
+   total sur la fenetre : 1787
+
+== rythme par seconde ==
+   07:03:50 : 162
+   07:03:51 : 162
+   07:03:52 : 162
+   07:03:53 : 161
+   07:03:54 : 164
+   07:03:55 : 167
+   07:03:56 : 162
+   07:03:57 : 162
+   07:03:58 : 164
+   07:03:59 : 159
+   07:04:00 : 162

@@ -31,6 +31,9 @@ data class LaunchOutcome(
  * password when one is known) and lets the upstream application take over. The alternative —
  * embedding librustdesk through JNI — is a much larger commitment than a launcher, and the
  * launcher is what a connection manager actually needs.
+ *
+ * The order of the attempts lives in [RustDeskLaunchChain], which is free of Android imports and
+ * therefore exercised by plain JVM tests; this class only supplies the Android transport.
  */
 class RustDeskLauncher(private val context: Context) {
 
@@ -50,37 +53,38 @@ class RustDeskLauncher(private val context: Context) {
     }
 
     fun launch(deviceId: String, password: String?): LaunchOutcome {
-        if (deviceId.isBlank()) {
-            return LaunchOutcome(false, "none", context.getString(R.string.rustdesk_no_device_id))
-        }
-        if (!isInstalled()) {
-            return LaunchOutcome(false, "none", context.getString(R.string.rustdesk_not_installed))
-        }
-
-        if (openDeepLink(deviceId)) {
-            return LaunchOutcome(true, "deep link rustdesk://", null)
-        }
-
-        // RustDesk does not accept the device id through an intent parameter, so the clipboard is
-        // the only channel that survives the jump between the two applications.
-        val clipboardUsed = copyForPaste(deviceId, password)
-        if (openActivity()) {
-            val strategy = if (clipboardUsed) "activity + clipboard" else "explicit activity"
-            val message = context.getString(
-                if (clipboardUsed) R.string.rustdesk_clipboard_with_password
-                else R.string.rustdesk_clipboard_id_only
-            )
-            return LaunchOutcome(true, strategy, message)
-        }
-        return LaunchOutcome(false, "none", context.getString(R.string.rustdesk_no_response))
+        val result = RustDeskLaunchChain.launch(deviceId, password, androidTransport())
+        return LaunchOutcome(result.launched, result.strategy, messageFor(result.message))
     }
 
-    private fun copyForPaste(deviceId: String, password: String?): Boolean {
-        val clipboard = context.getSystemService(ClipboardManager::class.java) ?: return false
+    private fun androidTransport(): RustDeskTransport = object : RustDeskTransport {
+        override val installed: Boolean get() = isInstalled()
+
+        override fun openDeepLink(deviceId: String): Boolean = this@RustDeskLauncher.openDeepLink(deviceId)
+
+        override fun openActivity(): Boolean = this@RustDeskLauncher.openActivity()
+
+        override fun copyForPaste(deviceId: String, password: String?): RustDeskClipboard =
+            this@RustDeskLauncher.copyForPaste(deviceId, password)
+    }
+
+    private fun messageFor(message: RustDeskMessage): String? = when (message) {
+        RustDeskMessage.NONE -> null
+        RustDeskMessage.NO_DEVICE_ID -> context.getString(R.string.rustdesk_no_device_id)
+        RustDeskMessage.NOT_INSTALLED -> context.getString(R.string.rustdesk_not_installed)
+        RustDeskMessage.NO_RESPONSE -> context.getString(R.string.rustdesk_no_response)
+        RustDeskMessage.CLIPBOARD_WITH_PASSWORD -> context.getString(R.string.rustdesk_clipboard_with_password)
+        RustDeskMessage.CLIPBOARD_ID_ONLY -> context.getString(R.string.rustdesk_clipboard_id_only)
+        RustDeskMessage.CLIPBOARD_UNAVAILABLE -> context.getString(R.string.rustdesk_clipboard_unavailable)
+    }
+
+    private fun copyForPaste(deviceId: String, password: String?): RustDeskClipboard {
+        val clipboard = context.getSystemService(ClipboardManager::class.java)
+            ?: return RustDeskClipboard.UNAVAILABLE
         val withPassword = !password.isNullOrEmpty()
         val payload = if (withPassword) "$deviceId $password" else deviceId
         clipboard.setPrimaryClip(ClipData.newPlainText("Remote access — RustDesk", payload))
-        return withPassword
+        return if (withPassword) RustDeskClipboard.PASSWORD_AND_ID else RustDeskClipboard.ID_ONLY
     }
 
     private fun openDeepLink(deviceId: String): Boolean {

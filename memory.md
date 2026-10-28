@@ -138,8 +138,10 @@ utilisé, `am start` ne reprenait pas le premier plan (le verrou n'est pas conto
   tiers du même auteur. Ce n'est pas aRDP ; laissé en place faute de demande.
 - Les traductions autres que l'anglais et le français gardent les libellés d'origine (par exemple
   le titre du menu « évaluer/partager » en espagnol) : ce sont des étiquettes, pas des liens.
-- Les deux stratégies de repli (activité, presse-papiers) ne sont **pas** exercées : elles ne se
-déclenchent que si le deep link échoue, ce qui n'est pas le cas sur cette version.
+- Les deux stratégies de repli (activité, presse-papiers) sont désormais exercées **sur banc JVM**
+  (voir « Chaîne de repli du lanceur, exercée sur banc JVM » en fin de fichier). Ce qui reste non
+  prouvé, c'est que RustDesk accepte réellement l'intent d'activité sur un appareil : le banc vérifie
+  l'ordre et le compte rendu, pas l'accueil de l'application d'en face.
 - Un accès RustDesk est désormais **modifiable et supprimable** (éprouvé le 26/10 à 22:23) :
   l'appui long sur la carte propose « Modifier » et « Supprimer » seulement, sans l'option
   raccourci d'écran d'accueil qui n'a pas de sens sans hôte ni port ; « Modifier » rouvre le
@@ -147,10 +149,12 @@ déclenchent que si le deep link échoue, ce qui n'est pas le cas sur cette vers
   options : aucune régression.
 - Aucun accès RustDesk de démonstration ne subsiste sur le téléphone : celui des essais a été
   supprimé, la liste ne contient que le modèle `:3389` fourni par aRDP.
-- Le mot de passe RustDesk est rangé dans la base commune, protégée seulement si le mot de passe
-  maître est activé.
+- Le mot de passe RustDesk est désormais **scellé sous une clé Keystore** (voir « Mot de passe
+  RustDesk scellé sous Keystore » en fin de fichier), donc lisible sans dépendre du mot de passe
+  maître. Reste à trancher : ce que devient ce sceau lors d'un export/import vers un autre appareil.
 - Icône, nom d'application et traductions restent ceux d'aRDP (`icon_ardp`, chaînes en anglais).
-- Aucun test automatisé propre au fork.
+- Douze tests JVM couvrent deux logiques pures (chaîne de repli du lanceur, format du sceau) ; le
+  reste n'est couvert que par les parcours `_check`, qui mesurent l'application installée.
 
 ## Éprouvé de nouveau sur le POCO, chaîne complète (27/10/2026, 18:46–18:54)
 
@@ -540,3 +544,104 @@ Piège à ne pas oublier : le dialogue d'identifiants RDP exige une saisie dans 
 l'émulateur (la base du téléphone n'est pas transposable, clé Keystore). Une fois la session ouverte,
 les mesures se font entièrement en `adb` : `logcat`, `screencap`, `input swipe` pour provoquer du
 trafic, et un simple comptage des `ProgressiveFrameEnd` avec leurs horodatages donne la cadence.
+
+## Chaîne de repli du lanceur, exercée sur banc JVM (28/10/2026)
+
+Motif : le lanceur promet trois stratégies (deep link, activité explicite, presse-papiers) et **seul le
+deep link avait tourné**, parce qu'il aboutit à chaque essai sur les appareils de mesure. Une promesse
+qu'aucun essai ne déclenche n'est pas vérifiée. Aucun téléphone n'était disponible ce jour-là : la
+chaîne a donc été exercée hors appareil.
+
+Ce qui a été fait, et pourquoi ainsi :
+
+- l'ordre des tentatives sort de `RustDeskLauncher` et vit dans `RustDeskLaunchChain`, un fichier
+  **sans aucun import Android**, qui reçoit un `RustDeskTransport` (installé ? deep link accepté ?
+  activité démarrée ? presse-papiers) ; `RustDeskLauncher` ne garde que le `Context`, les `Intent` et
+  les chaînes traduites. Sans cette couture, `startActivity` et `getString` rendent le code
+  intestable hors d'un appareil (Robolectric aurait ajouté une dépendance lourde pour le même
+  résultat) ;
+- les sept tests sont dans `bVNC/src/test/java/com/dualdesk/rustdesk/RustDeskLaunchChainTest.kt`, avec
+  un transport factice qui **enregistre l'ordre des appels** ; `junit:junit:4.13.2` a été ajouté en
+  `testImplementation` à `bVNC/build.gradle` (premier source set de test du dépôt ; l'artefact était
+  déjà dans le cache Gradle).
+
+Résultat mesuré, pas déclaré :
+
+```bash
+export JAVA_HOME="/c/Program Files/Zulu/zulu-21"
+export GRADLE_USER_HOME="D:/codex/android-tools/gradle-home"
+./gradlew :bVNC:testDebugUnitTest --tests "com.dualdesk.rustdesk.*" --console=plain --offline
+```
+
+`7 tests, 0 échec, 0 erreur` (lu dans `bVNC/build/test-results/testDebugUnitTest/`). Les cas couverts :
+
+| Situation | Ordre des appels | Stratégie annoncée | Message |
+|---|---|---|---|
+| deep link accepté | `deepLink` seul | `deep link rustdesk://` | aucun |
+| deep link refusé, mot de passe | `deepLink` → `clipboard` → `activity` | `activity + clipboard` | presse-papiers |
+| deep link refusé, sans mot de passe | idem | `explicit activity` | « identifiant copié » |
+| presse-papiers indisponible | idem | `explicit activity` | « presse-papiers indisponible » |
+| activité refusée aussi | idem, puis échec | `none` | « n'a pas répondu » |
+| RustDesk absent | aucun appel | `none` | « pas installé » |
+| identifiant vide | aucun appel | `none` | « aucun identifiant » |
+
+**Un défaut trouvé par l'exercice, et corrigé** : quand le service de presse-papiers manquait
+(`getSystemService` rend `null`, ce que `copyForPaste` traitait en `false`), le message affiché
+annonçait quand même « Identifiant copié : collez-le dans RustDesk » — une information fausse. Le
+retour du presse-papiers est devenu un `RustDeskClipboard` à trois états (`PASSWORD_AND_ID`,
+`ID_ONLY`, `UNAVAILABLE`), et le troisième a sa chaîne : `rustdesk_clipboard_unavailable`, en anglais
+et en français.
+
+**Une nuance laissée telle quelle, volontairement** : sans mot de passe, l'identifiant est copié mais
+la stratégie journalisée dit `explicit activity`. La trace ne mentionne donc pas le presse-papiers
+alors qu'il a servi. Seul le journal est concerné (le message à l'écran est juste) ; le renommer
+changerait le texte sur lequel repose la lecture des journaux de campagne, donc il est consigné ici
+plutôt que modifié sans décision.
+
+**Ce que le banc ne prouve pas** : que RustDesk accepte l'intent d'activité sur un appareil réel. Le
+test dit que DualDesk essaie ce qu'il annonce, dans l'ordre annoncé, et rend compte de ce qu'il a
+obtenu ; l'accueil par l'application d'en face reste à voir sur le POCO.
+
+Pièges d'outillage rencontrés :
+
+- `:bVNC:processDebugResources` est **ambigu** en AGP 8.13 (quatre tâches candidates) : utiliser
+  `:bVNC:assembleDebug` pour valider les ressources ;
+- `assembleDebug --offline` échoue sur `extractDebugAnnotations` (il réclame
+  `com.android.tools.lint:lint-gradle:31.13.2`), sans rapport avec le code : lancer cette tâche en
+  ligne ; `testDebugUnitTest --offline` passe, lui, sans réseau.
+
+## Mot de passe RustDesk scellé sous Keystore (28/10/2026)
+
+Point ouvert du rapport : le mot de passe d'un accès RustDesk était écrit **en clair** dans la colonne
+`PASSWORD` de la base commune, faute d'un chiffrement propre ; la base n'est chiffrée (SQLCipher)
+que si le mot de passe maître de l'application est activé, ce qui n'est pas le cas par défaut. Un
+`adb backup` ou un appareil rooté lisait donc le secret de la machine distante.
+
+Ce qui a été fait :
+
+- `RustDeskSecretCodec` (pur, `javax.crypto` seulement) scelle en **AES-GCM**, forme
+  `ks1:<iv hex>:<chiffré hex>`, IV aléatoire de 12 octets à chaque sceau. L'hexadécimal est un choix :
+  `android.util.Base64` n'existe pas sur la JVM et `java.util.Base64` demande l'API 26 alors que
+  `SDK_VERSION=21` ;
+- `RustDeskSecretStore` fournit la clé : alias `dualdesk.rustdesk.password.v1` dans `AndroidKeyStore`,
+  générée au premier usage, non exportable. Sous l'API 23 (Android 5.x), où `KeyGenParameterSpec`
+  n'existe pas, la valeur est enregistrée comme avant et un avertissement est journalisé ;
+- la grille (`ConnectionGridActivity`) scelle à l'enregistrement, ouvre à l'affichage et au lancement,
+  et **scelle les anciens enregistrements en clair au chargement** (`sealStoredRustDeskPasswords`),
+  sinon « scellé » ne serait vrai que pour les accès créés après ce correctif ;
+- si le Keystore refuse, rien n'est enregistré et un message le dit
+  (`rustdesk_password_not_sealed`), plutôt que d'écrire le secret en clair.
+
+Mesure : `5 tests` du codec (aller-retour, deux sceaux d'un même mot de passe différents, mauvaise
+clé rend `null`, enregistrement altéré rend `null`, ancienne valeur en clair rendue telle quelle),
+soit **12 tests, 0 échec** avec la chaîne de repli. `:bVNC:assembleDebug` et
+`:dualdesk-app:assembleDebug` passent.
+
+Conséquence à ne pas oublier : la clé est liée à l'appareil. Une réinstallation, une restauration sur
+un autre téléphone, ou un export/import d'accès (`Utils.exportSettingsToXml` exporte la base entière)
+transporte le sceau sans la clé — le mot de passe devient alors illisible et l'accès s'ouvre sans
+mot de passe, à ressaisir. C'est consigné comme point à trancher, pas corrigé au passage.
+
+Ce qui n'est pas prouvé : le comportement **sur le POCO** (création, modification, relance d'un accès
+scellé, et migration d'un accès existant). Le banc JVM couvre le format et l'aller-retour, pas le
+Keystore d'un appareil réel ; l'essai est à faire au retour du téléphone.

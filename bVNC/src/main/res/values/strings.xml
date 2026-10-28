@@ -1029,4 +1029,6 @@ Below that is where you configure your connection.
     <string name="rustdesk_no_response">RustDesk did not respond to the launch request.</string>
     <string name="rustdesk_clipboard_id_only">Device ID copied: paste it in RustDesk.</string>
     <string name="rustdesk_clipboard_with_password">Device ID and password copied: paste them in RustDesk.</string>
+    <string name="rustdesk_clipboard_unavailable">RustDesk opened, but the clipboard is unavailable: type the device ID.</string>
+    <string name="rustdesk_password_not_sealed">The password could not be protected, so nothing was saved.</string>
 </resources>
