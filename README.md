@@ -71,6 +71,149 @@ sans appareil :
 ./gradlew :bVNC:testDebugUnitTest --tests "com.dualdesk.rustdesk.*" --offline
 ```
 
+## Building the fork from source
+
+The wrapper pins Gradle 8.13 and the Android Gradle plugin 8.13.2. **No NDK and no C compilation is
+needed**: FreeRDP and its Java glue ship precompiled for the four ABIs in the upstream dependencies
+archive, which is not stored in this repository and has to be fetched once.
+
+What the machine needs first:
+
+- **JDK 21** — the sources target Java 21, and a JDK 8 on the `PATH` fails the build, so point
+  `JAVA_HOME` at a 21 before calling Gradle;
+- **the Android SDK** (compileSdk 36) with its path in `local.properties`; without that file Gradle
+  stops after everything else with "SDK location not found".
+
+Then, from the repository root:
+
+```bash
+./download-prebuilt-dependencies.sh        # 171 MB: the prebuilt .so and the FreeRDP Java glue
+printf 'sdk.dir=/path/to/Android/sdk\n' > local.properties
+export JAVA_HOME=/path/to/jdk-21
+./gradlew :dualdesk-app:assembleDebug
+```
+
+On Windows with Git Bash, one step needs a hand: the archive holds a single symbolic link
+(`freeRDPCore/src/main/libs`) that Windows cannot create, which stops the extraction. Run it yourself
+with the link left out, then carry on:
+
+```bash
+tar xzf remote-desktop-clients-libs-17.tar.gz --exclude='*/src/main/libs'
+```
+
+Gradle does not read that link, so its absence changes nothing.
+
+The fork's unit tests need no device and no emulator:
+
+```bash
+./gradlew :bVNC:testDebugUnitTest --tests "com.dualdesk.rustdesk.*" --offline
+```
+
+## Installing the APK
+
+`assembleDebug` writes one APK per ABI plus a universal one, all in
+`dualdesk-app/build/outputs/apk/debug/`:
+
+- `dualdesk-app-arm64-v8a-debug.apk` (70 MB) — the right file for any phone sold in the last few
+  years;
+- `dualdesk-app-universal-debug.apk` (187 MB) — when the ABI is unknown, at the cost of size;
+- `dualdesk-app-armeabi-v7a-debug.apk`, `dualdesk-app-x86-debug.apk`,
+  `dualdesk-app-x86_64-debug.apk` (64 to 72 MB) — older 32-bit phones and emulator images.
+
+Over USB:
+
+```bash
+adb install -r dualdesk-app/build/outputs/apk/debug/dualdesk-app-arm64-v8a-debug.apk
+```
+
+Or copy the APK to the device and open it, allowing installs from unknown sources.
+
+Five things worth knowing before installing:
+
+- **Android 5.0 (API 21) or newer** — the minimum the fork is built for.
+- On **Xiaomi/MIUI**, `adb install` answers `INSTALL_FAILED_USER_RESTRICTED` until "Install via USB"
+  is enabled in the developer options.
+- DualDesk **does not replace aRDP**: its package is `com.dualdesk.rdp`, so both applications can be
+  installed side by side and the RDP accesses stay where they are.
+- The APK from `assembleDebug` is **signed with the debug key**: fine for sideloading, not for
+  publishing. Installing a build signed with another key over an existing one fails with
+  `INSTALL_FAILED_UPDATE_INCOMPATIBLE`, and the fix is `adb uninstall com.dualdesk.rdp` first.
+- Uninstalling destroys the Keystore keys, hence the sealed RustDesk passwords. That is what the
+  export section above is for: export with a passphrase **before** uninstalling if those accesses
+  must be restored.
+
+## Construire le fork depuis les sources
+
+Le wrapper fige Gradle 8.13 et le plugin Android 8.13.2. **Aucun NDK, aucune compilation C** : FreeRDP
+et sa glue Java arrivent précompilés pour les quatre ABI dans l'archive de dépendances de l'amont,
+laquelle n'est pas stockée dans ce dépôt et doit être récupérée une fois.
+
+Ce qu'il faut sur la machine avant de commencer :
+
+- **un JDK 21** — les sources ciblent Java 21, et un JDK 8 sur le `PATH` fait échouer la
+  construction : pointez `JAVA_HOME` vers un 21 avant d'appeler Gradle ;
+- **le SDK Android** (compileSdk 36) avec son chemin dans `local.properties` ; sans ce fichier Gradle
+  s'arrête après avoir tout téléchargé, sur « SDK location not found ».
+
+Puis, depuis la racine du dépôt :
+
+```bash
+./download-prebuilt-dependencies.sh        # 171 Mo : les .so précompilés et la glue Java de FreeRDP
+printf 'sdk.dir=/chemin/vers/Android/sdk\n' > local.properties
+export JAVA_HOME=/chemin/vers/jdk-21
+./gradlew :dualdesk-app:assembleDebug
+```
+
+Sous Windows en Git Bash, une étape demande la main : l'archive contient un lien symbolique
+(`freeRDPCore/src/main/libs`) que Windows refuse de créer, ce qui interrompt l'extraction. Lancez-la
+vous-même en l'écartant, puis reprenez :
+
+```bash
+tar xzf remote-desktop-clients-libs-17.tar.gz --exclude='*/src/main/libs'
+```
+
+Gradle ne lit pas ce lien : son absence ne change rien.
+
+Les tests unitaires du fork ne demandent ni appareil ni émulateur :
+
+```bash
+./gradlew :bVNC:testDebugUnitTest --tests "com.dualdesk.rustdesk.*" --offline
+```
+
+## Installer l'APK
+
+`assembleDebug` écrit un APK par ABI et un universel, tous dans
+`dualdesk-app/build/outputs/apk/debug/` :
+
+- `dualdesk-app-arm64-v8a-debug.apk` (70 Mo) — le bon fichier pour tout téléphone vendu ces
+  dernières années ;
+- `dualdesk-app-universal-debug.apk` (187 Mo) — quand l'ABI est inconnue, au prix du poids ;
+- `dualdesk-app-armeabi-v7a-debug.apk`, `dualdesk-app-x86-debug.apk`,
+  `dualdesk-app-x86_64-debug.apk` (64 à 72 Mo) — anciens téléphones 32 bits et images d'émulateur.
+
+Par USB :
+
+```bash
+adb install -r dualdesk-app/build/outputs/apk/debug/dualdesk-app-arm64-v8a-debug.apk
+```
+
+Ou copiez l'APK sur l'appareil et ouvrez-le, en autorisant l'installation de sources inconnues.
+
+Cinq choses à savoir avant d'installer :
+
+- **Android 5.0 (API 21) ou plus récent** — le minimum pour lequel le fork est construit.
+- Sur **Xiaomi/MIUI**, `adb install` répond `INSTALL_FAILED_USER_RESTRICTED` tant que « Installer via
+  USB » n'est pas activé dans les options pour développeurs.
+- DualDesk **ne remplace pas aRDP** : son paquet est `com.dualdesk.rdp`, les deux applications
+  cohabitent donc, et les accès RDP restent où ils sont.
+- L'APK produit par `assembleDebug` est **signé avec la clé de débogage** : parfait pour un
+  chargement direct, pas pour une publication. Installer une construction signée d'une autre clé
+  par-dessus une existante échoue en `INSTALL_FAILED_UPDATE_INCOMPATIBLE`, et le remède est
+  `adb uninstall com.dualdesk.rdp` d'abord.
+- La désinstallation détruit les clés du Keystore, donc les mots de passe RustDesk scellés. C'est
+  l'objet de la section d'export ci-dessus : exportez avec une phrase de passe **avant** de
+  désinstaller si ces accès doivent être restaurés.
+
 # Intro
 
 The upstream project's own documentation follows, apart from one reversed link made clickable.
