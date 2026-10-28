@@ -759,10 +759,16 @@ pas d'exécution.
   (la 1.0.0 était en 1). Le suffixe `-dualdesk` est conservé : il fait partie de l'identité affichée,
   pas du numéro.
 - Release `v1.10` publiée (https://github.com/Endymi0n74/ardp/releases/tag/v1.10), tag poussé sur
-  `origin/master`. Assets, comme pour la 1.0.0 : `dualdesk-app-arm64-v8a-debug.apk` (67 617 368 o) et
-  `dualdesk-app-universal-debug.apk` (190 782 557 o), copies dans `_released/v1.10/` ; les tailles
-  lues sur la release correspondent à celles du disque. `_released/` est désormais dans
-  `.gitignore` : 245 Mo de binaires n'ont rien à faire dans l'historique.
+  `origin/master`. Assets **signés par la clé de publication** :
+  `dualdesk-app-arm64-v8a-release.apk` (62 455 477 o,
+  sha256 `305053980eaec6ea20ad21e0d412bd5671aa3e7398c69c940d6b194dad6c4a88`) et
+  `dualdesk-app-universal-release.apk` (177 138 551 o,
+  sha256 `5982e5a67baf3d5c3959c032d11a1e6e500689f6d95dc2d2160563e1f890bd2e`), copies dans
+  `_released/v1.10/`. Les octets téléchargés depuis la page ont été hachés et comparés : identiques au
+  disque. Les deux assets signés en débogage, publiés en premier, ont été **supprimés** de la release
+  plutôt que laissés à côté — deux fichiers du même nom et de signature différente auraient été un
+  piège pour qui télécharge. `_released/` est dans `.gitignore` : 240 Mo de binaires n'ont rien à
+  faire dans l'historique.
 - `CHANGELOG.md` créé (bilingue, 1.10 puis 1.0.0) ; le README gagne une section « Version and
   releases » / « Version et publications » qui pointe la page de release et le journal.
 
@@ -782,7 +788,43 @@ journal des versions, avec le conseil d'exporter avec phrase de passe avant.
 
 La clé d'origine est perdue : aucune trace d'un `debug.keystore` ailleurs (ni dans le profil
 utilisateur ni sur le disque de travail, vérifié par recherche). Tant que la publication se fait avec
-la clé de débogage, **chaque nouvelle
-machine ou chaque nettoyage du profil casse la mise à jour**. Le remède — une clé de publication
-stable, conservée hors dépôt avec son mot de passe — n'a pas été créé ici : c'est une décision de
-garde de clé, pas un détail de build.
+la clé de débogage, **chaque nouvelle machine ou chaque nettoyage du profil casse la mise à jour**.
+D'où la clé de publication stable décrite ci-dessous, et la republication de la 1.10 avec elle.
+
+## Cle de publication stable (28/10/2026)
+
+Motif : la 1.0.0 et la 1.10 ont ete signees avec des cles de debogage **differentes**, donc
+`INSTALL_FAILED_UPDATE_INCOMPATIBLE` a chaque fois. Publier ainsi, c'est casser la mise a jour a
+chaque machine ou a chaque nettoyage du profil.
+
+- cle creee : `_keystore/dualdesk-release.jks` (PKCS#12, RSA 4096, alias `dualdesk`, validite 30 ans
+  jusqu'en 2056), empreinte SHA-256 du certificat
+  `72:FB:AB:59:83:38:FA:A7:C4:48:FD:65:AA:30:BA:91:39:ED:44:9C:30:E4:64:77:29:C1:B0:86:44:98:B7:85` ;
+- `_keystore/keystore.properties` porte le chemin, l'alias et les phrases de passe, tirees au hasard
+  (32 caracteres) et ecrites **uniquement** la. Le mot de passe n'a ete affiche ni dans la
+  conversation ni dans un journal de build ;
+- `_keystore/` est ajoute a `.gitignore`. C'est le point qui compte : une cle de signature dans un
+  depot public laisse n'importe qui publier une mise a jour sous ce nom de paquet ;
+- `dualdesk-app/build.gradle` lit ces proprietes et les applique au variant `release` seulement. Si
+  le fichier manque, la construction aboutit mais les fichiers sortent en `…-release-unsigned.apk`
+  et `assembleDebug` reste intact — c'est ce qui permet de compiler un clone neuf sans la cle.
+  Verifie en renommant `_keystore/` le temps d'un build : c'est le suffixe qui change, pas le code de
+  sortie.
+
+Mesure : `:dualdesk-app:assembleRelease` passe ; `apksigner verify --print-certs` sur
+`dualdesk-app-arm64-v8a-release.apk` rend le DN `CN=DualDesk, OU=Release signing, O=DualDesk, C=FR`
+et l'empreinte `72fbab59…` — celle du magasin, donc la signature est bien celle qu'on croit. L'APK
+x86_64 de release s'installe sur l'emulateur apres desinstallation et demarre :
+`onResume of version 1.10-dualdesk_2`.
+
+La 1.10 **publiee** a ensuite ete re-signee avec cette cle et ses deux fichiers remplaces sur la
+release, pour que la rupture de signature s'arrete la et pas a la version suivante. Consequence a
+connaitre : ceux qui auraient pris la premiere 1.10 (signee en debogage, quelques minutes en ligne)
+doivent aussi desinstaller — meme version, signature differente, meme refus. C'est ecrit dans les
+notes de version.
+
+Reste ouvert, et c'est le vrai risque : la cle n'existe qu'a un seul endroit sur cette machine. Sans
+sauvegarde hors ligne, une panne de disque equivaut a une cle perdue.
+
+Garde de la cle : deux fichiers, une archive chiffree a deux endroits, phrase de passe dans un
+gestionnaire. Perdue, elle interdit toute mise a jour future.

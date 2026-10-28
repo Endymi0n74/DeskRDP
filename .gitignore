@@ -224,3 +224,6 @@ remote-desktop-clients-libs-*
 _released/
 
 venv
+
+# Cle de publication : jamais dans l historique.
+_keystore/

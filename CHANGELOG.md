@@ -32,13 +32,15 @@ Published builds live on the [Releases](https://github.com/Endymi0n74/ardp/relea
 
 ### À savoir avant d'installer / Before installing
 
-- L'APK est signé avec la **clé de débogage**, comme la 1.0.0, mais ce n'est **pas la même clé** :
-  poser la 1.10 sur une 1.0.0 installée échoue en `INSTALL_FAILED_UPDATE_INCOMPATIBLE`. Il faut
-  désinstaller d'abord, ce qui **détruit les mots de passe RustDesk scellés** — exportez avec une
-  phrase de passe avant. / The APK is signed with the **debug key**, as 1.0.0 was, but **not the same
-  key**: installing 1.10 over an existing 1.0.0 fails with `INSTALL_FAILED_UPDATE_INCOMPATIBLE`.
-  Uninstall first, which **destroys the sealed RustDesk passwords** — export with a passphrase
-  beforehand.
+- Première version signée par la **clé de publication du projet** (`72:FB:AB:59:…`), et toutes les
+  suivantes s'appuieront sur la même : à partir d'ici, une mise à jour s'installe par-dessus la
+  précédente. La 1.0.0, elle, était signée en débogage : poser la 1.10 dessus échoue en
+  `INSTALL_FAILED_UPDATE_INCOMPATIBLE`, et désinstaller d'abord **détruit les mots de passe RustDesk
+  scellés** — exportez avec une phrase de passe avant. / First version signed with the **project's
+  publication key** (`72:FB:AB:59:…`), and every later release will use the same one: from here on an
+  update installs over the previous version. 1.0.0 itself was debug-signed, so installing 1.10 on top
+  of it fails with `INSTALL_FAILED_UPDATE_INCOMPATIBLE`, and uninstalling first **destroys the sealed
+  RustDesk passwords** — export with a passphrase beforehand.
 - `versionCode` passe de 1 à 2, `versionName` de `1.0.0-dualdesk` à `1.10-dualdesk`.
 
 ## 1.0.0 — 28 octobre 2026

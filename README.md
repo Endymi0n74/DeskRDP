@@ -9,26 +9,101 @@ RustDesk accesses as well. The state of each feature and the measurements behind
 
 The current version is **1.10** (`versionName` `1.10-dualdesk`, `versionCode` 2), published on the
 [Releases](https://github.com/Endymi0n74/ardp/releases/tag/v1.10) page with two assets:
-`dualdesk-app-arm64-v8a-debug.apk` for any recent phone, and `dualdesk-app-universal-debug.apk` when
-the ABI is unknown. What changed since the previous milestone is in [CHANGELOG.md](CHANGELOG.md).
+`dualdesk-app-arm64-v8a-release.apk` for any recent phone, and `dualdesk-app-universal-release.apk`
+when the ABI is unknown. What changed since the previous milestone is in
+[CHANGELOG.md](CHANGELOG.md).
 
-One thing to know before upgrading: both versions are signed with a **debug key**, and the key is not
-the same one — 1.10 cannot be installed over an existing 1.0.0 (`INSTALL_FAILED_UPDATE_INCOMPATIBLE`).
-Uninstalling first **destroys the Keystore keys, hence the sealed RustDesk passwords**: export with a
-passphrase before doing it.
+1.10 is the first version signed with the **project's publication key** (see below), and every later
+release will use the same one — so from 1.10 onwards, an update installs over the previous version.
+The one step that still hurts is **1.0.0 → 1.10**: 1.0.0 was signed with a debug key, so 1.10 is
+refused (`INSTALL_FAILED_UPDATE_INCOMPATIBLE`). Uninstalling first **destroys the Keystore keys, hence
+the sealed RustDesk passwords**: export with a passphrase before doing it.
 
 ## Version et publications
 
 La version courante est la **1.10** (`versionName` `1.10-dualdesk`, `versionCode` 2), publiée sur la
 page [Releases](https://github.com/Endymi0n74/ardp/releases/tag/v1.10) avec deux fichiers :
-`dualdesk-app-arm64-v8a-debug.apk` pour tout téléphone récent, et `dualdesk-app-universal-debug.apk`
-quand l'ABI est inconnue. Ce qui a changé depuis le jalon précédent est dans
-[CHANGELOG.md](CHANGELOG.md).
+`dualdesk-app-arm64-v8a-release.apk` pour tout téléphone récent, et
+`dualdesk-app-universal-release.apk` quand l'ABI est inconnue. Ce qui a changé depuis le jalon
+précédent est dans [CHANGELOG.md](CHANGELOG.md).
 
-Une chose à savoir avant de mettre à jour : les deux versions sont signées avec une **clé de
-débogage**, et ce n'est pas la même — la 1.10 ne s'installe pas par-dessus une 1.0.0 existante
-(`INSTALL_FAILED_UPDATE_INCOMPATIBLE`). Désinstaller d'abord **détruit les clés du Keystore, donc les
-mots de passe RustDesk scellés** : exportez avec une phrase de passe avant de le faire.
+La 1.10 est la première version signée par la **clé de publication du projet** (voir ci-dessous), et
+toutes les suivantes s'appuieront sur la même — à partir de là, une mise à jour s'installe par-dessus
+la précédente. La seule étape qui reste douloureuse est **1.0.0 → 1.10** : la 1.0.0 était signée avec
+une clé de débogage, donc la 1.10 est refusée (`INSTALL_FAILED_UPDATE_INCOMPATIBLE`). Désinstaller
+d'abord **détruit les clés du Keystore, donc les mots de passe RustDesk scellés** : exportez avec une
+phrase de passe avant de le faire.
+
+## Signing the release
+
+`assembleDebug` needs no key. `assembleRelease` signs with the project's publication key, which lives
+**outside version control** in `_keystore/`: that directory is ignored by git, and it has to be — a
+signing key in a public repository would let anyone publish an update as this application.
+
+- `_keystore/dualdesk-release.jks` — RSA 4096, PKCS#12, alias `dualdesk`, valid 30 years (to 2056),
+  certificate SHA-256 `72:FB:AB:59:83:38:FA:A7:C4:48:FD:65:AA:30:BA:91:39:ED:44:9C:30:E4:64:77:29:C1:B0:86:44:98:B7:85`;
+- `_keystore/keystore.properties` — the path, alias and passphrases Gradle reads. It is in clear
+  text: that directory must not be committed, copied into a build artifact, or pasted anywhere.
+
+```bash
+./gradlew :dualdesk-app:assembleRelease   # -> dualdesk-app/build/outputs/apk/release/
+```
+
+If `_keystore/` is missing (fresh clone, another machine), the build still succeeds but the files are
+named `…-release-unsigned.apk`: no signing config is applied, nothing else changes, and
+`assembleDebug` keeps working. To create a key for your own fork, follow the same shape:
+
+```bash
+keytool -genkeypair -keystore _keystore/dualdesk-release.jks -storetype PKCS12 \
+  -alias dualdesk -keyalg RSA -keysize 4096 -validity 10950 \
+  -dname "CN=DualDesk, O=DualDesk, C=FR"
+```
+
+**Keep a copy.** Two files, one encrypted archive stored in two separate places, and the passphrase
+in a password manager. Losing either the keystore or its passphrase means never publishing an update
+again: Android refuses an APK signed by another key, so every installed user would have to uninstall
+— losing the Keystore-sealed RustDesk passwords with it.
+
+1.10 is the first release signed with this key; the assets on the release page are the signed ones
+(`…-release.apk`, not `…-debug.apk`), and their SHA-256 is listed in the release notes.
+
+## Signer la publication
+
+`assembleDebug` ne demande aucune clé. `assembleRelease` signe avec la clé de publication du projet,
+qui vit **hors du dépôt**, dans `_keystore/` : ce dossier est ignoré par git, et il doit l'être — une
+clé de signature dans un dépôt public laisserait n'importe qui publier une mise à jour sous le nom de
+cette application.
+
+- `_keystore/dualdesk-release.jks` — RSA 4096, PKCS#12, alias `dualdesk`, valide 30 ans (jusqu'en
+  2056), empreinte SHA-256 du certificat
+  `72:FB:AB:59:83:38:FA:A7:C4:48:FD:65:AA:30:BA:91:39:ED:44:9C:30:E4:64:77:29:C1:B0:86:44:98:B7:85` ;
+- `_keystore/keystore.properties` — le chemin, l'alias et les phrases de passe que lit Gradle. Elles y
+  sont en clair : ce dossier ne se commite pas, ne part pas dans un artefact de construction et ne se
+  colle nulle part.
+
+```bash
+./gradlew :dualdesk-app:assembleRelease   # -> dualdesk-app/build/outputs/apk/release/
+```
+
+Si `_keystore/` manque (clone neuf, autre machine), la construction aboutit quand même mais les
+fichiers s'appellent `…-release-unsigned.apk` : aucune configuration de signature n'est appliquée,
+rien d'autre ne change, et `assembleDebug` continue de fonctionner. Pour créer une clé pour votre
+propre fork, même forme :
+
+```bash
+keytool -genkeypair -keystore _keystore/dualdesk-release.jks -storetype PKCS12 \
+  -alias dualdesk -keyalg RSA -keysize 4096 -validity 10950 \
+  -dname "CN=DualDesk, O=DualDesk, C=FR"
+```
+
+**Gardez-en une copie.** Deux fichiers, une archive chiffrée stockée à deux endroits distincts, et la
+phrase de passe dans un gestionnaire de mots de passe. Perdre le magasin ou sa phrase de passe, c'est
+ne plus jamais pouvoir publier de mise à jour : Android refuse une APK signée d'une autre clé, donc
+chaque utilisateur installé devrait désinstaller — en perdant les mots de passe RustDesk scellés sous
+le Keystore.
+
+La 1.10 est la première version signée par cette clé ; les fichiers de la page de release sont les
+signés (`…-release.apk`, et non `…-debug.apk`), et leur SHA-256 est donné dans les notes de version.
 
 ## Exporting the access list: what happens to the RustDesk password
 
