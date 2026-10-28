@@ -90,6 +90,15 @@ au premier chargement de la grille — et si le Keystore refuse, l'accès n'est 
 de l'être en clair, avec un message qui le dit. Cinq tests JVM couvrent le format : aller-retour, deux
 sceaux différents, mauvaise clé, enregistrement altéré, ancienne valeur en clair.
 
+**Le mot de passe ne quitte pas l'appareil.** L'export d'accès écrit la base entière : il emportait le
+sceau dans un fichier destiné à changer d'appareil, alors que la clé, elle, ne le peut pas — et qu'une
+réinstallation détruit les clés du Keystore. Le fichier exporté ne contient donc plus aucun mot de
+passe RustDesk : la valeur est retirée du document au moment de l'écriture, la base n'est pas touchée,
+et un message dit combien d'accès en sont privés. Le retrait est vérifié avant écriture, et si le
+document n'a pas la forme attendue l'export est **refusé** au lieu d'être écrit tel quel. À l'import,
+un sceau créé ailleurs (ancien fichier, autre téléphone) est illisible ici : il est retiré et le nombre
+d'accès à ressaisir est annoncé, plutôt que de laisser une carte dont le mot de passe est du charabia.
+
 ### 1.4 Rien ne renvoie plus vers l'application d'origine
 
 L'écran « ⭐ Aide, évaluer, partager » pointait encore vers le projet amont : forum, dépôt des bogues,
@@ -315,12 +324,11 @@ points ci-dessous.
 il reste à provoquer un repli réel sur le téléphone, en désactivant temporairement le filtre du deep
 link, pour voir RustDesk accepter l'activité — c'est le seul maillon que le banc ne peut pas couvrir.
 
-**Le mot de passe RustDesk est scellé, mais le sceau est lié à l'appareil** (cf. § 1.3). La clé ne
-quitte pas le Keystore : une réinstallation, une restauration sur un autre téléphone, ou un
-export/import d'accès — l'export écrit la base entière — transporte le sceau sans la clé, et le mot
-de passe devient illisible (l'accès s'ouvre alors sans mot de passe, à ressaisir). À trancher :
-refuser d'exporter un mot de passe scellé, l'exporter en l'annonçant à l'import, ou accepter la perte
-et le documenter pour l'utilisateur.
+**L'export ne transporte plus les mots de passe RustDesk** (cf. § 1.3), et c'est une décision, pas un
+reste : un sceau lié à l'appareil n'a de valeur sur aucun autre. Reste à voir ce que l'utilisateur en
+pense à l'usage — deux messages l'en informent (à l'export, à l'import d'un sceau étranger) ; si la
+restauration sur un appareil neuf devient un besoin courant, c'est une phrase de passe à ajouter,
+pas un sceau à exporter.
 
 **Trois résidus d'identité, sans effet visible** mais vérifiables : le bouton **Morpheusly** de la
 barre d'action, qui fait la promotion d'un produit tiers du même auteur ; l'étiquette de carte qui

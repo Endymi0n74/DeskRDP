@@ -1031,4 +1031,7 @@ Below that is where you configure your connection.
     <string name="rustdesk_clipboard_with_password">Device ID and password copied: paste them in RustDesk.</string>
     <string name="rustdesk_clipboard_unavailable">RustDesk opened, but the clipboard is unavailable: type the device ID.</string>
     <string name="rustdesk_password_not_sealed">The password could not be protected, so nothing was saved.</string>
+    <string name="rustdesk_export_refused">Export cancelled: a RustDesk password could not be removed from the file.</string>
+    <string name="rustdesk_export_without_password">The password of %1$d RustDesk access(es) is not in the export: it stays on this device.</string>
+    <string name="rustdesk_password_dropped">%1$d RustDesk access(es): the saved password cannot be read here, so it was removed. Type it again.</string>
 </resources>

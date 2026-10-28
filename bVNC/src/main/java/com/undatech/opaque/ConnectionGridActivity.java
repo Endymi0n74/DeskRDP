@@ -470,13 +470,21 @@ public class ConnectionGridActivity extends AppCompatActivity implements GetText
     }
 
     /**
-     * Seals the RustDesk passwords saved before sealing existed, once, on load.
+     * Brings the stored RustDesk passwords in line with the way they are kept, once, on load.
      *
-     * Without this, an access created earlier keeps its clear password in the shared database
-     * until the user edits it: "sealed" would only be true for new accesses. A record that is
-     * already sealed is left untouched, so this runs cheaply on every load.
+     * Two older states are repaired here:
+     *  - a password saved before sealing existed is clear in the shared database until the user
+     *    edits it, so it is sealed on first load; without this "sealed" would only be true for
+     *    accesses created after the change;
+     *  - a seal created on another device (or before a reinstall, which destroys the keystore key)
+     *    cannot be opened here. Keeping it would leave an access whose password is garbage, so it
+     *    is dropped and the user is told how many must be typed again.
+     *
+     * A seal that opens is left untouched, so this runs cheaply on every load, and the message is
+     * shown only on the load that actually drops something.
      */
     private void sealStoredRustDeskPasswords() {
+        int dropped = 0;
         for (Connection connection : getConnectionLoader(this).loadConnectionsById().values()) {
             if (!(connection instanceof ConnectionBean)) {
                 continue;
@@ -486,7 +494,21 @@ public class ConnectionGridActivity extends AppCompatActivity implements GetText
                 continue;
             }
             String stored = bean.getPassword();
-            if (stored == null || stored.isEmpty() || RustDeskSecretStore.isSealed(stored)) {
+            if (stored == null || stored.isEmpty()) {
+                continue;
+            }
+            if (RustDeskSecretStore.isSealed(stored)) {
+                if (RustDeskSecretStore.open(stored) != null) {
+                    continue;
+                }
+                try {
+                    bean.setPassword("");
+                    bean.setKeepPassword(true);
+                    bean.save(this);
+                    dropped++;
+                } catch (RuntimeException e) {
+                    Log.w(TAG, "Unreadable RustDesk password could not be cleared: " + e);
+                }
                 continue;
             }
             try {
@@ -496,6 +518,11 @@ public class ConnectionGridActivity extends AppCompatActivity implements GetText
             } catch (RuntimeException e) {
                 Log.w(TAG, "Stored RustDesk password could not be sealed: " + e);
             }
+        }
+        if (dropped > 0) {
+            Log.i(TAG, dropped + " unreadable RustDesk password(s) cleared.");
+            Snackbar.make(gridView, getString(R.string.rustdesk_password_dropped, dropped),
+                    Snackbar.LENGTH_LONG).show();
         }
     }
 
@@ -840,7 +867,16 @@ public class ConnectionGridActivity extends AppCompatActivity implements GetText
                         if (connectionsInSharedPrefs) {
                             ConnectionSettings.exportSettingsFromSharedPrefsToJson(out, this);
                         } else {
-                            Utils.exportSettingsToXml(out, database.getReadableDatabase());
+                            int removed = Utils.exportSettingsToXml(
+                                    out, database.getReadableDatabase());
+                            if (removed < 0) {
+                                Snackbar.make(gridView, R.string.rustdesk_export_refused,
+                                        Snackbar.LENGTH_LONG).show();
+                            } else if (removed > 0) {
+                                Snackbar.make(gridView,
+                                        getString(R.string.rustdesk_export_without_password, removed),
+                                        Snackbar.LENGTH_LONG).show();
+                            }
                         }
                     } else {
                         Log.e(TAG, "File uri not found, not exporting settings");

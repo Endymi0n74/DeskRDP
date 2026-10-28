@@ -994,4 +994,7 @@ L\'application est déjà exemptée des optimisations de la batterie.</string>
     <string name="rustdesk_clipboard_with_password">Identifiant et mot de passe copiés dans le presse-papiers : collez-les dans RustDesk.</string>
     <string name="rustdesk_clipboard_unavailable">RustDesk ouvert, mais le presse-papiers est indisponible : saisissez l\'identifiant.</string>
     <string name="rustdesk_password_not_sealed">Le mot de passe n\'a pas pu être protégé : rien n\'a été enregistré.</string>
+    <string name="rustdesk_export_refused">Export annulé : un mot de passe RustDesk n\'a pas pu être retiré du fichier.</string>
+    <string name="rustdesk_export_without_password">Le mot de passe de %1$d accès RustDesk n\'est pas dans l\'export : il reste sur cet appareil.</string>
+    <string name="rustdesk_password_dropped">%1$d accès RustDesk : le mot de passe enregistré n\'est pas lisible ici, il a été retiré. Saisissez-le de nouveau.</string>
 </resources>

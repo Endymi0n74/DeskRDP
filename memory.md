@@ -151,7 +151,8 @@ utilisé, `am start` ne reprenait pas le premier plan (le verrou n'est pas conto
   supprimé, la liste ne contient que le modèle `:3389` fourni par aRDP.
 - Le mot de passe RustDesk est désormais **scellé sous une clé Keystore** (voir « Mot de passe
   RustDesk scellé sous Keystore » en fin de fichier), donc lisible sans dépendre du mot de passe
-  maître. Reste à trancher : ce que devient ce sceau lors d'un export/import vers un autre appareil.
+  maître. Et il **ne quitte pas l'appareil** : l'export le retire du fichier, l'import retire un
+  sceau créé ailleurs (voir « L'export ne transporte pas les mots de passe RustDesk »).
 - Icône, nom d'application et traductions restent ceux d'aRDP (`icon_ardp`, chaînes en anglais).
 - Douze tests JVM couvrent deux logiques pures (chaîne de repli du lanceur, format du sceau) ; le
   reste n'est couvert que par les parcours `_check`, qui mesurent l'application installée.
@@ -637,10 +638,36 @@ clé rend `null`, enregistrement altéré rend `null`, ancienne valeur en clair 
 soit **12 tests, 0 échec** avec la chaîne de repli. `:bVNC:assembleDebug` et
 `:dualdesk-app:assembleDebug` passent.
 
-Conséquence à ne pas oublier : la clé est liée à l'appareil. Une réinstallation, une restauration sur
-un autre téléphone, ou un export/import d'accès (`Utils.exportSettingsToXml` exporte la base entière)
-transporte le sceau sans la clé — le mot de passe devient alors illisible et l'accès s'ouvre sans
-mot de passe, à ressaisir. C'est consigné comme point à trancher, pas corrigé au passage.
+## L'export ne transporte pas les mots de passe RustDesk (décidée le 28/10/2026)
+
+Le point laissé ouvert par le scellement : la clé est liée à l'appareil, et `Utils.exportSettingsToXml`
+écrit la base **entière** — le sceau partait donc dans un fichier fait pour changer d'appareil, alors
+qu'aucune autre installation (ni la même après une réinstallation, qui détruit les clés du Keystore)
+ne peut l'ouvrir.
+
+Décision : **le mot de passe reste sur l'appareil**, l'export ne le transporte pas.
+
+- `RustDeskExportSanitizer` (pur) retire les mots de passe du **document**, pas de la base : le
+  fichier exporté garde l'accès, son identifiant, son surnom, sans le secret ;
+- l'écriture passe par un tampon (`Utils.exportSettingsToXml` rend le nombre de mots de passe
+  retirés, ou `-1` en échec) pour pouvoir vérifier le document **avant** de le poser sur le disque ;
+- le retrait est vérifié, et l'export est **refusé** si un sceau subsiste ou si un attribut `PASSWORD`
+  apparaît dans une forme que le nettoyage ne sait pas lire — un fichier qui garde un secret en
+  silence serait pire que pas d'export ;
+- à l'import, un sceau créé ailleurs est illisible : `sealStoredRustDeskPasswords` le retire et
+  annonce combien d'accès sont à ressaisir, plutôt que d'afficher une carte au mot de passe faux.
+
+Détail de format qui rend le passage sûr : l'export de `SqliteElement` écrit une ligne par
+enregistrement, colonnes en **attributs** (`DatabaseUtils.cursorRowToContentValues` puis
+`ContentValuesElement`), et les valeurs sont échappées — un `<` ou un `"` n'apparaît jamais dedans.
+Le nettoyage lit donc `PASSWORD="…"` et `CONNECTIONTYPE="6"` sans analyseur XML, et refuse tout
+`ks1:` qui subsisterait.
+
+Mesure : **23 tests, 0 échec** (`RustDeskExportSanitizerTest` 11, chaîne de repli 7, codec 5).
+`:dualdesk-app:assembleDebug` passe et produit l'APK.
+
+Ce qui reste non prouvé : l'export et l'import **réels sur un appareil** (le document est reconstitué
+en test à partir du format lu dans la bibliothèque, pas produit par une base SQLCipher sous Android).
 
 Ce qui n'est pas prouvé : le comportement **sur le POCO** (création, modification, relance d'un accès
 scellé, et migration d'un accès existant). Le banc JVM couvre le format et l'aller-retour, pas le

@@ -61,6 +61,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.antlersoft.android.contentxml.SqliteElement;
 import com.antlersoft.android.contentxml.SqliteElement.ReplaceStrategy;
+import com.dualdesk.rustdesk.RustDeskExportSanitizer;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.tasks.Task;
@@ -521,14 +522,41 @@ public class Utils {
                 Build.MANUFACTURER.contains("BlackBerry");
     }
 
-    public static void exportSettingsToXml(OutputStream f, SQLiteDatabase db) {
-        Writer writer = new OutputStreamWriter(f);
+    /**
+     * Writes the connection database to {@code f} as XML, without the RustDesk passwords.
+     *
+     * Those passwords are sealed by a key of this device's keystore, which never leaves it — not
+     * even across a reinstall, since uninstalling the application destroys its keys. Writing the
+     * seal to a file meant to move between devices would only carry a value nothing can open, so
+     * the password is left where it lives and the user is told.
+     *
+     * @return how many RustDesk passwords were left out of the file, or -1 when nothing usable was
+     * written (the document was refused because a secret could not be removed from it).
+     */
+    public static int exportSettingsToXml(OutputStream f, SQLiteDatabase db) {
+        StringWriter buffer = new StringWriter();
         try {
-            SqliteElement.exportDbAsXmlToStream(db, writer);
-            writer.close();
+            SqliteElement.exportDbAsXmlToStream(db, buffer);
         } catch (SAXException | IOException e) {
             Log.e(TAG, Log.getStackTraceString(e));
+            return -1;
         }
+
+        RustDeskExportSanitizer.Sanitized sanitized =
+                RustDeskExportSanitizer.blankRustDeskPasswords(buffer.toString());
+        if (sanitized == null) {
+            Log.e(TAG, "Export refused: a RustDesk password could not be removed from the document.");
+            return -1;
+        }
+
+        try (Writer writer = new OutputStreamWriter(f)) {
+            writer.write(sanitized.getDocument());
+            writer.flush();
+        } catch (IOException e) {
+            Log.e(TAG, Log.getStackTraceString(e));
+            return -1;
+        }
+        return sanitized.getPasswordsRemoved();
     }
 
     public static void importSettingsFromXml(InputStream fin, SQLiteDatabase db) {
