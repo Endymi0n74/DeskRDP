@@ -59,10 +59,33 @@ keytool -genkeypair -keystore _keystore/dualdesk-release.jks -storetype PKCS12 \
   -dname "CN=DualDesk, O=DualDesk, C=FR"
 ```
 
-**Keep a copy.** Two files, one encrypted archive stored in two separate places, and the passphrase
-in a password manager. Losing either the keystore or its passphrase means never publishing an update
+**Keep a copy.** One encrypted archive, stored in two separate places, and the passphrase in a
+password manager. Losing either the keystore or its passphrase means never publishing an update
 again: Android refuses an APK signed by another key, so every installed user would have to uninstall
 — losing the Keystore-sealed RustDesk passwords with it.
+
+### Backup and restore
+
+```bash
+# archive (the passphrase is read from the environment, never typed on the command line)
+export DUALDESK_KEY_PASS="$(sed -n 's/^storePassword=//p' _keystore/keystore.properties)"
+tar czf - -C _keystore dualdesk-release.jks keystore.properties |
+  openssl enc -aes-256-cbc -pbkdf2 -iter 600000 -md sha512 -salt \
+    -pass env:DUALDESK_KEY_PASS -out dualdesk-keys.tar.enc
+
+# restore, on this machine or another one
+openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 -md sha512 \
+  -pass env:DUALDESK_KEY_PASS -in dualdesk-keys.tar.enc | tar xzf - -C _keystore
+```
+
+The archive is encrypted with the **keystore passphrase itself**, so it is only half the secret: put
+that passphrase in a password manager (not in the same folder, not in the same backup). After a
+restore, check the key is the right one before publishing anything:
+
+```bash
+keytool -list -v -keystore _keystore/dualdesk-release.jks | grep 'SHA 256'
+# must print 72:FB:AB:59:83:38:FA:A7:C4:48:FD:65:AA:30:BA:91:39:ED:44:9C:30:E4:64:77:29:C1:B0:86:44:98:B7:85
+```
 
 1.10 is the first release signed with this key; the assets on the release page are the signed ones
 (`…-release.apk`, not `…-debug.apk`), and their SHA-256 is listed in the release notes.
@@ -96,11 +119,34 @@ keytool -genkeypair -keystore _keystore/dualdesk-release.jks -storetype PKCS12 \
   -dname "CN=DualDesk, O=DualDesk, C=FR"
 ```
 
-**Gardez-en une copie.** Deux fichiers, une archive chiffrée stockée à deux endroits distincts, et la
-phrase de passe dans un gestionnaire de mots de passe. Perdre le magasin ou sa phrase de passe, c'est
-ne plus jamais pouvoir publier de mise à jour : Android refuse une APK signée d'une autre clé, donc
-chaque utilisateur installé devrait désinstaller — en perdant les mots de passe RustDesk scellés sous
-le Keystore.
+**Gardez-en une copie.** Une archive chiffrée, stockée à deux endroits distincts, et la phrase de
+passe dans un gestionnaire de mots de passe. Perdre le magasin ou sa phrase de passe, c'est ne plus
+jamais pouvoir publier de mise à jour : Android refuse une APK signée d'une autre clé, donc chaque
+utilisateur installé devrait désinstaller — en perdant les mots de passe RustDesk scellés sous le
+Keystore.
+
+### Sauvegarde et restauration
+
+```bash
+# archive (la phrase de passe est lue dans l'environnement, jamais tapée sur la ligne de commande)
+export DUALDESK_KEY_PASS="$(sed -n 's/^storePassword=//p' _keystore/keystore.properties)"
+tar czf - -C _keystore dualdesk-release.jks keystore.properties |
+  openssl enc -aes-256-cbc -pbkdf2 -iter 600000 -md sha512 -salt \
+    -pass env:DUALDESK_KEY_PASS -out dualdesk-keys.tar.enc
+
+# restauration, sur cette machine ou une autre
+openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 -md sha512 \
+  -pass env:DUALDESK_KEY_PASS -in dualdesk-keys.tar.enc | tar xzf - -C _keystore
+```
+
+L'archive est chiffrée avec la **phrase de passe du magasin elle-même** : elle ne porte donc que la
+moitié du secret. Cette phrase va dans un gestionnaire de mots de passe, pas dans le même dossier ni
+dans la même sauvegarde. Après une restauration, vérifiez que c'est la bonne clé avant de publier :
+
+```bash
+keytool -list -v -keystore _keystore/dualdesk-release.jks | grep 'SHA 256'
+# doit afficher 72:FB:AB:59:83:38:FA:A7:C4:48:FD:65:AA:30:BA:91:39:ED:44:9C:30:E4:64:77:29:C1:B0:86:44:98:B7:85
+```
 
 La 1.10 est la première version signée par cette clé ; les fichiers de la page de release sont les
 signés (`…-release.apk`, et non `…-debug.apk`), et leur SHA-256 est donné dans les notes de version.

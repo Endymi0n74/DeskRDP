@@ -828,3 +828,25 @@ sauvegarde hors ligne, une panne de disque equivaut a une cle perdue.
 
 Garde de la cle : deux fichiers, une archive chiffree a deux endroits, phrase de passe dans un
 gestionnaire. Perdue, elle interdit toute mise a jour future.
+
+## Sauvegarde chiffree de la cle (28/10/2026)
+
+Une cle qui n'existe qu'a un seul endroit n'est pas une cle de publication, c'est une date de peremption.
+
+- archive : `_keystore/backup/dualdesk-keys-2026-10-28.tar.enc`, 4736 octets,
+  sha256 `ff9920ebbe50d8db249cca478227336fb299b78262fc728910a9fe38acb182dd`. Elle contient
+  `dualdesk-release.jks` et `keystore.properties`, rien d'autre ;
+- chiffrement : `openssl enc -aes-256-cbc -pbkdf2 -iter 600000 -md sha512`, phrase de passe passee
+  par l'environnement (`-pass env:`) et non par la ligne de commande, pour qu'elle ne traine ni dans
+  l'argv des processus ni dans un journal de shell ;
+- la phrase de passe est **celle du magasin**, lue depuis `keystore.properties` : l'archive seule ne
+  suffit donc pas a ouvrir la cle, ce qui est voulu. Elle doit aller dans un gestionnaire de mots de
+  passe, et surtout pas dans le meme dossier ni dans la meme sauvegarde que l'archive.
+
+Restauration **repetee pour de vrai**, pas decrite : dechiffrement dans un dossier temporaire, puis
+`keytool -list -v` rend `72:FB:AB:59:…`, identique a la cle en service. Un faux mot de passe est
+refuse (verifie aussi : le dechiffrement n'aboutit pas, `tar` ne lit rien). Les commandes exactes
+sont dans le README, section « Backup and restore » / « Sauvegarde et restauration ».
+
+Ce qui reste a faire, et qui n'est pas dans mon perimetre : copier l'archive ailleurs que sur ce
+disque. Une sauvegarde dans le dossier d'a cote ne protege de rien.
