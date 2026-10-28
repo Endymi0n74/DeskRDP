@@ -376,3 +376,167 @@ Il reste dans ce dossier temporaire : `dualdesk-rapport/rapport.txt` seul. Les s
 compilation des dépôts n'ont **pas** été touchées : `ardp/dualdesk-app/build` (1,2 Go) contient les
 cinq APK construits, dont l'universel de 190 Mo — les purger obligerait à refaire une compilation
 qui a demandé onze essais.
+
+### Témoin GFX côté poste — verdict (28/10/2026)
+
+Le test témoin qui manquait est fait, avec deux clients de référence installés sur le téléphone
+(aRDP 6.4.9 Free arm64 depuis F-Droid, aFreeRDP 3.32.1 build arm64-v8a — attention, F-Droid publie un
+paquet **par architecture** : 3320102 = armeabi-v7a, 3320103 = arm64-v8a, 3320104 = riscv64,
+3320108 = x86, 3320109 = x86_64 ; l'APK x86_64 ne s'installe pas sur le POCO).
+
+**Résultat : le poste fait du GFX.** aFreeRDP, journal poussé en DEBUG, annonce onze jeux de
+capacités (8.0 → 10.7) ; le poste confirme **RDPGFX 10.7** (`0x000A0701`, AVC à 0), ouvre une surface
+1220 × 2530 et l'alimente à **160 commandes/s** (1 787 sur onze secondes), en **CLEARCODEC** et
+**CAPROGRESSIVE** — pas de H.264. L'image du bureau s'affiche et se rafraîchit. Extrait conservé :
+`preuve-poco/temoin-afreerdp-extrait.txt`.
+
+aRDP (même moteur que le fork, FreeRDP 2.11.7) : NLA OK, session ouverte, canal `rdpgfx` chargé, puis
+`PDU_TYPE_DATA not properly parsed, 562 bytes remaining unhandled` — **et l'écran s'affiche quand
+même**, en bandeau (bureau distant 21:9 logé dans les 1220 × 2530 du client), avec des mises à jour
+vivantes : une fenêtre ouverte côté poste apparaît dans la capture suivante. Ce client ne fait donc
+pas de GFX utilisable mais il rend l'écran par le chemin classique.
+
+**Conséquence pour le fork** : le poste est innocent (prouvé deux fois) et le fork n'a pas d'écran
+noir — il affiche le bureau par le chemin classique (mesure du 26/10 : 102 images en 40 s, sans GFX ;
+les 5 s de noir au démarrage étaient l'attente du garde-fou, supprimée depuis). Ce qui manque au fork
+n'est donc pas l'image mais le **GFX**, et l'écart se lit maintenant dans les annonces de capacités :
+
+aFreeRDP 3.32.1 annonce **11** jeux et le poste confirme 10.7 ; le fork en annonce **8** (10.7 avec
+`SCALEDMAP_DISABLE` 0x80) et n'obtient **rien** en 25 s. Piste la plus courte, deux essais : annoncer
+les onze jeux comme aFreeRDP, puis retirer `SCALEDMAP_DISABLE`.
+
+Attention, il y a **deux applications** et deux moteurs, d'où la confusion facile :
+
+- `com.dualdesk.rdp` (module `dualdesk-app` de ce dépôt) — le fork aRDP, moteur **FreeRDP 2.x**
+  (`libfreerdp2.so`), c'est celui qu'on installe sur le téléphone ;
+- `com.dualdesk.debug` (projet `dualdesk`) — l'appli autonome à moteur natif **FreeRDP 3**
+  (`libfreerdp3.so`), celle qui a servi aux mesures GFX du 26/10 ; elle n'est pas installée sur le POCO.
+
+Les annonces de capacités relevées (8 jeux, `SCALEDMAP_DISABLE`) viennent de la seconde, pas du fork
+aRDP. Ne pas mélanger les deux quand on parle de « notre fork ».
+
+Pièges d'outillage rencontrés, à ne pas repayer :
+
+- **MIUI refuse l'installation tant que l'écran est verrouillé** (`INSTALL_FAILED_USER_RESTRICTED`,
+  « Install canceled by user ») : déverrouiller, puis relancer `adb install`.
+- **aRDP Free lève une exception au premier essai** (`DIALOG_RDP_CERT` →
+  `View ... not attached to window manager`) : le dialogue de certificat ne se montre pas et la
+  connexion reste bloquée sur « poignée de main ». Au deuxième essai, la fenêtre est attachée et le
+  dialogue s'affiche. Ne pas conclure à un refus du poste.
+- **Le certificat du poste est auto-signé au nom de la machine** : le client avertit d'un nom qui ne
+  correspond pas à l'adresse IP, il faut accepter.
+- **Arbitrage de session Windows** : le téléphone prend la session du compte (même utilisateur), donc
+  il voit le bureau de la console — pratique pour provoquer un changement d'image et vérifier que
+  l'affichage suit. Mais dès que la console reprend la main, la session distante est coupée (vu une
+  fois, au bout de 11 s) : garder les mesures courtes, ou laisser le poste tranquille pendant l'essai.
+- Le journal des capacités GFX n'est visible qu'en **DEBUG** : aRDP Free est figé en INFO (rien à
+  régler dans l'interface), aFreeRDP expose « Debug Settings → Debug Level ».
+- Les journaux graphiques **du poste** (`Rdp-Graphics-RdpAvenc`, `Rdp-Graphics-RdpLite`) restent
+  vides : la machine ne journalise pas ses échanges GFX, tout se lit côté client.
+- Le journal client RDP de Windows (`TerminalServices-RDPClient`) ne contient que des connexions
+  **sortantes** : l'événement 1401 « 0x80004 » qui y figure ne dit rien de ce poste-ci.
+
+## Banc émulateur : monté et vérifié (28/10/2026)
+
+Le fork n'a pas besoin du téléphone pour tourner : `dualdesk-app` publie ses `.so` FreeRDP 2.11.7
+pour les quatre ABI (`armeabi-v7a`, `arm64-v8a`, `x86`, `x86_64`), donc l'APK universel s'installe
+sur un émulateur x86_64. Mise en place, une seule fois :
+
+```bash
+export JAVA_HOME="C:/Program Files/Zulu/zulu-21"   # le JAVA_HOME ambiant est un JRE 11 :
+export ANDROID_SDK_ROOT=D:/android-sdk              # sdkmanager refuse de démarrer avec
+sdkmanager --install "system-images;android-34;default;x86_64"
+avdmanager create avd -n dualdesk-test -k "system-images;android-34;default;x86_64" -d pixel_6
+emulator -avd dualdesk-test -no-snapshot -no-audio -no-boot-anim -gpu swiftshader_indirect -no-window
+```
+
+WHPX est utilisable (`emulator -accel-check`), démarrage complet en ~55 s, `emulator-5554`.
+Installation de l'APK **universel** (190 Mo) : les APK par ABI ne contiennent qu'une architecture.
+
+Ce qui a été mesuré, sans rien interpréter :
+
+- l'application se lance (`ConnectionGridActivity`, version `1.0.0-dualdesk_1`) et son interface
+  répond : grille vide, feuille « Add Connection » → « ENTER MANUALLY », éditeur RDP complet
+  (type, serveur, port, utilisateur, domaine, mot de passe, mode couleur) ;
+- le poste est joignable depuis l'émulateur (ping 2/2, `nc` sur 33899 sort en 0) ;
+- session RDP réelle, d'abord jusqu'à l'authentification (`RDP_NEG_RSP` avec
+  `DYNVC_GFX_PROTOCOL_SUPPORTED`, `Attempting NLA security`, certificat auto-signé accepté, puis
+  `STATUS_LOGON_FAILURE` faute de mot de passe), ensuite jusqu'au **bureau** une fois le mot de passe
+  saisi dans la fenêtre. Moteur, canaux (`rdpdr`, `rdpsnd`, `cliprdr`, `drdynvc`) et pile réseau
+  fonctionnent donc bien en x86_64.
+
+Une seule limite de départ, contournable : **le mot de passe manque** sur un émulateur neuf. La base
+du téléphone n'est pas transposable — elle est chiffrée par SQLCipher avec une clé du Keystore,
+propre à l'appareil. Il faut donc le saisir une fois dans la fenêtre de l'émulateur ; ensuite la
+session se rouvre sans le redemander (vérifié : reconnexion après changement de réglage).
+
+Piège d'outillage : sous Git Bash, les chemins `/sdcard/...` passés à `adb` sont réécrits en chemins
+Windows. Exporter `MSYS_NO_PATHCONV=1` pour `uiautomator dump` et `adb pull`.
+
+### Le GFX du fork est une case du profil, et elle est cochée par défaut
+
+Le chemin graphique n'est ni absent ni compilé à part : il est **piloté par les préférences du
+profil**. `remoteClientLib/.../LibFreeRDP.java` n'ajoute `/gfx` que si `flags.getGfx()`, et
+`/gfx:AVC444` que si `flags.getH264()` **et** que le décodeur existe ; ces drapeaux viennent de
+`RdpCommunicator` (`performanceFlags.setGfx(enableGfx)`), eux-mêmes du profil.
+
+- `ConnectionBean` met les deux à **vrai** à la création, et l'éditeur les expose : sections
+  avancées, « RDP Gfx » et « RDP Gfx H264 » (`checkboxEnableGfx`, `checkboxEnableGfxH264`).
+  Un profil neuf sur l'émulateur les affiche bien cochés.
+- `rdpgfx` est un canal **dynamique** : contrairement à `rdpdr`/`rdpsnd`/`cliprdr`/`drdynvc`, il
+  n'apparaît pas dans les lignes `loading channelEx` au démarrage. Ne pas conclure de leur absence
+  que le GFX est désactivé — c'était l'erreur à éviter.
+- Le poste, lui, annonce `DYNVC_GFX_PROTOCOL_SUPPORTED` dans ses `RDP_NEG_RSP::flags` à chaque
+  connexion : la porte est ouverte côté serveur.
+
+Réglage retenu pour le banc : « RDP Gfx » coché, « RDP Gfx H264 » décoché en premier essai, parce
+que `c2.goldfish.h264.decoder` échoue à la **sonde** du démarrage (`AMediaCodec_configure failed:
+-10000`). Ce n'est pas une fatalité : en session, la même configuration H264 activée décode sans
+erreur (voir plus bas). La sonde et le chemin réel ne se comportent donc pas pareil — ne pas
+conclure d'un `-10000` au démarrage que l'AVC est inutilisable.
+
+### Le GFX du fork s'engage — mesuré en session (28/10/2026)
+
+Session réelle depuis l'émulateur vers le poste (`RDP Gfx` coché, `RDP Gfx H264` décoché), journal
+`logcat` en DEBUG. Déroulé, tel que le client le raconte :
+
+```
+CONNECTION_STATE_NEGO -> CONNECTION_STATE_NLA -> CONNECTION_STATE_MCS_CONNECT
+-> MCS_ATTACH_USER -> MCS_CHANNEL_JOIN -> LICENSING -> CAPABILITIES_EXCHANGE
+-> FINALIZATION -> CONNECTION_STATE_ACTIVE
+Loading Dynamic Virtual Channel rdpgfx
+```
+
+Puis des tuiles progressives décodées sans interruption (`com.freerdp.codec.progressive`,
+`ProgressiveTileFirst` … `ProgressiveFrameEnd`), **zéro** `Error while processing GFX cmdId`.
+
+| Mesure | Valeur |
+|---|---|
+| Bureau au repos, 20 s | 7 images en 10,6 s (0,66 img/s), 500 tuiles |
+| Pendant un mouvement provoqué | 7 images en 0,4 s (**16 img/s**), 621 tuiles |
+
+**Verdict : le fork fait du GFX, et l'image arrive — dans les deux modes.** Le poste avait donc
+raison d'annoncer `DYNVC_GFX_PROTOCOL_SUPPORTED`, le canal dynamique s'ouvre après
+l'authentification, et le codec servi suit le réglage du profil :
+
+| Réglage du profil | Ce que le poste envoie | Mesure | Image |
+|---|---|---|---|
+| `RDP Gfx` seul | tuiles **progressives** (`ProgressiveTileFirst` → `ProgressiveFrameEnd`) | 0,66 img/s au repos (7 en 10,6 s, 500 tuiles) ; **16 img/s** en mouvement (7 en 0,4 s, 621 tuiles) | oui |
+| `RDP Gfx` + `RDP Gfx H264` | **H264_METABLOCK** (AVC444) | 31,7 metablocs/s (322 en 10,2 s), **0 erreur de décodeur**, aucune tuile progressive | oui |
+
+Dans les deux cas : `Loading Dynamic Virtual Channel rdpgfx`, aucun `Error while processing GFX
+cmdId`, et le bureau distant s'affiche (clichés pris en session, non publiés car ils montrent le
+bureau réel).
+
+Ce que cela change pour la question ouverte : **le couple fork + poste fonctionne en GFX sur un banc
+neuf**, y compris avec le décodeur logiciel de l'émulateur (`c2.goldfish.h264.decoder`), qui se
+configure sans erreur en session alors qu'il échoue à la sonde du démarrage. L'écran noir / l'absence
+de GFX constatés sur le POCO ne se reproduisent donc pas ici : la cause est à chercher côté appareil
+(version de MediaCodec, thermique, ou profil différent sur le téléphone), pas dans le client ni dans
+le poste. Prochaine mesure utile : rejouer exactement ce filtre de journal sur le POCO, avec le même
+profil, et comparer les deux lignes `Loading Dynamic Virtual Channel rdpgfx` et `H264_METABLOCK`.
+
+Piège à ne pas oublier : le dialogue d'identifiants RDP exige une saisie dans la fenêtre de
+l'émulateur (la base du téléphone n'est pas transposable, clé Keystore). Une fois la session ouverte,
+les mesures se font entièrement en `adb` : `logcat`, `screencap`, `input swipe` pour provoquer du
+trafic, et un simple comptage des `ProgressiveFrameEnd` avec leurs horodatages donne la cadence.

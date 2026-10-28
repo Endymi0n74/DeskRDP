@@ -1,6 +1,6 @@
 # DualDesk sur base aRDP — rapport d'état
 
-Rapport d'une campagne d'essais sur appareil (POCO, MIUI) et sur émulateur, du 26 au 27 octobre 2026.
+Rapport d'une campagne d'essais sur appareil (POCO, MIUI) et sur émulateur, du 26 au 28 octobre 2026.
 Il rend compte de ce que le fork apporte réellement, de ce qui est prouvé et de ce qui ne l'est pas,
 et des décisions qui restent à prendre. Il se lit avec [memory.md](memory.md), qui porte le détail des
 mesures, et [_check/](_check), qui porte les outils qui les ont produites.
@@ -191,13 +191,92 @@ la liste des applications refusées du gestionnaire.
 
 ## 3. Ce qui reste à faire ou à décider
 
-**La question du moteur, côté poste : le témoin GFX.** La mesure de bout en bout du projet voisin a
-montré des trames reçues et un débit réel, mais elle ne peut pas dire **qui** ne fait pas de GFX :
-l'appareil, la négociation, ou le poste lui-même. Le test décisif est un **témoin côté poste** : lancer
-la même connexion vers la même machine avec un client de référence (un aRDP ou aFreeRDP officiel) et
-regarder si le poste annonce GFX. Tant que ce témoin n'est pas fait, toute conclusion sur le rendu
-reste une hypothèse, et c'est ce témoin qui dira si le travail moteur vaut la peine d'être poursuivi
-ou s'il faut se contenter d'un protocole plus modeste.
+**La question du GFX : témoin côté poste, puis banc émulateur — verdict du 28/10/2026.** La mesure de bout en
+bout du projet voisin montrait des trames reçues et un débit réel, sans pouvoir dire **qui** ne fait
+pas de GFX : l'appareil, la négociation, ou le poste lui-même. Le témoin a été fait : les deux
+clients de référence officiels ont été installés sur le téléphone, pointés sur la même machine, avec
+le canal graphique activé côté client.
+
+- **aFreeRDP 3.32.1 (moteur FreeRDP 3.x), journal au niveau DEBUG** : le client annonce **onze** jeux
+de capacités graphiques (8.0 à 10.7) ; le poste **confirme RDPGFX 10.7** (`0x000A0701`, indicateur
+AVC à 0) ; il crée ensuite une surface de 1220 × 2530, la mappe sur la sortie et l'alimente sans
+interruption — **de 159 à 167 commandes de surface par seconde** sur onze secondes consécutives
+(1 787 au total), en **CLEARCODEC** (1 774 commandes) et **CAPROGRESSIVE** (13), donc **sans
+H.264**.
+L'image du bureau distant s'affiche et se rafraîchit.
+- **aRDP 6.4.9 (moteur FreeRDP 2.11.7)** : l'authentification NLA passe, la session s'ouvre, le
+client charge le canal dynamique `rdpgfx`, puis son journal signale une PDU qu'il n'interprète pas
+(`PDU_TYPE_DATA not properly parsed, 562 bytes remaining unhandled`) — et **l'image arrive quand
+même** : le bureau s'affiche, en bandeau (le bureau distant est en 21:9, le client le loge dans ses
+1220 × 2530 avec du noir au-dessus et en dessous). Le rythme mesuré entre deux images est dans la
+seconde. Autrement dit, ce client rend l'écran par le chemin classique.
+
+**Conclusion du témoin : le poste fait bien du GFX.** Il annonce le niveau de capacités le plus
+récent (10.7) et remplit la surface à ~160 commandes par seconde, en CLEARCODEC et CAPROGRESSIVE —
+sans H.264.
+
+**Confusion à lever au passage** : le fork `com.dualdesk.rdp` embarque **FreeRDP 2.11.7**
+(`libfreerdp2.so`), pas FreeRDP 3. L'observation « 8 jeux de capacités annoncés, aucune réponse du
+poste en 25 s, `SCALEDMAP_DISABLE` » vient de l'application **autonome du projet voisin**
+(`com.dualdesk.debug`, `libfreerdp3.so`), qui n'est plus installée. Les deux ne doivent pas être
+mêlées dans une même conclusion.
+
+**Le fork fait du GFX — mesuré en session, sur banc émulateur (28/10/2026).** Le doute « le client du
+fork ne fait pas de GFX » est levé par une mesure, pas par une lecture de code. Le fork a été
+installé sur un émulateur Android 34 x86_64 — ses `.so` FreeRDP 2.11.7 sont publiés pour les quatre
+ABI, donc l'APK universel y tourne — et connecté au même poste, journal `logcat` en DEBUG, après
+saisie du mot de passe dans la fenêtre de l'émulateur.
+
+Ce que le client raconte en s'ouvrant :
+
+```
+CONNECTION_STATE_NEGO → NLA → MCS_CONNECT → MCS_ATTACH_USER → MCS_CHANNEL_JOIN
+→ LICENSING → CAPABILITIES_EXCHANGE → FINALIZATION → CONNECTION_STATE_ACTIVE
+Loading Dynamic Virtual Channel rdpgfx
+```
+
+Trois points de méthode, parce qu'ils avaient égaré les essais précédents :
+
+- `rdpgfx` est un canal **dynamique** : il n'apparaît pas dans les lignes `loading channelEx` du
+démarrage, donc leur absence ne prouve rien ;
+- le GFX est une **case du profil** — `LibFreeRDP` n'ajoute `/gfx` que si `flags.getGfx()`, et
+  `/gfx:AVC444` que si `flags.getH264()` ; l'éditeur les expose (« RDP Gfx », « RDP Gfx H264 ») et
+  `ConnectionBean` les met à vrai à la création ;
+- la sonde MediaCodec du démarrage n'est pas le chemin réel : elle échoue sur l'émulateur
+  (`AMediaCodec_configure failed: -10000`) alors que la même configuration décode ensuite sans
+  erreur.
+
+| Réglage du profil | Ce que le poste envoie | Mesure | Bureau affiché |
+|---|---|---|---|
+| `RDP Gfx` seul | tuiles progressives (`ProgressiveTileFirst` → `ProgressiveFrameEnd`) | 0,66 img/s au repos (7 en 10,6 s) ; **16 img/s** en mouvement (7 en 0,4 s, 621 tuiles) | oui |
+| `RDP Gfx` + H264 | `H264_METABLOCK` (AVC444) | **31,7 metablocs/s** (322 en 10,2 s), aucune erreur de décodeur | oui |
+
+Aucun `Error while processing GFX cmdId` dans les deux cas.
+
+**Ce que cela déplace.** L'écart constaté sur le téléphone — GFX qui ne s'engage pas, image par le
+chemin classique — **ne se reproduit pas** sur un banc neuf. Ni le client du fork ni le poste ne sont
+en cause : les deux font du GFX dès que le profil est réglé pour. La cause est donc **côté
+appareil** : case du profil différente sur le téléphone, particularité de son MediaCodec, ou
+arbitrage de session. Le prochain essai n'est plus un changement de moteur mais la même lecture de
+journal sur le POCO, et deux lignes suffisent à trancher : `Loading Dynamic Virtual Channel rdpgfx`
+et `H264_METABLOCK`. Présentes, la panne est en aval du décodage ; absentes, le profil du téléphone
+n'a pas les mêmes cases cochées.
+
+Deux limites de mesure, pour ne pas conclure au-delà de ce qui est prouvé :
+
+- le journal d'aRDP est figé au niveau **INFO** : on voit qu'une PDU graphique n'est pas interprétée,
+  mais pas quelles capacités il a annoncées ni lesquelles le poste a confirmées — impossible de dire
+  s'il s'est rabattu faute d'accord ou après l'échec de lecture ;
+- les journaux graphiques **du poste** (`Rdp-Graphics-RdpAvenc`, `Rdp-Graphics-RdpLite`) sont vides :
+  la machine ne journalise pas ses échanges GFX, tout le verdict repose donc sur le journal du
+  client — ce qui est la bonne source, puisque c'est lui qui reçoit. L'extrait exploitable est
+  conservé sous `preuve-poco/temoin-afreerdp-extrait.txt`, et le rendu d'aRDP (recadré sur la fenêtre
+  de contrôle, sans contenu du bureau) sous `preuve-poco/temoin-ardp-rendu.png`.
+
+Un détail d'exploitation relevé au passage : l'arbitrage de session Windows coupe la session
+sortante dès que la console reprend la main (constaté une fois, au bout de onze secondes). Toute mesure faite depuis le
+téléphone vers ce poste pendant que la console est utilisée doit donc être courte, ou le poste doit
+être laissé au clavier pendant l'essai.
 
 **La décision de fond : fork continu, délégation, ou emprunt ciblé.** Les trois options sont
 désormais documentées par des faits, pas par des intentions :
@@ -210,7 +289,9 @@ désormais documentées par des faits, pas par des intentions :
   installé, exactement comme la greffe actuelle le fait pour RustDesk. C'est le chemin déjà prouvé
   pour RustDesk, et il ne demande aucun travail de suivi d'amont pour cette partie.
 - **Emprunt ciblé** — ne reprendre du fork que ce qui est démontré utile (identité, greffe, et le
-  client RDP si le témoin GFX est concluant), sans en faire un produit à maintenir.
+  client RDP tel qu'il est : son moteur FreeRDP 2.11.7 fait du GFX, c'est mesuré), sans en faire un
+  produit à maintenir. Passer à FreeRDP 3.x n'est plus une condition : c'était une piste fondée sur
+  l'hypothèse, aujourd'hui démentie, que le moteur 2.x ne savait pas faire de GFX.
 
 C'est cette décision qui commande la suite : chacune des trois implique un travail différent sur les
 points ci-dessous.
@@ -249,3 +330,33 @@ Les essais d'interface se font ensuite avec les parcours de `_check/`, et les cl
 dans [preuve-poco/](preuve-poco) — douze images du cycle RustDesk, sept de la campagne sur la saisie
 automatique. Les autres clichés de la campagne montrent le bureau réel de la machine de mesure et
 restent hors du dépôt.
+
+### Rejouer la mesure GFX sans le téléphone (banc émulateur)
+
+Le fork tourne sur émulateur : l'APK **universel** embarque ses `.so` FreeRDP 2.11.7 pour les quatre
+ABI (`arm64-v8a`, `armeabi-v7a`, `x86`, `x86_64`). Mise en place, une seule fois :
+
+```bash
+export JAVA_HOME=<un JDK 21>       # le JAVA_HOME du poste est un JRE 11 : sdkmanager refuse de démarrer
+export ANDROID_SDK_ROOT=<le SDK Android>
+sdkmanager --install "system-images;android-34;default;x86_64"
+avdmanager create avd -n dualdesk-test -k "system-images;android-34;default;x86_64" -d pixel_6
+emulator -avd dualdesk-test -no-snapshot -no-audio -no-boot-anim -gpu swiftshader_indirect
+adb install -r dualdesk-app/build/outputs/apk/debug/dualdesk-app-universal-debug.apk
+```
+
+Puis, dans l'éditeur d'accès du fork, vérifier « RDP Gfx » (et « RDP Gfx H264 » selon le mode
+voulu), ouvrir la session et saisir le mot de passe une fois dans la fenêtre — il n'est pas
+transférable depuis le téléphone (base chiffrée par SQLCipher, clé du Keystore propre à l'appareil).
+
+Le relevé se fait ensuite sans interaction :
+
+```bash
+adb logcat -c && sleep 10 && adb logcat -d > mesure.txt   # pendant la session
+# puis compter, avec leurs horodatages :
+#   "Loading Dynamic Virtual Channel rdpgfx"   -> le canal GFX est monté
+#   "ProgressiveFrameEnd" / "H264_METABLOCK"   -> les images arrivent
+```
+
+Sous Git Bash, exporter `MSYS_NO_PATHCONV=1` avant `adb pull` / `uiautomator dump` : les chemins
+`/sdcard/...` sont sinon réécrits en chemins Windows.
