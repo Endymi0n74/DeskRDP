@@ -31,7 +31,7 @@ RDPGFX + H.264 MediaCodec) et y greffer la partie DualDesk — les accès **Rust
 - **Vérifié sur le POCO** avec l'APK arm64 de la release : la grille ne contient plus que l'accès
   RDP existant, aucune entrée RustDesk résiduelle, et le menu ⋮ n'a plus ni « Nouvel accès RustDesk »
   ni « Serveur RustDesk ». Un appui sur l'accès RDP atteint bien le poste : dialogue de certificat
-  (`CN = KEYRA-PC`), puis demande d'identifiants RDP, barre de touches supplémentaires visible sous
+  (nom du poste en `CN`), puis demande d'identifiants RDP, barre de touches supplémentaires visible sous
   le clavier (ESC, SHIFT, PGUP, PGDN, HOME, END, CTRL, SUPER, ALT, flèches).
 - **Non vérifié** : la session RDP complète jusqu'au bureau distant — l'authentification du poste
   demande un mot de passe que l'agent n'a pas à manipuler. Le rendu du bureau, les gestes et la
