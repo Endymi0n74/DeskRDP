@@ -25,6 +25,8 @@
 #   ./publish-release.sh --skip-build    # réutilise les APK déjà dans build/outputs (reprise)
 #   ./publish-release.sh --rustdesk-lib <fichier.so>
 #                                        # embarque le cœur RustDesk (arm64-v8a) dans l'APK
+#   ./publish-release.sh --libcxx <libc++_shared.so>
+#                                        # libc++ du NDK qui a compilé le cœur (voir plus bas)
 #
 # Prérequis : JDK 21 (cherché ci-dessous), SDK Android (local.properties ou ANDROID_SDK_ROOT),
 # `python`, `gh` authentifié, `_keystore/keystore.properties`.
@@ -49,6 +51,7 @@ PYTHON="${PYTHON:-python}"
 SEC_DRY_RUN=0
 SEC_SANS_BUILD=0
 RUSTDESK_LIB="${DUALDESK_RUSTDESK_LIB:-}"
+LIBCXX="${DUALDESK_LIBCXX:-}"
 
 # Sortie en erreur, avec la marche à suivre.
 die() {
@@ -73,6 +76,10 @@ while [ $# -gt 0 ]; do
       [ $# -ge 2 ] || { printf '--rustdesk-lib demande un chemin.\n\n' >&2; usage 2; }
       RUSTDESK_LIB="$2"; shift ;;
     --rustdesk-lib=*) RUSTDESK_LIB="${1#*=}" ;;
+    --libcxx)
+      [ $# -ge 2 ] || { printf -- '--libcxx demande un chemin.\n\n' >&2; usage 2; }
+      LIBCXX="$2"; shift ;;
+    --libcxx=*) LIBCXX="${1#*=}" ;;
     -h|--help) usage 0 ;;
     *) printf 'argument inconnu : %s\n\n' "$1" >&2; usage 2 ;;
   esac
@@ -220,6 +227,13 @@ printf '    branche     : %s\n' "$branche"
 if [ -n "$RUSTDESK_LIB" ]; then
   [ -f "$RUSTDESK_LIB" ] || die "cœur RustDesk introuvable : $RUSTDESK_LIB"
   printf '    cœur        : %s (%s o)\n' "$RUSTDESK_LIB" "$(wc -c <"$RUSTDESK_LIB" | tr -d ' ')"
+  # Sans elle, l'APK embarque la libc++ de ses prébuilt, trop ancienne pour le cœur :
+  # `dlopen` échoue sur `__libcpp_verbose_abort` et la session retombe en silence sur le
+  # report vers RustDesk installé. Constaté sur le POCO le 29/10.
+  [ -n "$LIBCXX" ] || die "libc++ du NDK manquante : passez --libcxx <libc++_shared.so>.
+        Le cœur compilé avec le NDK 29 ne charge pas avec la libc++ des prébuilt FreeRDP."
+  [ -f "$LIBCXX" ] || die "libc++ introuvable : $LIBCXX"
+  printf '    libc++      : %s (%s o)\n' "$LIBCXX" "$(wc -c <"$LIBCXX" | tr -d ' ')"
 else
   printf '    cœur        : absent — APK sans librustdesk.so (repli par Intent)\n'
 fi
@@ -236,7 +250,8 @@ if [ "$SEC_SANS_BUILD" = "1" ]; then
 else
   etape "construction : :dualdesk-app:assembleRelease"
   if [ -n "$RUSTDESK_LIB" ]; then
-    ./gradlew :dualdesk-app:assembleRelease -Pdualdesk.rustdeskLib="$RUSTDESK_LIB" ||
+    ./gradlew :dualdesk-app:assembleRelease -Pdualdesk.rustdeskLib="$RUSTDESK_LIB" \
+      -Pdualdesk.libcxxShared="$LIBCXX" ||
       die "la compilation a échoué : rien n'est copié, rien n'est publié."
   else
     ./gradlew :dualdesk-app:assembleRelease ||

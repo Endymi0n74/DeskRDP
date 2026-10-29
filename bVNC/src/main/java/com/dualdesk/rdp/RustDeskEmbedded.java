@@ -1,6 +1,7 @@
 package com.dualdesk.rdp;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 /**
@@ -14,7 +15,32 @@ public final class RustDeskEmbedded {
 
     private static final String TAG = "DualDeskRustDesk";
 
+    /** Réglages du serveur de rendez-vous, partagés par l'interface et la session. */
+    public static final String SERVER_PREFS = "rustdesk_server";
+    public static final String PREF_SERVER = "server";
+    public static final String PREF_KEY = "key";
+
     private RustDeskEmbedded() {
+    }
+
+    /**
+     * Transmet au cœur le serveur RustDesk configuré, s'il y en a un.
+     *
+     * Le cœur interroge le serveur public tant qu'on ne lui a rien dit. Avec un serveur privé,
+     * il cherche le pair au mauvais endroit et répond « the target device is offline or does
+     * not exist » alors que le pair est joignable : il faut `custom-rendezvous-server` et, quand
+     * le serveur en impose une, sa clé publique. Les deux sont facultatifs — sans eux, rien ne
+     * change pour un utilisateur des serveurs publics.
+     */
+    public static void applyServerOptions(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(SERVER_PREFS, Context.MODE_PRIVATE);
+        // Toujours transmettre, valeur vide comprise : le cœur écrit ses options dans son
+        // dossier personnel et les relit au démarrage suivant. Se contenter d'appeler `setOption`
+        // quand le champ est rempli laisse l'ancien serveur actif après un effacement, et l'appel
+        // échoue alors contre une adresse que l'interface ne montre plus.
+        RustDeskNative.INSTANCE.setOption("custom-rendezvous-server",
+                prefs.getString(PREF_SERVER, "").trim());
+        RustDeskNative.INSTANCE.setOption("key", prefs.getString(PREF_KEY, "").trim());
     }
 
     /** True when `librustdesk.so` is in this APK and loadable on this device. */

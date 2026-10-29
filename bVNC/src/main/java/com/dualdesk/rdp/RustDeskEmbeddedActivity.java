@@ -143,6 +143,10 @@ public class RustDeskEmbeddedActivity extends Activity implements SurfaceHolder.
                         return;
                     }
 
+                    // Avant toute connexion : le serveur de rendez-vous. Le cœur part sur le
+                    // serveur public, où un pair d'un serveur privé n'existe pas.
+                    RustDeskEmbedded.applyServerOptions(RustDeskEmbeddedActivity.this);
+
                     String id = RustDeskNative.INSTANCE.connect(deviceId, password == null ? "" : password);
                     if (id == null) {
                         setStatus("RustDesk: session refused for " + deviceId);

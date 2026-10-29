@@ -1035,4 +1035,8 @@ Below that is where you configure your connection.
     <string name="rustdesk_export_with_passphrase">Export written: the password of %1$d RustDesk access(es) is sealed under your passphrase.</string>
     <string name="rustdesk_import_passphrase_title">Export passphrase</string>
     <string name="rustdesk_import_passphrase_message">This file carries %1$d RustDesk password(s) sealed under a passphrase. Type the passphrase used at export to restore them on this device.</string>
+    <string name="action_rustdesk_server">RustDesk server</string>
+    <string name="rustdesk_server_hint">Server (host:port, empty = public servers)</string>
+    <string name="rustdesk_server_key_hint">Server public key (optional)</string>
+    <string name="rustdesk_server_saved">RustDesk server saved: the embedded session will use it.</string>
 </resources>

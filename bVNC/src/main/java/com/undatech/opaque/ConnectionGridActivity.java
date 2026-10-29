@@ -63,6 +63,7 @@ import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.dualdesk.rdp.RustDeskEmbedded;
 import com.dualdesk.rustdesk.LaunchOutcome;
 import com.dualdesk.rustdesk.RustDeskExportSanitizer;
 import com.dualdesk.rustdesk.RustDeskLauncher;
@@ -715,6 +716,53 @@ public class ConnectionGridActivity extends AppCompatActivity implements GetText
     /** Menu action: creates a connection that RustDesk owns, not us. */
     public void addRustDeskConnection(MenuItem menuItem) {
         showRustDeskDialog(null);
+    }
+
+    /**
+     * Renseigne le serveur RustDesk privé dont dépend la session embarquée.
+     *
+     * Sans ce réglage, le cœur interroge le serveur public et un pair enregistré ailleurs
+     * paraît hors ligne. Les deux champs sont facultatifs : vides, le comportement reste celui
+     * des serveurs publics, et rien n'est écrit dans la configuration du cœur.
+     */
+    public void rustDeskServer(MenuItem item) {
+        SharedPreferences prefs = getSharedPreferences(RustDeskEmbedded.SERVER_PREFS, MODE_PRIVATE);
+
+        int padding = (int) (16 * getResources().getDisplayMetrics().density);
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(padding, padding, padding, 0);
+        excludeTreeFromAutofill(layout);
+
+        EditText server = new EditText(this);
+        server.setHint(R.string.rustdesk_server_hint);
+        server.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+        server.setText(prefs.getString(RustDeskEmbedded.PREF_SERVER, ""));
+        excludeFromAutofill(server);
+        layout.addView(server);
+
+        EditText key = new EditText(this);
+        key.setHint(R.string.rustdesk_server_key_hint);
+        key.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+        key.setText(prefs.getString(RustDeskEmbedded.PREF_KEY, ""));
+        excludeFromAutofill(key);
+        layout.addView(key);
+
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.action_rustdesk_server)
+                .setView(layout)
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                    prefs.edit()
+                            .putString(RustDeskEmbedded.PREF_SERVER,
+                                    server.getText().toString().trim())
+                            .putString(RustDeskEmbedded.PREF_KEY,
+                                    key.getText().toString().trim())
+                            .apply();
+                    Snackbar.make(gridView, R.string.rustdesk_server_saved,
+                            Snackbar.LENGTH_LONG).show();
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
     }
 
     /**

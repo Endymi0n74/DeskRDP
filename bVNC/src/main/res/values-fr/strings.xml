@@ -998,4 +998,8 @@ L\'application est déjà exemptée des optimisations de la batterie.</string>
     <string name="rustdesk_export_with_passphrase">Export écrit : le mot de passe de %1$d accès RustDesk est scellé sous votre phrase.</string>
     <string name="rustdesk_import_passphrase_title">Phrase de passe de l\'export</string>
     <string name="rustdesk_import_passphrase_message">Ce fichier contient %1$d mot de passe RustDesk scellé sous une phrase. Saisissez la phrase utilisée à l\'export pour les restaurer sur cet appareil.</string>
+    <string name="action_rustdesk_server">Serveur RustDesk</string>
+    <string name="rustdesk_server_hint">Serveur (hôte:port, vide = serveurs publics)</string>
+    <string name="rustdesk_server_key_hint">Clé publique du serveur (facultatif)</string>
+    <string name="rustdesk_server_saved">Serveur RustDesk enregistré : la session embarquée s\'en servira.</string>
 </resources>

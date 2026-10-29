@@ -1022,3 +1022,50 @@ La 1.11 est publiée (`https://github.com/Endymi0n74/DualDesk/releases/tag/v1.11
 - `assembleRelease` complet : 1 min 48 à chaud, cinq splits plus l'universel.
 - La licence de la release est dite explicitement (AGPL-3.0 pour cette build), la mention n'est
   pas laissée au seul journal.
+
+### Session POCO du 29/10 — ce que la 1.11 publiée ne fait pas
+
+Deux défauts trouvés en installant l'APK arm64 publié sur le POCO (Android 16, arm64-v8a).
+
+- **Le cœur ne se charge pas.** `nativeloader` : `dlopen failed: cannot locate symbol
+  "_ZNSt6__ndk122__libcpp_verbose_abortEPKcz" referenced by librustdesk.so`. Le cœur est compilé
+  avec le NDK 29 (libc++ 17+), l'APK embarque la `libc++_shared.so` des prébuilt FreeRDP
+  (1 027 408 o, plus ancienne, sans ce symbole). Conséquence muette : l'application retombe sur le
+  report vers RustDesk installé et la release annonce une session embarquée qu'elle ne fait pas.
+  Correctif : `-Pdualdesk.libcxxShared=<libc++ du NDK 29>` (copie dans `build/rustdeskJni`,
+  `pickFirst` pour `lib/arm64-v8a/libc++_shared.so`). Vérifié sur l'appareil : le symbole est là,
+  `RustDeskEmbeddedActivity` s'ouvre et négocie. `publish-release.sh` refuse désormais de publier
+  un cœur sans `--libcxx`.
+- **Le cœur ignore les serveurs privés.** `setOption` existait dans le JNI mais n'était appelé
+  nulle part : le cœur interrogeait `rs-ny.rustdesk.com` et répondait « target device is offline »
+  pour un pair enregistré ailleurs. Ajout d'une entrée « Serveur RustDesk » (adresse + clé) et de
+  l'appel avant `connect`. Piège : `setOption` doit être appelé **même avec une valeur vide** — le
+  cœur persiste ses options dans son dossier et l'ancien serveur survit sinon à l'effacement du
+  champ.
+- **Où le test s'est arrêté.** Le serveur privé du pair (`82.64.x.x:21116`) ne répond plus
+  (« test nat: Failed to connect »), y compris depuis le PC. Basculé temporairement sur le serveur
+  public : le trou est percé, TCP s'établit, puis `Handshake failed: invalid public key from
+  rendezvous server` — le service RustDesk lit son propre profil et garde l'ancienne clé. Le mot de
+  passe permanent du pair est chiffré dans sa configuration, donc inaccessible.
+  **Rendu, gestes et reprise après perte de surface restent non vérifiés.**
+- Machine laissée en l'état : configuration RustDesk restaurée à l'identique, service installé puis
+  retiré, accès RDP du téléphone recréé à la main (la désinstallation de la 1.0.0 signée en debug
+  détruit la base ; la sauvegarde `tar` des données est dans le dossier temporaire de la session).
+- **APK de la `v1.11` remplacés (29/10).** Les deux actifs de la release ont été reconstruits avec
+  le cœur et la libc++ du NDK 29, puis remplacés (`gh release upload --clobber`) ; les notes font
+  foi avec les nouvelles empreintes.
+  - `arm64-v8a` : 75 950 278 o, `0a373e42aae322f5897321fe4bbe14611b7ee69310eab2dbc0550329e723d921`
+  - `universal` : 190 633 348 o, `c9a15ec8b85a01cf8df77d4bb6fa54d7fa7078df9c62abf3718433db7b3add44`
+  - Vérifié après coup par téléchargement : l'empreinte du fichier servi est celle des notes.
+  - `versionCode` reste 3 : la build se réinstalle par-dessus la précédente sans désinstallation.
+- **La libc++ du NDK doit être détourée avant d'entrer dans l'APK.** La copie des `jniLibs` passe
+  par `copieRustDeskLib`, donc Gradle ne la `strip` pas : le fichier du NDK fait 9 290 184 o et
+  gonfle l'APK de ~2 Mo compressés. Version détourée conservée hors dépôt :
+  `D:\Codex\dualdesk-artifacts\rustdesk\libc++_shared.so` (1 374 336 o, `--strip-unneeded`),
+  le symbole `__libcpp_verbose_abort` y reste défini (ils sont dynamiques).
+- **Piège `gh` dans ce dépôt :** `gh` résout tout seul et choisit le remote `upstream`
+  (`iiordanov/remote-desktop-clients`) ; `gh release list` y répond `RELEASE-v6.4.9`. Toujours
+  passer `--repo Endymi0n74/DualDesk`, et attention à la syntaxe : `upload` et `edit` n'acceptent
+  que le tag en positionnel (`gh release upload v1.11 --repo … --clobber …`).
+- **Reste à faire :** le correctif n'est pas commité — l'arbre porte neuf fichiers modifiés, et le
+  tag `v1.11` pointe sur un commit qui ne les contient pas.

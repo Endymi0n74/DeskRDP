@@ -40,6 +40,29 @@ Published builds live on the [Releases](https://github.com/Endymi0n74/DualDesk/r
 - `versionCode` 2 → 3. Existing accesses, their sealed passwords and the passphrase export are
   unchanged.
 
+### Correctif du 29 octobre — fichiers remplacés / 29 October fix — files replaced
+
+- **Le cœur ne se chargeait pas dans les APK publiés.** La build du 28 octobre embarquait la libc++
+  des prébuilt FreeRDP, antérieure au NDK qui a compilé le cœur : `dlopen` échouait sur
+  `_ZNSt6__ndk122__libcpp_verbose_abortEPKcz` et la session retombait en silence sur le report vers
+  l'application installée — la version annonçait donc une session embarquée qu'elle ne faisait pas.
+  Les deux APK sont reconstruits avec la libc++ du NDK 29 (1,4 Mo, détourée) : le symbole est défini
+  et la session embarquée s'ouvre sur le POCO.
+- **Serveur RustDesk privé.** Le cœur interrogeait toujours le serveur public et ne trouvait jamais
+  un hôte enregistré ailleurs. Une entrée « Serveur RustDesk » (adresse + clé) dans le menu de la
+  grille applique le serveur choisi avant la connexion, et vide le champ suffit à revenir au public.
+- **The core did not load in the published APKs.** The 28 October build shipped the libc++ from the
+  FreeRDP prebuilts, older than the NDK that compiled the core: `dlopen` failed on
+  `_ZNSt6__ndk122__libcpp_verbose_abortEPKcz` and the session silently fell back to handing off to
+  the installed application — the version promised an embedded session it did not deliver. Both
+  APKs are rebuilt against the NDK 29 libc++ (1.4 MB, stripped): the symbol is defined and the
+  embedded session opens on the POCO.
+- **Private RustDesk server.** The core always queried the public server and never found a host
+  registered elsewhere. A “RustDesk server” entry (address + key) in the grid menu applies the
+  chosen server before connecting, and clearing the field returns to the public one.
+- `versionCode` unchanged (3): the build replaces the release files and installs over the previous
+  one without uninstalling. Hashes below.
+
 ## 1.10 — 28 octobre 2026
 
 ### Français
