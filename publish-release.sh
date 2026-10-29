@@ -23,9 +23,16 @@
 #   ./publish-release.sh                 # tout, jusqu'à la release GitHub
 #   ./publish-release.sh --dry-run       # construit et contrôle, mais ne pousse ni ne publie
 #   ./publish-release.sh --skip-build    # réutilise les APK déjà dans build/outputs (reprise)
+#   ./publish-release.sh --rustdesk-lib <fichier.so>
+#                                        # embarque le cœur RustDesk (arm64-v8a) dans l'APK
 #
 # Prérequis : JDK 21 (cherché ci-dessous), SDK Android (local.properties ou ANDROID_SDK_ROOT),
 # `python`, `gh` authentifié, `_keystore/keystore.properties`.
+#
+# Le cœur RustDesk n'est pas versionné (32 Mo, reproductible depuis ses sources) : une version
+# qui l'annonce doit donc le désigner explicitement, par `--rustdesk-lib` ou
+# `DUALDESK_RUSTDESK_LIB`. Le script vérifie alors qu'il est bien DANS l'APK produit — une note
+# de version qui promet le cœur embarqué ne doit pas pouvoir partir sur une build qui l'a oublié.
 # ============================================================
 set -euo pipefail
 
@@ -41,6 +48,7 @@ PYTHON="${PYTHON:-python}"
 
 SEC_DRY_RUN=0
 SEC_SANS_BUILD=0
+RUSTDESK_LIB="${DUALDESK_RUSTDESK_LIB:-}"
 
 # Sortie en erreur, avec la marche à suivre.
 die() {
@@ -57,13 +65,18 @@ usage() {
   exit "${1:-0}"
 }
 
-for arg in "$@"; do
-  case "$arg" in
+while [ $# -gt 0 ]; do
+  case "$1" in
     --dry-run) SEC_DRY_RUN=1 ;;
     --skip-build) SEC_SANS_BUILD=1 ;;
+    --rustdesk-lib)
+      [ $# -ge 2 ] || { printf '--rustdesk-lib demande un chemin.\n\n' >&2; usage 2; }
+      RUSTDESK_LIB="$2"; shift ;;
+    --rustdesk-lib=*) RUSTDESK_LIB="${1#*=}" ;;
     -h|--help) usage 0 ;;
-    *) printf 'argument inconnu : %s\n\n' "$arg" >&2; usage 2 ;;
+    *) printf 'argument inconnu : %s\n\n' "$1" >&2; usage 2 ;;
   esac
+  shift
 done
 
 # ------------------------------------------------------------
@@ -204,6 +217,13 @@ fi
 printf '    journal     : section %s trouvée\n' "$VERSION"
 printf '    branche     : %s\n' "$branche"
 
+if [ -n "$RUSTDESK_LIB" ]; then
+  [ -f "$RUSTDESK_LIB" ] || die "cœur RustDesk introuvable : $RUSTDESK_LIB"
+  printf '    cœur        : %s (%s o)\n' "$RUSTDESK_LIB" "$(wc -c <"$RUSTDESK_LIB" | tr -d ' ')"
+else
+  printf '    cœur        : absent — APK sans librustdesk.so (repli par Intent)\n'
+fi
+
 if [ "$SEC_DRY_RUN" = "1" ]; then
   printf '    mode        : --dry-run (ni tag, ni poussée, ni release)\n'
 fi
@@ -215,12 +235,38 @@ if [ "$SEC_SANS_BUILD" = "1" ]; then
   etape "construction ignorée (--skip-build) : les APK présents dans $SORTIE sont réutilisés"
 else
   etape "construction : :dualdesk-app:assembleRelease"
-  ./gradlew :dualdesk-app:assembleRelease ||
-    die "la compilation a échoué : rien n'est copié, rien n'est publié."
+  if [ -n "$RUSTDESK_LIB" ]; then
+    ./gradlew :dualdesk-app:assembleRelease -Pdualdesk.rustdeskLib="$RUSTDESK_LIB" ||
+      die "la compilation a échoué : rien n'est copié, rien n'est publié."
+  else
+    ./gradlew :dualdesk-app:assembleRelease ||
+      die "la compilation a échoué : rien n'est copié, rien n'est publié."
+  fi
 fi
 
 [ -f "$APK_ARM64" ] || die "APK arm64-v8a absent après construction : $APK_ARM64"
 [ -f "$APK_UNIVERSEL" ] || die "APK universel absent après construction : $APK_UNIVERSEL"
+
+# Le cœur annoncé doit être réellement dans les fichiers : `-Pdualdesk.rustdeskLib` mal
+# orthographié, ou une build reprise avec `--skip-build` depuis une sortie plus ancienne, produit
+# des APK valides — signés, installables — mais sans session embarquée.
+SANS_COEUR=0
+for apk in "$APK_ARM64" "$APK_UNIVERSEL"; do
+  if "$PYTHON" - "$apk" <<'PY'
+import sys, zipfile
+with zipfile.ZipFile(sys.argv[1]) as z:
+    sys.exit(0 if "lib/arm64-v8a/librustdesk.so" in z.namelist() else 1)
+PY
+  then :; else SANS_COEUR=1; fi
+done
+if [ -n "$RUSTDESK_LIB" ] && [ "$SANS_COEUR" = "1" ]; then
+  die "librustdesk.so absent d'un des APK : la version annoncerait un cœur qu'elle ne contient pas.
+        Rien n'a été copié, aucun tag n'a été créé."
+fi
+if [ -z "$RUSTDESK_LIB" ] && [ "$SANS_COEUR" = "0" ]; then
+  printf '    cœur        : présent dans les APK (hérité d\x27une build précédente)\n'
+  RUSTDESK_LIB="(déjà présent)"
+fi
 
 # ------------------------------------------------------------
 # 4. Contrôle de signature — le point de non-retour
@@ -289,6 +335,11 @@ corps="$(awk -v v="$VERSION" '
   printf '\n## Fichiers / Files\n\n'
   printf '| Fichier / File | Taille / Size | SHA-256 |\n|---|---|---|\n'
   printf '%s' "$lignes_fichiers"
+  if [ -n "$RUSTDESK_LIB" ]; then
+    printf '\nCœur RustDesk embarqué (`lib/arm64-v8a/librustdesk.so`) : sessions RustDesk rendues par\nl\x27application elle-même, licence AGPL-3.0 pour cette build. / Embedded RustDesk core:\nRustDesk sessions are rendered by the application itself, AGPL-3.0 for this build.\n'
+  else
+    printf '\nSans cœur RustDesk embarqué : les accès RustDesk sont remis à l\x27application installée. /\nNo embedded RustDesk core: RustDesk accesses are handed to the installed application.\n'
+  fi
   printf '\nSignés par la clé de publication du projet / signed with the project publication key —\ncertificat SHA-256 `%s`.\n' "$EMPREINTE_CLE"
   printf '\nAndroid 5.0 (API 21) ou plus récent / Android 5.0 (API 21) or newer. Paquet `com.dualdesk.rdp`.\n'
 } >"$NOTES"
