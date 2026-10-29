@@ -44,14 +44,12 @@ différant. Celle que les utilisateurs installent est celle construite ici.
 
 ## Version and releases
 
-The published version is **1.10** (`versionName` `1.10-dualdesk`, `versionCode` 2), on the
-[Releases](https://github.com/Endymi0n74/DualDesk/releases/tag/v1.10) page with two assets:
+The published version is **1.11** (`versionName` `1.11-dualdesk`, `versionCode` 3), on the
+[Releases](https://github.com/Endymi0n74/DualDesk/releases/tag/v1.11) page with two assets:
 `dualdesk-app-arm64-v8a-release.apk` for any recent phone, and `dualdesk-app-universal-release.apk`
-when the ABI is unknown. What changed since the previous milestone is in
-[CHANGELOG.md](CHANGELOG.md).
-
-The tree is now **1.11** (`versionName` `1.11-dualdesk`, `versionCode` 3) — the version that embeds
-the RustDesk core — compiled and committed, not yet released.
+when the ABI is unknown. 1.11 is the version that embeds the RustDesk core, and that is why it ships
+under AGPL-3.0. What changed since the previous milestone is in [CHANGELOG.md](CHANGELOG.md) — 1.10
+stays available for anyone who does not want the embedded core.
 
 1.10 is the first version signed with the **project's publication key** (see below), and every later
 release will use the same one — so from 1.10 onwards, an update installs over the previous version.
@@ -61,14 +59,13 @@ the sealed RustDesk passwords**: export with a passphrase before doing it.
 
 ## Version et publications
 
-La version publiée est la **1.10** (`versionName` `1.10-dualdesk`, `versionCode` 2), sur la page
-[Releases](https://github.com/Endymi0n74/DualDesk/releases/tag/v1.10) avec deux fichiers :
+La version publiée est la **1.11** (`versionName` `1.11-dualdesk`, `versionCode` 3), sur la page
+[Releases](https://github.com/Endymi0n74/DualDesk/releases/tag/v1.11) avec deux fichiers :
 `dualdesk-app-arm64-v8a-release.apk` pour tout téléphone récent, et
-`dualdesk-app-universal-release.apk` quand l'ABI est inconnue. Ce qui a changé depuis le jalon
-précédent est dans [CHANGELOG.md](CHANGELOG.md).
-
-L'arbre est désormais en **1.11** (`versionName` `1.11-dualdesk`, `versionCode` 3) — la version qui
-embarque le cœur RustDesk — compilée et commitée, pas encore publiée.
+`dualdesk-app-universal-release.apk` quand l'ABI est inconnue. La 1.11 est la version qui embarque le
+cœur RustDesk, et c'est pourquoi elle est livrée sous AGPL-3.0. Ce qui a changé depuis le jalon
+précédent est dans [CHANGELOG.md](CHANGELOG.md) — la 1.10 reste téléchargeable pour qui ne veut pas
+du cœur embarqué.
 
 La 1.10 est la première version signée par la **clé de publication du projet** (voir ci-dessous), et
 toutes les suivantes s'appuieront sur la même — à partir de là, une mise à jour s'installe par-dessus
