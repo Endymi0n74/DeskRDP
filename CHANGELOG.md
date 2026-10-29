@@ -3,6 +3,45 @@
 Les versions publiées sont sur la page [Releases](https://github.com/Endymi0n74/DualDesk/releases).
 Published builds live on the [Releases](https://github.com/Endymi0n74/DualDesk/releases) page.
 
+## 1.12 — 29 octobre 2026
+
+### Français
+
+- **README réécrit.** Il tenait 732 lignes et parlait de quatre choses à la fois : présentation,
+  manuel de signature, recette de compilation, et la documentation entière de l'amont recopiée après
+  un « # Intro ». Il tient désormais en une page — ce qu'est l'application, comment l'installer, ce
+  qu'elle fait et ses limites, la construction, la publication — en français puis en anglais.
+- **Le détail opérationnel a déménagé** dans `docs/PUBLICATION.md` : clé de publication et son
+  empreinte, sauvegarde et restauration de l'archive chiffrée, contrôle de signature, chaîne
+  `publish-release.sh`, et les pièges de `gh` (remote `upstream`, tag déplacé, actifs remplacés). Il
+  rejoint `docs/RUSTDESK-NATIF.md`, qui portait déjà le détail du cœur embarqué.
+- **La documentation de l'amont n'est plus recopiée**, seulement liée : elle n'est pas la nôtre et
+  vieillissait ici sans que personne ne la mette à jour.
+- **`docs/RUSTDESK-NATIF.md` dit maintenant ce qui est vérifié** : rendu, gestes et reprise après
+  perte de surface l'ont été sur le POCO le 29 octobre, avec l'APK publié et un poste Windows à sa
+  console — l'ancien texte les annonçait comme non mesurés.
+- **Aucun changement fonctionnel** : le code est celui de la 1.11 corrigée, donc les gestes, les
+  accès existants, leurs mots de passe scellés et l'export avec phrase de passe se comportent à
+  l'identique. `versionCode` 3 → 4.
+
+### English
+
+- **README rewritten.** It ran to 732 lines and covered four things at once: presentation, signing
+  manual, build recipe, and the entire upstream documentation copied in after an “# Intro”. It is now
+  one page — what the application is, how to install it, what it does and its limits, how to build it,
+  how to publish it — in French, then in English.
+- **Operational detail moved out** into `docs/PUBLICATION.md`: the publication key and its fingerprint,
+  backup and restore of the encrypted archive, the signature check, the `publish-release.sh` chain,
+  and the `gh` traps (the `upstream` remote, moved tags, replaced assets). It joins
+  `docs/RUSTDESK-NATIF.md`, which already held the embedded core's detail.
+- **Upstream documentation is linked, no longer copied**: it is not ours and it aged here without
+  anyone refreshing it.
+- **`docs/RUSTDESK-NATIF.md` now states what has been verified**: rendering, gestures and recovery
+  after surface loss were measured on the POCO on 29 October, with the published APK and a Windows
+  host at its console — the old text presented them as unmeasured.
+- **No functional change**: the code is that of the fixed 1.11, so gestures, existing accesses, their
+  sealed passwords and the passphrase export behave identically. `versionCode` 3 → 4.
+
 ## 1.11 — 28 octobre 2026
 
 ### Français
