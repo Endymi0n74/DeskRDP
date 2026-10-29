@@ -23,6 +23,24 @@ RDPGFX + H.264 MediaCodec) et y greffer la partie DualDesk — les accès **Rust
 - `publish-release.sh` n'a plus `--rustdesk-lib` ni `--libcxx`.
 - Licence : retour en **GPLv3**. `versionCode` 5, `versionName` 1.13-dualdesk.
 
+### Publication et vérification de la 1.13 (29/10/2026)
+
+- Release `v1.13` publiée sur `Endymi0n74/DualDesk` avec les deux APK signés par la clé de
+  publication (contrôle `verifieSignatureRelease` passé avant le tag) : arm64 62 422 154 o
+  (`9f78c305…`), universel 177 105 218 o (`013e5931…`). Le tag pointe sur le commit du retrait.
+- **Vérifié sur le POCO** avec l'APK arm64 de la release : la grille ne contient plus que l'accès
+  RDP existant, aucune entrée RustDesk résiduelle, et le menu ⋮ n'a plus ni « Nouvel accès RustDesk »
+  ni « Serveur RustDesk ». Un appui sur l'accès RDP atteint bien le poste : dialogue de certificat
+  (`CN = KEYRA-PC`), puis demande d'identifiants RDP, barre de touches supplémentaires visible sous
+  le clavier (ESC, SHIFT, PGUP, PGDN, HOME, END, CTRL, SUPER, ALT, flèches).
+- **Non vérifié** : la session RDP complète jusqu'au bureau distant — l'authentification du poste
+  demande un mot de passe que l'agent n'a pas à manipuler. Le rendu du bureau, les gestes et la
+  reprise après perte de surface ne sont donc **pas** rejoués en 1.13 ; le code de session RDP est
+  inchangé depuis la 1.12, mais cela reste une inférence, pas une mesure.
+- Le téléphone doit être **déverrouillé** pour toute vérification `adb` : le 29/10, le POCO est resté
+  sous son écran de verrouillage une partie de la session, `screencap` renvoyant alors du noir et
+  `mCurrentFocus` restant sur `NotificationShade`. Le remède est côté utilisateur, pas côté agent.
+
 ### Pourquoi pas de multi-écran en RDP (mesuré, pas supposé)
 
 La demande « passer d'un écran à l'autre » a été poussée jusqu'au bout côté RDP avant d'être
