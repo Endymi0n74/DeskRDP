@@ -51,6 +51,13 @@ Published builds live on the [Releases](https://github.com/Endymi0n74/DualDesk/r
 - **Serveur RustDesk privé.** Le cœur interrogeait toujours le serveur public et ne trouvait jamais
   un hôte enregistré ailleurs. Une entrée « Serveur RustDesk » (adresse + clé) dans le menu de la
   grille applique le serveur choisi avant la connexion, et vide le champ suffit à revenir au public.
+- **Gestes de la session embarquée.** Ils ne produisaient rien : le masque envoyé au cœur porte le
+  type d'événement dans les trois bits bas et le bouton à partir du bit trois, si bien qu'un « clic »
+  était un appui *sans bouton* — accepté par le poste, puis ignoré sans un mot. Un toucher bref
+  clique désormais à gauche, un glissement fait glisser avec le bouton gauche tenu, un appui long
+  clique à droite (sans appui gauche parasite) et un appui dans la bande noire autour du bureau est
+  ignoré. Vérifié sur un poste Windows à sa console : menu Démarrer, menu contextuel de la barre des
+  tâches, glisser, et `ESC` reçu du clavier.
 - **The core did not load in the published APKs.** The 28 October build shipped the libc++ from the
   FreeRDP prebuilts, older than the NDK that compiled the core: `dlopen` failed on
   `_ZNSt6__ndk122__libcpp_verbose_abortEPKcz` and the session silently fell back to handing off to
@@ -60,6 +67,12 @@ Published builds live on the [Releases](https://github.com/Endymi0n74/DualDesk/r
 - **Private RustDesk server.** The core always queried the public server and never found a host
   registered elsewhere. A “RustDesk server” entry (address + key) in the grid menu applies the
   chosen server before connecting, and clearing the field returns to the public one.
+- **Embedded session gestures.** They did nothing: the mask sent to the core carries the event type
+  in the low three bits and the button from bit three upwards, so a “click” was a press *with no
+  button* — accepted by the host, then silently ignored. A brief touch now left-clicks, a swipe
+  drags with the left button held, a long press right-clicks (with no stray left click before it)
+  and a touch in the black letterbox around the desktop is ignored. Verified against a Windows host
+  at its console: Start menu, taskbar context menu, dragging, and `ESC` received from the keyboard.
 - `versionCode` unchanged (3): the build replaces the release files and installs over the previous
   one without uninstalling. Hashes below.
 
