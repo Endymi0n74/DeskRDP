@@ -1200,3 +1200,44 @@ Deux défauts trouvés en installant l'APK arm64 publié sur le POCO (Android 16
   passe permanent remplacé par un mot de passe temporaire, service RustDesk installé et démarré.
   Sauvegarde de la configuration d'origine (serveur privé + mot de passe d'origine) :
   `D:\Codex\tmpshot\rd-backup\` — la restaurer remet tout en état, mais casse la session publique.
+
+**Rendu et reprise vérifiés avec l'APK publié ; gestes vérifiés aussi.**
+
+## APK publié de la 1.11 installé tel quel : gestes vérifiés (29/10)
+
+- **Installation depuis la release, pas depuis la sortie de build.** `gh release download` du seul
+  `arm64-v8a`, empreinte `198ae3165bd71e7ebd9337424ac7cec7df30f672ea3b2d7619c6b6be201dfef7`
+  conforme aux notes, puis `adb install -r` en 4,7 s par-dessus la build locale : `versionCode` 3
+  inchangé, donc les accès, les mots de passe scellés et le serveur enregistré survivent.
+- **Session ouverte depuis la carte de la grille** (le carré de droite), pas par `am start` du
+  manifeste : `new video handler for display #0, format: AV1`, `remote desktop: 2560x1440`,
+  `Set fps to 30`, HUD `2560x1440 — 29 fps — 356 frames`. Poste à la console, donc les trames
+  arrivent — le blocage venait bien de la session RDP, jamais du client.
+- **Bande utile :** image 2560x1440 à l'échelle 0,4766 dans 1220x2712, soit y=1013..1699. Un appui
+  hors de cette bande n'est pas converti du tout (c'est voulu) ; convertir une pression sur l'écran
+  vers le bureau plutôt que l'inverse demande de retrancher la bande *avant* de diviser.
+- **Témoin objectif, à refaire ainsi.** Le poste piloté est la session de la console elle-même
+  (celle où tourne l'agent), donc PowerShell peut y relever la fenêtre au premier plan (classe +
+  titre) et la position du curseur : cela sépare « l'application a émis » de « le poste a appliqué ».
+  Les deux petits scripts de relevé sont restés hors dépôt, dans `D:\Codex\tmpshot\`.
+- **Appui simple** (bouton Démarrer, 130,1669 côté téléphone) : journal `press type=1 button=1` puis
+  `type=2 button=1` au **même** point (20,1399) ; 22 % de la bande changent, le poste passe au
+  premier plan sur la surface shell « Rechercher » et le curseur se pose en 19,1398 ; `ESC` rend le
+  foyer à Firefox.
+- **Appui long** (barre des tâches, 429,1680) : `type=1 button=2` puis `type=2 button=2`, aucun
+  appui gauche parasite avant ; le poste ouvre la « Liste de raccourcis » de l'application survolée
+  (900,1399).
+- **Glissement** de 610,1032 à 477,1251 : `type=1 button=1` en (1280,40), `type=2 button=1` en
+  (1000,499) — un seul appui, tenu pendant tout le trajet — et le poste se comporte comme pour un
+  vrai glisser (glissement d'onglet dans la barre de titre) : un simple clic au départ n'aurait rien
+  produit de tel. Le curseur finit en 1000,497, à deux pixels du point de relâchement.
+- **Reprise après perte de surface :** écran éteint puis rallumé, la même activité revient au premier
+  plan et le compteur passe de 2 509 à 3 397 trames sans reconnexion.
+- **Pièges de mesure, à ne pas repayer :**
+  - `input swipe x y x y 900` produit bien un appui long ; mais sur la barre des tâches il tombe sur
+    l'application survolée, donc la différence de pixels seule (0,8 %) ne dit pas grand-chose — le
+    titre de la fenêtre au premier plan, si.
+  - Le POCO se reverrouille après extinction : `NotificationShade` au premier plan, et une capture
+    pendant l'extinction est noire. `input keyevent 224` réveille sans toucher au verrou.
+  - Chercher un élément par `uiautomator dump` puis `grep` : le XML tient sur **une** ligne, donc
+    découper sur `>` avec `tr` ne marche pas — parser les `<node …>` en Python.
