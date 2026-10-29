@@ -1067,5 +1067,12 @@ Deux défauts trouvés en installant l'APK arm64 publié sur le POCO (Android 16
   (`iiordanov/remote-desktop-clients`) ; `gh release list` y répond `RELEASE-v6.4.9`. Toujours
   passer `--repo Endymi0n74/DualDesk`, et attention à la syntaxe : `upload` et `edit` n'acceptent
   que le tag en positionnel (`gh release upload v1.11 --repo … --clobber …`).
-- **Reste à faire :** le correctif n'est pas commité — l'arbre porte neuf fichiers modifiés, et le
-  tag `v1.11` pointe sur un commit qui ne les contient pas.
+- **Correctif commité et publié (29/10).** Commit `97c5b2d6` (dix fichiers : cœur, libc++, entrée
+  « Serveur RustDesk », script de publication, journal, mémoire), poussé sur `origin/master`. Le tag
+  `v1.11` a été recréé sur ce commit et poussé en force : GitHub répond bien
+  `v1.11 -> commit 97c5b2d6`, et les deux actifs de la release gardent leurs empreintes
+  (`0a373e42…`, `c9a15ec8…`). Déplacer un tag ne touche pas les actifs attachés à la release, mais
+  il faut `git push --force origin refs/tags/v1.11` — un `push` ordinaire est refusé.
+- **Reste à faire :** rendre le scellement des accès RustDesk compatible d'un appareil à l'autre
+  (phrase de passe à l'export), et vérifier le rendu de la session embarquée sur le POCO — bloqué
+  jusqu'ici par le serveur privé injoignable.
