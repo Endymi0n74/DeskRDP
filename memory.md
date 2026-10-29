@@ -1073,6 +1073,22 @@ Deux défauts trouvés en installant l'APK arm64 publié sur le POCO (Android 16
   `v1.11 -> commit 97c5b2d6`, et les deux actifs de la release gardent leurs empreintes
   (`0a373e42…`, `c9a15ec8…`). Déplacer un tag ne touche pas les actifs attachés à la release, mais
   il faut `git push --force origin refs/tags/v1.11` — un `push` ordinaire est refusé.
+- **Actifs de la `v1.11` remplacés une seconde fois, avec les gestes (29/10).** `publish-release.sh`
+  ne sait pas republier une version déjà sortie : il s'arrête sur « la release $TAG existe déjà »
+  et, le tag ne désignant plus `HEAD`, sur « le tag existe déjà et désigne … pas HEAD ». Le
+  remplacement se fait donc à la main, dans cet ordre : `./gradlew :dualdesk-app:assembleRelease
+  -I /d/Codex/tmpshot/init.gradle -Pdualdesk.rustdeskLib=… -Pdualdesk.libcxxShared=…` (JDK 21),
+  `python _check/verifie_signature.py` sur les deux APK, `gh release upload v1.11 --clobber`, puis
+  `gh release edit v1.11 --notes-file _released/v1.11/notes.md`.
+  - `arm64-v8a` : 75 950 627 o, `198ae3165bd71e7ebd9337424ac7cec7df30f672ea3b2d7619c6b6be201dfef7`
+  - `universal` : 190 633 656 o, `1fd116ebd091bac1d25cc09e5a77ed9ca89a723fab3453976b3c001e8282e295`
+  - Vérifié par téléchargement : le fichier servi a bien cette empreinte ; le dex contient
+    `press type=` (donc le correctif et son journal), `librustdesk.so` est présent, la libc++ est
+    celle du NDK (1 374 336 o).
+  - Le tag `v1.11` a été recréé sur `74efc2c7` (correctif des gestes + note de journal) et poussé
+    en force : la release désigne le code qui a produit les fichiers.
+  - `_released/` n'est pas versionné (`.gitignore`) : seuls `CHANGELOG.md` et `memory.md` portent
+    la trace dans le dépôt.
 - **Le masque souris n'est pas un numéro de bouton (29/10).** C'était la cause des gestes inertes :
   l'activité envoyait `1` puis `2`, que le cœur interprète comme *down* et *up* **sans bouton**
   (`mask & 0x7` = type, `mask >> 3` = bouton). Un clic gauche est donc
