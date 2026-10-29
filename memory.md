@@ -55,6 +55,14 @@ abandonnée, et la raison est dans les binaires livrés :
 - Conclusion : `/multimon` sans définition de moniteurs retombe sur un seul bureau, et `/size` ne fait
   que changer la taille de ce bureau. RDP n'expose donc pas le second écran du poste dans ce fork.
   C'est écrit tel quel dans le README (FR et EN) pour ne pas promettre l'inverse.
+- Vérifié dans le code amont (`D:/Codex/freerdp-src`) : `/multimon` ne fait que poser
+  `FreeRDP_UseMultimon` et forcer le plein écran (`client/common/cmdline.c:4953`,
+  `client/common/client.c:387`) ; `/monitors:` ne fait que **choisir des identifiants** dans une liste
+  déjà détectée (`parse_monitors_options`, `cmdline.c:2860`) ; la géométrie ne vient que des clients
+  qui énumèrent l'écran — RandR pour X11 (`client/X11/xf_monitor.c:677`), `EnumDisplayMonitors` pour
+  Windows. `libfreerdp/core/settings.c:1760` : sans moniteur fourni, un seul moniteur de
+  `DesktopWidth` x `DesktopHeight` est créé. Il n'existe donc pas d'argument permettant de décrire
+  deux écrans à la main.
 
 ### Reconnexion automatique (1.14, en cours)
 
@@ -67,12 +75,20 @@ abandonnée, et la raison est dans les binaires livrés :
   une reconnexion est déjà en cours (`reconnectAttempts > 0`) : une première connexion ratée garde
   son message immédiat, sinon un mot de passe faux boucherait sur cinq essais. Le compteur est remis
   à zéro à `GRAPHICS_SETTINGS_RECEIVED`, seul signal qui prouve que la session est de nouveau vivante.
+- **Garde-fou mesuré sur le POCO** (29/10, 23:16) : un accès temporaire vers `192.0.2.10:3389`
+  (TEST-NET, injoignable) a été créé par `_check/flow_rdp_access.py --keep`, ouvert, puis supprimé.
+  Journal : deux `OnPreConnect` (23:15:38 et 23:15:54 — la reprise sans identifiants existe déjà en
+  amont), puis `RDP_UNABLE_TO_CONNECT` à 23:16:09, le dialogue « Impossible de se connecter au
+  serveur RDP » à l'écran, et **zéro** ligne `Scheduling reconnect` / `RECONNECT attempt` : une
+  première connexion ratée ne boucle pas. C'est exactement ce que la condition `reconnectAttempts > 0`
+  doit produire.
 - **Pas encore mesuré de bout en bout** : couper le réseau pendant une session RDP suppose une
   session ouverte, donc le mot de passe du poste — que l'agent n'a pas. Vérifié à la place : les
-  tests de la politique, la compilation, l'installation, et le fait que le chemin normal est intact
-  (appui sur l'accès → dialogue d'identifiants RDP, certificat déjà accepté). Pour finir la mesure :
-  saisir le mot de passe une fois avec « Conserver » coché, puis couper le Wi-Fi ; le journal doit
-  montrer `Scheduling reconnect n in Xs` à 2, 5, 10, 20, 30 s, puis le dialogue d'échec au 5e.
+  tests de la politique, la compilation, l'installation, le chemin normal intact (appui sur l'accès →
+  dialogue d'identifiants RDP, certificat déjà accepté) et le garde-fou ci-dessus. Pour finir la
+  mesure : saisir le mot de passe une fois avec « Conserver » coché, puis couper le Wi-Fi ; le
+  journal doit montrer `Scheduling reconnect n in Xs` à 2, 5, 10, 20, 30 s, puis le dialogue d'échec
+  au 5e.
 - `versionCode` 6, `versionName` 1.14-dualdesk : **non publiée** tant que la mesure manque.
 
 ## Construire (état 29/10/2026)
