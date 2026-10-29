@@ -63,12 +63,6 @@ import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
-import com.dualdesk.rdp.RustDeskEmbedded;
-import com.dualdesk.rustdesk.LaunchOutcome;
-import com.dualdesk.rustdesk.RustDeskExportSanitizer;
-import com.dualdesk.rustdesk.RustDeskLauncher;
-import com.dualdesk.rustdesk.RustDeskPortableSeal;
-import com.dualdesk.rustdesk.RustDeskSecretStore;
 import com.google.android.material.snackbar.Snackbar;
 import com.iiordanov.bVNC.App;
 import com.iiordanov.bVNC.ConnectionBean;
@@ -163,29 +157,18 @@ public class ConnectionGridActivity extends AppCompatActivity implements GetText
             String gridItemText = ((TextView) v.findViewById(R.id.grid_item_text)).getText().toString();
             String runtimeId = ((TextView) v.findViewById(R.id.grid_item_id)).getText().toString();
 
-            // A delegated RustDesk connection is edited by our own form: opening the RDP setup
-            // screen on it would rewrite the entry as an RDP host. A home-screen shortcut is not
-            // offered either — it would carry an address and a port the entry does not have.
-            Object selected = getConnectionLoader(this).getConnectionsById().get(runtimeId);
-            boolean rustDesk = selected instanceof ConnectionBean
-                    && ((ConnectionBean) selected).getConnectionType() == Constants.CONN_TYPE_RUSTDESK;
-
             alertDialogBuilder.setTitle(getString(R.string.connection_edit_delete_prompt) + " " + gridItemText + " ?");
             List<CharSequence> options = new ArrayList<>();
             options.add(getString(R.string.connection_edit));
             options.add(getString(R.string.connection_delete));
-            if (!rustDesk && shortcutCreationSupported()) {
+            if (shortcutCreationSupported()) {
                 options.add(getString(R.string.connection_add_shortcut));
             }
             CharSequence[] cs = options.toArray(new CharSequence[0]);
             alertDialogBuilder.setItems(cs, (dialog, item) -> {
                 String choice = cs[item].toString();
                 if (getString(R.string.connection_edit).equals(choice)) {
-                    if (rustDesk) {
-                        showRustDeskDialog((ConnectionBean) selected);
-                    } else {
-                        editConnection(v);
-                    }
+                    editConnection(v);
                 } else if (getString(R.string.connection_delete).equals(choice)) {
                     deleteConnection(v);
                 } else if (getString(R.string.connection_add_shortcut).equals(choice)) {
@@ -308,15 +291,6 @@ public class ConnectionGridActivity extends AppCompatActivity implements GetText
             System.gc();
 
         String runtimeId = ((TextView) v.findViewById(R.id.grid_item_id)).getText().toString();
-
-        // A delegated connection is not opened here: another application takes over, and the list
-        // stays in the foreground once the hand-off is done.
-        Object selected = getConnectionLoader(this).getConnectionsById().get(runtimeId);
-        if (selected instanceof ConnectionBean
-                && ((ConnectionBean) selected).getConnectionType() == Constants.CONN_TYPE_RUSTDESK) {
-            launchRustDesk((ConnectionBean) selected);
-            return;
-        }
 
         Intent intent = new IntentHelper().getIntent(
                 getConnectionLoader(this),
@@ -465,201 +439,46 @@ public class ConnectionGridActivity extends AppCompatActivity implements GetText
     }
 
     private void loadSavedConnections() {
-        sealStoredRustDeskPasswords();
+        dropRetiredAccesses();
         createAndSetLabeledImageAdapterAndNumberOfColumns();
     }
 
     /**
-     * The password to hand out for an access: nothing when the stored value cannot be opened here.
+     * Removes the accesses of a connection type this build no longer knows.
      *
-     * A value sealed under a passphrase belongs to an exported file, not to this device: showing it
-     * in the edit form or handing it to RustDesk would present a blob as a password. The load pass
-     * drops those before the list is even built, so this is the second lock on the same door.
+     * Up to 1.12 the list could hold RustDesk accesses, stored as ordinary rows with a connection
+     * type of 6. RustDesk has left the fork, and keeping those rows would leave entries in the grid
+     * that open nothing at all. They are dropped once, on load; the count goes to the log rather
+     * than to a message, since there is nothing the user could do about such a row.
      */
-    private String usablePassword(String stored) {
-        String clear = RustDeskSecretStore.open(stored);
-        return RustDeskPortableSeal.isPortable(clear) ? null : clear;
+    private void dropRetiredAccesses() {
+        int dropped = 0;
+        for (ConnectionBean bean : retiredAccesses()) {
+            try {
+                bean.Gen_delete(database.getWritableDatabase());
+                dropped++;
+            } catch (RuntimeException e) {
+                Log.w(TAG, "Retired access could not be removed: " + e);
+            }
+        }
+        if (dropped > 0) {
+            Log.i(TAG, dropped + " retired access(es) removed.");
+        }
     }
 
-    /** The RustDesk accesses of the list, in loading order. */
-    private List<ConnectionBean> rustDeskAccesses() {
+    /** The accesses of the retired connection type, in loading order. */
+    private List<ConnectionBean> retiredAccesses() {
         List<ConnectionBean> accesses = new ArrayList<>();
         for (Connection connection : getConnectionLoader(this).loadConnectionsById().values()) {
             if (!(connection instanceof ConnectionBean)) {
                 continue;
             }
             ConnectionBean bean = (ConnectionBean) connection;
-            if (bean.getConnectionType() == Constants.CONN_TYPE_RUSTDESK) {
+            if (bean.getConnectionType() == Constants.CONN_TYPE_RETIRED) {
                 accesses.add(bean);
             }
         }
         return accesses;
-    }
-
-    /**
-     * Brings the stored RustDesk passwords in line with the way they are kept, once, on load.
-     *
-     * Three states are repaired here:
-     *  - a password saved before sealing existed is clear in the shared database until the user
-     *    edits it, so it is sealed on first load; without this "sealed" would only be true for
-     *    accesses created after the change;
-     *  - a seal created on another device (or before a reinstall, which destroys the keystore key)
-     *    cannot be opened here. Keeping it would leave an access whose password is garbage, so it
-     *    is dropped and the user is told how many must be typed again;
-     *  - a portable value from an imported file that was never reopened (import cancelled, or the
-     *    passphrase refused) is useless here too, and is dropped the same way. It is announced by
-     *    the same message, which is exactly what the user has to do about it.
-     *
-     * A seal that opens is left untouched, so this runs cheaply on every load, and the message is
-     * shown only on the load that actually drops something.
-     */
-    private void sealStoredRustDeskPasswords() {
-        int dropped = 0;
-        for (ConnectionBean bean : rustDeskAccesses()) {
-            String stored = bean.getPassword();
-            if (stored == null || stored.isEmpty()) {
-                continue;
-            }
-            boolean usableHere = RustDeskSecretStore.isSealed(stored)
-                    ? RustDeskSecretStore.open(stored) != null
-                    : !RustDeskPortableSeal.isPortable(stored);
-            if (!usableHere) {
-                try {
-                    bean.setPassword("");
-                    bean.setKeepPassword(true);
-                    bean.save(this);
-                    dropped++;
-                } catch (RuntimeException e) {
-                    Log.w(TAG, "Unusable RustDesk password could not be cleared: " + e);
-                }
-                continue;
-            }
-            if (RustDeskSecretStore.isSealed(stored)) {
-                continue;
-            }
-            try {
-                bean.setPassword(RustDeskSecretStore.seal(stored));
-                bean.save(this);
-                Log.i(TAG, "RustDesk password of a stored access sealed.");
-            } catch (RuntimeException e) {
-                Log.w(TAG, "Stored RustDesk password could not be sealed: " + e);
-            }
-        }
-        if (dropped > 0) {
-            Log.i(TAG, dropped + " unusable RustDesk password(s) cleared.");
-            Snackbar.make(gridView, getString(R.string.rustdesk_password_dropped, dropped),
-                    Snackbar.LENGTH_LONG).show();
-        }
-    }
-
-    /**
-     * Asks for an optional passphrase, then writes the settings export.
-     *
-     * The passphrase is stored nowhere: it re-seals the RustDesk passwords for the file, and has to
-     * be typed again to reopen them. An empty answer is allowed and means "leave the passwords on
-     * this device", which is what happens without the feature.
-     */
-    private void askPassphraseAndExport(Uri uri) {
-        EditText passphrase = new EditText(this);
-        passphrase.setHint(R.string.rustdesk_passphrase_hint);
-        passphrase.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        excludeFromAutofill(passphrase);
-
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.rustdesk_export_passphrase_title)
-                .setMessage(R.string.rustdesk_export_passphrase_message)
-                .setView(passphrase)
-                .setPositiveButton(android.R.string.ok, (dialog, which) ->
-                        writeExport(uri, passphrase.getText().toString()))
-                .setNegativeButton(android.R.string.cancel, null)
-                .show();
-    }
-
-    /** Writes the export, sealing the RustDesk passwords under `passphrase` when there is one. */
-    private void writeExport(Uri uri, String passphrase) {
-        RustDeskExportSanitizer.PasswordExporter exporter = passphrase.isEmpty() ? null : stored -> {
-            String clear = RustDeskSecretStore.open(stored);
-            if (clear == null || clear.isEmpty()) {
-                return null;
-            }
-            return RustDeskPortableSeal.seal(passphrase, clear);
-        };
-
-        OutputStream out = FileUtils.getOutputStreamFromUri(getContentResolver(), uri);
-        RustDeskExportSanitizer.Sanitized result =
-                Utils.exportSettingsToXml(out, database.getReadableDatabase(), exporter);
-        if (result == null) {
-            Snackbar.make(gridView, R.string.rustdesk_export_refused, Snackbar.LENGTH_LONG).show();
-        } else if (result.getPasswordsCarried() > 0) {
-            Snackbar.make(gridView,
-                    getString(R.string.rustdesk_export_with_passphrase, result.getPasswordsCarried()),
-                    Snackbar.LENGTH_LONG).show();
-        } else if (result.getPasswordsRemoved() > 0) {
-            Snackbar.make(gridView,
-                    getString(R.string.rustdesk_export_without_password, result.getPasswordsRemoved()),
-                    Snackbar.LENGTH_LONG).show();
-        }
-    }
-
-    /**
-     * Offers to reopen the RustDesk passwords an imported file carries under a passphrase.
-     *
-     * The file holds them sealed under the passphrase, not under this device's key: without this
-     * step they would be dropped by the load pass and every imported access would ask for its
-     * password again. Whatever is not reopened here is dropped there, with the count announced.
-     */
-    private void restorePortableRustDeskPasswords() {
-        int pending = 0;
-        for (ConnectionBean bean : rustDeskAccesses()) {
-            if (RustDeskPortableSeal.isPortable(bean.getPassword())) {
-                pending++;
-            }
-        }
-        if (pending == 0) {
-            recreate();
-            return;
-        }
-
-        EditText passphrase = new EditText(this);
-        passphrase.setHint(R.string.rustdesk_passphrase_hint);
-        passphrase.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        excludeFromAutofill(passphrase);
-
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.rustdesk_import_passphrase_title)
-                .setMessage(getString(R.string.rustdesk_import_passphrase_message, pending))
-                .setView(passphrase)
-                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                    reopenPortablePasswords(passphrase.getText().toString());
-                    recreate();
-                })
-                .setNegativeButton(android.R.string.cancel, (dialog, which) -> recreate())
-                .show();
-    }
-
-    /** Opens the portable passwords with `passphrase` and seals them on this device. */
-    private void reopenPortablePasswords(String passphrase) {
-        int restored = 0;
-        for (ConnectionBean bean : rustDeskAccesses()) {
-            String stored = bean.getPassword();
-            if (!RustDeskPortableSeal.isPortable(stored)) {
-                continue;
-            }
-            String clear = RustDeskPortableSeal.open(passphrase, stored);
-            if (clear == null) {
-                Log.w(TAG, "A portable RustDesk password did not open with the passphrase given.");
-                continue;
-            }
-            try {
-                bean.setPassword(RustDeskSecretStore.seal(clear));
-                bean.setKeepPassword(true);
-                bean.save(this);
-                restored++;
-            } catch (RuntimeException e) {
-                Log.w(TAG, "A portable RustDesk password could not be sealed: " + e);
-            }
-        }
-        Log.i(TAG, restored + " portable RustDesk password(s) reopened.");
     }
 
     /**
@@ -711,215 +530,6 @@ public class ConnectionGridActivity extends AppCompatActivity implements GetText
     @SuppressWarnings("unused")
     public void addNewConnection(View view) {
         addNewConnection();
-    }
-
-    /** Menu action: creates a connection that RustDesk owns, not us. */
-    public void addRustDeskConnection(MenuItem menuItem) {
-        showRustDeskDialog(null);
-    }
-
-    /**
-     * Renseigne le serveur RustDesk privé dont dépend la session embarquée.
-     *
-     * Sans ce réglage, le cœur interroge le serveur public et un pair enregistré ailleurs
-     * paraît hors ligne. Les deux champs sont facultatifs : vides, le comportement reste celui
-     * des serveurs publics, et rien n'est écrit dans la configuration du cœur.
-     */
-    public void rustDeskServer(MenuItem item) {
-        SharedPreferences prefs = getSharedPreferences(RustDeskEmbedded.SERVER_PREFS, MODE_PRIVATE);
-
-        int padding = (int) (16 * getResources().getDisplayMetrics().density);
-        LinearLayout layout = new LinearLayout(this);
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setPadding(padding, padding, padding, 0);
-        excludeTreeFromAutofill(layout);
-
-        EditText server = new EditText(this);
-        server.setHint(R.string.rustdesk_server_hint);
-        server.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
-        server.setText(prefs.getString(RustDeskEmbedded.PREF_SERVER, ""));
-        excludeFromAutofill(server);
-        layout.addView(server);
-
-        EditText key = new EditText(this);
-        key.setHint(R.string.rustdesk_server_key_hint);
-        key.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
-        key.setText(prefs.getString(RustDeskEmbedded.PREF_KEY, ""));
-        excludeFromAutofill(key);
-        layout.addView(key);
-
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.action_rustdesk_server)
-                .setView(layout)
-                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                    prefs.edit()
-                            .putString(RustDeskEmbedded.PREF_SERVER,
-                                    server.getText().toString().trim())
-                            .putString(RustDeskEmbedded.PREF_KEY,
-                                    key.getText().toString().trim())
-                            .apply();
-                    Snackbar.make(gridView, R.string.rustdesk_server_saved,
-                            Snackbar.LENGTH_LONG).show();
-                })
-                .setNegativeButton(android.R.string.cancel, null)
-                .show();
-    }
-
-    /**
-     * Creates a RustDesk connection, or edits one when [existing] is given.
-     *
-     * The form is deliberately minimal: RustDesk is reached by device id, and the password is
-     * only there so it can be offered through the clipboard when the hand-off needs it.
-     */
-    private void showRustDeskDialog(ConnectionBean existing) {
-        boolean editing = existing != null;
-
-        int padding = (int) (16 * getResources().getDisplayMetrics().density);
-        LinearLayout layout = new LinearLayout(this);
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setPadding(padding, padding, padding, 0);
-        excludeTreeFromAutofill(layout);
-
-        EditText deviceId = new EditText(this);
-        deviceId.setHint(R.string.rustdesk_device_id_hint);
-        deviceId.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
-        excludeFromAutofill(deviceId);
-        if (editing) {
-            deviceId.setText(existing.getAddress());
-        }
-        layout.addView(deviceId);
-
-        EditText password = new EditText(this);
-        password.setHint(R.string.rustdesk_password_hint);
-        password.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        excludeFromAutofill(password);
-        if (editing) {
-            // Le champ affiche le mot de passe en clair : la valeur enregistrée est scellée.
-            password.setText(usablePassword(existing.getPassword()));
-        }
-        layout.addView(password);
-
-        AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle(editing ? R.string.rustdesk_edit_connection
-                        : R.string.action_new_rustdesk_connection)
-                .setView(layout)
-                .setPositiveButton(android.R.string.ok, null)
-                .setNegativeButton(android.R.string.cancel, null)
-                .create();
-        dialog.setOnShowListener(shown -> {
-            if (dialog.getWindow() != null) {
-                excludeTreeFromAutofill(dialog.getWindow().getDecorView());
-            }
-            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(view -> {
-                // Avant de fermer : abandonner le contexte de remplissage. Le laisser se
-                // terminer fait proposer au système d'enregistrer ce qui vient d'être saisi,
-                // ce qui recouvre l'application juste après la création.
-                abandonAutofillContext();
-                saveRustDeskConnection(existing, deviceId.getText().toString().trim(),
-                        password.getText().toString());
-                dialog.dismiss();
-            });
-        });
-        dialog.show();
-    }
-
-    /**
-     * Keeps a form field out of Android's autofill.
-     *
-     * Without this, submitting the form makes the system offer to store the RustDesk id and its
-     * password in the device's password manager, and that sheet covers the app right after the
-     * first creation. Neither value belongs to an account of this device: the id is RustDesk's
-     * own addressing, and the password is a secret of the machine being reached.
-     */
-    private void excludeFromAutofill(EditText field) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            field.setImportantForAutofill(View.IMPORTANT_FOR_AUTOFILL_NO);
-        }
-    }
-
-    /**
-     * Retire toute une sous-hiérarchie du remplissage automatique.
-     *
-     * Marquer les champs un à un ne suffit pas : depuis Android 14, une vue marquée
-     * IMPORTANT_FOR_AUTOFILL_NO peut malgré tout figurer dans la structure transmise au
-     * service. Constaté sur le POCO le 27/10 : le service Google recevait l'identifiant et le
-     * mot de passe et proposait de les enregistrer. Sur la racine, NO_EXCLUDE_DESCENDANTS
-     * interdit en plus le parcours des descendants.
-     */
-    private void excludeTreeFromAutofill(View view) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            view.setImportantForAutofill(View.IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS);
-        }
-    }
-
-    /**
-     * Abandonne le contexte de remplissage courant au lieu de le laisser se terminer.
-     *
-     * C'est l'abandon qui empêche la proposition d'enregistrer : laisser le contexte
-     * s'achever (fermeture de la boîte, arrêt de l'écran) amène le système à offrir
-     * d'enregistrer ce qui vient d'être saisi.
-     */
-    private void abandonAutofillContext() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            AutofillManager manager = getSystemService(AutofillManager.class);
-            if (manager != null) {
-                manager.cancel();
-            }
-        }
-    }
-
-    private void saveRustDeskConnection(ConnectionBean existing, String deviceId, String password) {
-        if (deviceId.isEmpty()) {
-            Snackbar.make(gridView, R.string.rustdesk_device_id_required, Snackbar.LENGTH_LONG)
-                    .show();
-            return;
-        }
-        String storedPassword;
-        try {
-            storedPassword = RustDeskSecretStore.seal(password);
-        } catch (RuntimeException e) {
-            // Mieux vaut ne rien enregistrer que d'écrire un secret en clair : on le dit et on s'arrête.
-            Log.w(TAG, "RustDesk password could not be sealed: " + e);
-            Snackbar.make(gridView, R.string.rustdesk_password_not_sealed, Snackbar.LENGTH_LONG)
-                    .show();
-            return;
-        }
-        ConnectionBean connection = existing != null ? existing : new ConnectionBean(this);
-        connection.setNickname(deviceId);
-        connection.setAddress(deviceId);
-        connection.setPassword(storedPassword);
-        // Without this the shared save path blanks PASSWORD for every connection.
-        connection.setKeepPassword(true);
-        if (existing == null) {
-            connection.setPort(0);
-            connection.setConnectionType(Constants.CONN_TYPE_RUSTDESK);
-            connection.setInvisible(false);
-            connection.setScreenshotFilename(Utils.newScreenshotFileName());
-        }
-        connection.save(this);
-        onResume();
-    }
-
-    /**
-     * Opens a RustDesk session: embedded when this build carries the core, handed to the
-     * installed application otherwise.
-     *
-     * The embedded path is tried first because it is the only one where the application knows
-     * what the session is doing; the Intent chain stays as the fallback for builds without
-     * `librustdesk.so` (another ABI, or compiled without -Pdualdesk.rustdeskLib=...).
-     */
-    private void launchRustDesk(ConnectionBean connection) {
-        if (com.dualdesk.rdp.RustDeskEmbedded.open(
-                this, connection.getAddress(), usablePassword(connection.getPassword()))) {
-            Log.i(TAG, "RustDesk session: embedded core");
-            return;
-        }
-        LaunchOutcome outcome = new RustDeskLauncher(this)
-                .launch(connection.getAddress(), usablePassword(connection.getPassword()));
-        if (outcome.getMessage() != null) {
-            Snackbar.make(gridView, outcome.getMessage(), Snackbar.LENGTH_LONG).show();
-        }
-        Log.i(TAG, "RustDesk hand-off: " + outcome.getStrategy());
     }
 
     /**
@@ -1033,8 +643,6 @@ public class ConnectionGridActivity extends AppCompatActivity implements GetText
                             ConnectionSettings.importSettingsFromJsonToSharedPrefs(in, this);
                         } else {
                             Utils.importSettingsFromXml(in, database.getWritableDatabase());
-                            restorePortableRustDeskPasswords();
-                            break;
                         }
                         recreate();
                     } else {
@@ -1047,12 +655,14 @@ public class ConnectionGridActivity extends AppCompatActivity implements GetText
             case RemoteClientLibConstants.EXPORT_SETTINGS_REQUEST_CODE:
                 if (resultCode == Activity.RESULT_OK) {
                     if (data != null && data.getData() != null) {
-                        if (Utils.isOpaque(this)) {
-                            OutputStream out = FileUtils.getOutputStreamFromUri(
-                                    getContentResolver(), data.getData());
+                        ContentResolver resolver = getContentResolver();
+
+                        boolean connectionsInSharedPrefs = Utils.isOpaque(this);
+                        OutputStream out = FileUtils.getOutputStreamFromUri(resolver, data.getData());
+                        if (connectionsInSharedPrefs) {
                             ConnectionSettings.exportSettingsFromSharedPrefsToJson(out, this);
                         } else {
-                            askPassphraseAndExport(data.getData());
+                            Utils.exportSettingsToXml(out, database.getReadableDatabase());
                         }
                     } else {
                         Log.e(TAG, "File uri not found, not exporting settings");

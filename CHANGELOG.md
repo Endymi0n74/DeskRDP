@@ -3,6 +3,47 @@
 Les versions publiées sont sur la page [Releases](https://github.com/Endymi0n74/DualDesk/releases).
 Published builds live on the [Releases](https://github.com/Endymi0n74/DualDesk/releases) page.
 
+## 1.13 — 29 octobre 2026
+
+### Français
+
+- **Retour au RDP seul.** DualDesk redevient ce qu'il était au départ : un fork d'aRDP. Toute la
+  partie RustDesk est retirée — le cœur natif, l'activité de session embarquée, la chaîne de repli
+  par deep link puis Intent, le scellement des mots de passe, l'export à phrase de passe qui
+  n'existait que pour eux, la documentation, les scripts de compilation et les tests. Environ
+  2 300 lignes en moins, et plus aucune bibliothèque native propriétaire dans l'APK.
+- **Les accès RustDesk enregistrés sont supprimés** de la liste au premier lancement : leur type de
+  connexion n'existe plus, les garder aurait laissé des entrées qui n'ouvrent rien. Le nombre
+  d'entrées retirées va au journal, pas à un message — il n'y a rien à faire pour l'utilisateur.
+- **Licence de retour en GPLv3** : le cœur RustDesk des 1.11 et 1.12 était en AGPL-3.0 et imposait
+  cette licence à toute la build. Sans lui, l'application reprend la licence de l'amont.
+- **Les 51 traductions sont nettoyées** des chaînes propres à RustDesk et des phrases d'aide
+  VPN qui nommaient l'ancien produit.
+- **README réécrit** en une page : ce qu'est l'application, comment l'installer, ce qu'elle fait,
+  ses limites, la construction, la publication — en français puis en anglais. Il documente
+  franchement la limite qui compte : **RDP n'ouvre qu'un bureau, il n'y a pas de choix de l'écran
+  du poste**.
+- `versionCode` 4 → 5. Les accès RDP, leurs réglages et le presse-papiers sont inchangés.
+
+### English
+
+- **Back to RDP only.** DualDesk is again what it started as: a fork of aRDP. The whole RustDesk
+  side is gone — the native core, the embedded session activity, the deep-link-then-Intent fallback
+  chain, the sealed passwords, the passphrase export that existed only for them, the documentation,
+  the build scripts and the tests. About 2,300 lines fewer, and no proprietary native library left
+  in the APK.
+- **Recorded RustDesk accesses are dropped** from the list on first launch: their connection type no
+  longer exists, and keeping them would have left entries that open nothing. The number of removed
+  entries goes to the log, not to a message — there is nothing the user could do about it.
+- **Licence back to GPLv3**: the RustDesk core of 1.11 and 1.12 was AGPL-3.0 and forced that licence
+  on the whole build. Without it, the application returns to the upstream licence.
+- **The 51 translations are cleaned** of RustDesk-only strings and of the VPN help sentences naming
+  the former product.
+- **README rewritten** to one page: what the application is, how to install it, what it does, its
+  limits, how to build it, how to publish it — in French, then in English. It states the limit that
+  matters plainly: **RDP opens one desktop, there is no host screen selection**.
+- `versionCode` 4 → 5. RDP accesses, their settings and the clipboard are unchanged.
+
 ## 1.12 — 29 octobre 2026
 
 ### Français

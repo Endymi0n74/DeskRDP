@@ -1014,29 +1014,4 @@ Below that is where you configure your connection.
     <string name="disable_battery_optimizations">🔋Disable Battery Optimizations</string>
     <string name="disable_battery_optimizations_failed">Could not open battery optimization settings. Disable battery optimization manually in system settings.</string>
     <string name="disable_battery_optimizations_already_done">App is already exempt from battery optimizations.</string>
-    <string name="action_new_rustdesk_connection">New RustDesk access</string>
-    <string name="rustdesk_device_id_hint">RustDesk device ID</string>
-    <string name="rustdesk_password_hint">Password (optional)</string>
-    <string name="rustdesk_device_id_required">Enter the RustDesk device ID.</string>
-    <string name="rustdesk_edit_connection">Edit RustDesk access</string>
-    <string name="rustdesk_not_installed">RustDesk is not installed on this device.</string>
-    <string name="rustdesk_no_device_id">No device ID to open.</string>
-    <string name="rustdesk_no_response">RustDesk did not respond to the launch request.</string>
-    <string name="rustdesk_clipboard_id_only">Device ID copied: paste it in RustDesk.</string>
-    <string name="rustdesk_clipboard_with_password">Device ID and password copied: paste them in RustDesk.</string>
-    <string name="rustdesk_clipboard_unavailable">RustDesk opened, but the clipboard is unavailable: type the device ID.</string>
-    <string name="rustdesk_password_not_sealed">The password could not be protected, so nothing was saved.</string>
-    <string name="rustdesk_export_refused">Export cancelled: a RustDesk password could not be removed from the file.</string>
-    <string name="rustdesk_export_without_password">The password of %1$d RustDesk access(es) is not in the export: it stays on this device.</string>
-    <string name="rustdesk_password_dropped">%1$d RustDesk access(es): the saved password cannot be read here, so it was removed. Type it again.</string>
-    <string name="rustdesk_passphrase_hint">Passphrase (leave empty to leave the passwords behind)</string>
-    <string name="rustdesk_export_passphrase_title">Protect the exported passwords?</string>
-    <string name="rustdesk_export_passphrase_message">A RustDesk password cannot leave this device as it is stored. Give a passphrase to take it along: it will be asked again when importing, on the other device. Leave empty to export without the passwords.</string>
-    <string name="rustdesk_export_with_passphrase">Export written: the password of %1$d RustDesk access(es) is sealed under your passphrase.</string>
-    <string name="rustdesk_import_passphrase_title">Export passphrase</string>
-    <string name="rustdesk_import_passphrase_message">This file carries %1$d RustDesk password(s) sealed under a passphrase. Type the passphrase used at export to restore them on this device.</string>
-    <string name="action_rustdesk_server">RustDesk server</string>
-    <string name="rustdesk_server_hint">Server (host:port, empty = public servers)</string>
-    <string name="rustdesk_server_key_hint">Server public key (optional)</string>
-    <string name="rustdesk_server_saved">RustDesk server saved: the embedded session will use it.</string>
 </resources>

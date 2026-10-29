@@ -61,7 +61,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.antlersoft.android.contentxml.SqliteElement;
 import com.antlersoft.android.contentxml.SqliteElement.ReplaceStrategy;
-import com.dualdesk.rustdesk.RustDeskExportSanitizer;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.tasks.Task;
@@ -522,43 +521,14 @@ public class Utils {
                 Build.MANUFACTURER.contains("BlackBerry");
     }
 
-    /**
-     * Writes the connection database to {@code f} as XML, keeping the RustDesk passwords out of it.
-     *
-     * Those passwords are sealed by a key of this device's keystore, which never leaves it — not
-     * even across a reinstall, since uninstalling the application destroys its keys. Writing that
-     * seal to a file meant to move between devices would only carry a value nothing can open.
-     *
-     * @param exporter re-seals a stored password under a passphrase, so the file can be restored
-     *                 elsewhere; null leaves every RustDesk password out of the export.
-     * @return what became of the passwords and the document that was written, or null when nothing
-     * usable was written (the document was refused because a secret could not be handled).
-     */
-    public static RustDeskExportSanitizer.Sanitized exportSettingsToXml(
-            OutputStream f, SQLiteDatabase db, RustDeskExportSanitizer.PasswordExporter exporter) {
-        StringWriter buffer = new StringWriter();
+    public static void exportSettingsToXml(OutputStream f, SQLiteDatabase db) {
+        Writer writer = new OutputStreamWriter(f);
         try {
-            SqliteElement.exportDbAsXmlToStream(db, buffer);
+            SqliteElement.exportDbAsXmlToStream(db, writer);
+            writer.close();
         } catch (SAXException | IOException e) {
             Log.e(TAG, Log.getStackTraceString(e));
-            return null;
         }
-
-        RustDeskExportSanitizer.Sanitized sanitized =
-                RustDeskExportSanitizer.protectRustDeskPasswords(buffer.toString(), exporter);
-        if (sanitized == null) {
-            Log.e(TAG, "Export refused: a RustDesk password could not be handled in the document.");
-            return null;
-        }
-
-        try (Writer writer = new OutputStreamWriter(f)) {
-            writer.write(sanitized.getDocument());
-            writer.flush();
-        } catch (IOException e) {
-            Log.e(TAG, Log.getStackTraceString(e));
-            return null;
-        }
-        return sanitized;
     }
 
     public static void importSettingsFromXml(InputStream fin, SQLiteDatabase db) {

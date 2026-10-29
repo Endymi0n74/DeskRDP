@@ -8,6 +8,10 @@ mesures, et [_check/](_check), qui porte les outils qui les ont produites.
 Les faits ne sont retenus ici que s'ils ont été **observés sur l'appareil ou mesurés**. Quand une
 vérification n'a pas été faite, c'est écrit.
 
+> **Note du 29/10/2026 — document historique.** Il décrit la période où le fork embarquait le cœur
+> RustDesk (1.11 et 1.12). La 1.13 **retire RustDesk** et revient à un fork d'aRDP, RDP seul. Les
+> mesures RDP de ce rapport restent valables ; tout ce qui concerne RustDesk ne décrit plus le dépôt.
+
 ---
 
 ## 1. Ce que le fork apporte aujourd'hui

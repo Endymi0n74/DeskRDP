@@ -4,6 +4,55 @@ Fork de [iiordanov/remote-desktop-clients](https://github.com/iiordanov/remote-d
 cloné le 26/10/2026 (v6.4.9, versionCode 116490). But : garder le client RDP mature (FreeRDP 2.11.7,
 RDPGFX + H.264 MediaCodec) et y greffer la partie DualDesk — les accès **RustDesk**.
 
+> **1.13 (29/10/2026) — décision : retour au RDP seul.** RustDesk est retiré du fork. Les sections
+> qui décrivent la partie RustDesk ci-dessous sont de l'**histoire** : elles restent pour expliquer
+> ce qui a été essayé et pourquoi ça s'arrête, pas pour décrire le code actuel. Où en est le dépôt :
+> voir « État de l'arbre en 1.13 » plus bas.
+
+## État de l'arbre en 1.13 (29/10/2026)
+
+- Supprimés : `com/dualdesk/rustdesk/` (7 fichiers), `com/dualdesk/rdp/` (3 fichiers dont l'activité
+  de session embarquée), les 5 tests, `docs/RUSTDESK-NATIF.md`, `scripts/compile-rustdesk-android.sh`,
+  `LICENCE-RustDesk.txt`, `_check/flow_rustdesk.py`, `_check/delete_rustdesk_access.py`, deux
+  `preuve-poco/*rustdesk*.png`.
+- `Constants.CONN_TYPE_RETIRED = 6` : la valeur reste pour que le chargement de la liste retrouve les
+  accès de 1.12 et les supprime (`ConnectionGridActivity.dropRetiredAccesses`, appelée depuis
+  `loadSavedConnections`). Le nombre d'entrées retirées va au journal, pas à un message.
+- `dualdesk-app/build.gradle` n'a plus ni `rustdeskLib`, ni `libcxxShared`, ni `rustdeskJniDir`, ni la
+  tâche `copieRustDeskLib`. `bVNC/build.gradle` n'a plus la dépendance Kotlin du JNI.
+- `publish-release.sh` n'a plus `--rustdesk-lib` ni `--libcxx`.
+- Licence : retour en **GPLv3**. `versionCode` 5, `versionName` 1.13-dualdesk.
+
+### Pourquoi pas de multi-écran en RDP (mesuré, pas supposé)
+
+La demande « passer d'un écran à l'autre » a été poussée jusqu'au bout côté RDP avant d'être
+abandonnée, et la raison est dans les binaires livrés :
+
+- `libfreerdp-client2.so` (précompilé, non recompilable sans refaire la chaîne FreeRDP) contient les
+  symboles de réglage `UseMultimon`, `MonitorDefArray`, `MonitorCount`, `SupportMonitorLayoutPdu` —
+  mais l'analyse des moniteurs passe par l'API Win32 (`List detected monitors`), qui n'existe pas
+  sous Android.
+- Côté Java, `LibFreeRDP.java` ne construit que `/size:WxH` : aucun chemin ne remplit
+  `MonitorDefArray`, et il n'existe qu'**une** surface de rendu pour tout le client.
+- Conclusion : `/multimon` sans définition de moniteurs retombe sur un seul bureau, et `/size` ne fait
+  que changer la taille de ce bureau. RDP n'expose donc pas le second écran du poste dans ce fork.
+  C'est écrit tel quel dans le README (FR et EN) pour ne pas promettre l'inverse.
+
+## Construire (état 29/10/2026)
+
+```bash
+export JAVA_HOME=/d/Codex/tools/jdk-21
+export ANDROID_SDK_ROOT=/d/android-sdk ANDROID_HOME=/d/android-sdk
+./gradlew :dualdesk-app:assembleRelease --offline
+```
+
+- **Le JDK n'est pas sous `C:`** : `/d/Codex/tools/jdk-21` (l'ancienne note ci-dessous parle de Zulu
+  sous `C:`, c'est périmé). Le SDK est `/d/android-sdk`.
+- La clé de publication est dans `_keystore/` (`dualdesk-release.jks` + `keystore.properties`), donc
+  `assembleRelease` signe ; `_check/verifie_signature.py` contrôle l'empreinte.
+- `--offline` suffit : les dépendances sont déjà dans le cache Gradle.
+
+
 ## Ce qui a été vérifié
 
 - `git clone --depth 1` puis `download-prebuilt-dependencies.sh` : l'archive

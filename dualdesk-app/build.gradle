@@ -5,8 +5,8 @@ apply plugin: 'com.android.application'
  *
  * Same code base and same resources as freeaRDP-app: the RDP client, its settings screens and
  * its resources live in :bVNC, and every application variant in this repository is only a
- * manifest plus a namespace. What makes this one ours is the RustDesk connection type handled by
- * the connection grid (see com.dualdesk.rustdesk).
+ * manifest plus a namespace. What this one adds on top of upstream aRDP is documented in the
+ * README: reconnection, the shortcut bar, the gestures and the framing of a wide desktop.
  *
  * The application id must keep the letters "rdp": Utils.isRdp() decides which protocol an
  * application speaks from its package name alone.
@@ -19,37 +19,6 @@ apply plugin: 'com.android.application'
  * Quand le fichier est absent — clone neuf, machine de compilation — le variant release est
  * simplement non signe : `assembleDebug` continue de fonctionner comme avant.
  */
-/*
- * Embedded RustDesk core.
- *
- * The heart is a 32 MB arm64-v8a shared library produced by
- * `rustdesk-src` (see docs/RUSTDESK-NATIF.md). It is NOT versioned: the repository is a client, not
- * a binary dump, and the library is reproducible from its sources. A build that wants the embedded
- * session passes the file explicitly:
- *
- *     ./gradlew :dualdesk-app:assembleRelease \
- *         -Pdualdesk.rustdeskLib=/path/to/librustdesk.so
- *
- * Without the property the APK simply has no `librustdesk.so`: the grid then keeps handing the
- * session to the installed RustDesk application, which is the behaviour of 1.10.
- */
-def rustdeskLib = project.findProperty('dualdesk.rustdeskLib')
-def rustdeskJniDir = layout.buildDirectory.dir('rustdeskJni')
-
-/*
- * libc++ embarquée.
- *
- * Le cœur est compilé avec le NDK 29 et appelle `__libcpp_verbose_abort`, un symbole apparu dans
- * libc++ 17 : la libc++ livrée avec les prébuilt FreeRDP (NDK d'origine, plus ancien) ne l'a pas,
- * et `dlopen` échoue alors sur « cannot locate symbol ... referenced by librustdesk.so ». Le
- * symptôme est muet côté produit — la session retombe simplement sur le report vers RustDesk
- * installé — donc on ne peut pas le laisser à une compilation qui réussit.
- *
- * La propriété désigne donc la libc++ du NDK qui a compilé le cœur. Sans elle, rien ne change :
- * l'APK garde la libc++ de ses prébuilt, celle qui convient aux sessions RDP.
- */
-def libcxxShared = project.findProperty('dualdesk.libcxxShared')
-
 def keystorePropsFile = rootProject.file('_keystore/keystore.properties')
 def keystoreProps = new java.util.Properties()
 if (keystorePropsFile.exists()) {
@@ -99,13 +68,6 @@ android {
         resources {
             excludes += ['META-INF/versions/9/OSGI-INF/MANIFEST.MF']
         }
-        // Deux libc++ de même soname dans le même APK : c'est celle du cœur qui doit gagner.
-        // Sans `pickFirst`, la fusion des jniLibs refuse ces fichiers dupliqués.
-        if (libcxxShared) {
-            jniLibs {
-                pickFirsts += ['lib/arm64-v8a/libc++_shared.so']
-            }
-        }
     }
 
     compileOptions {
@@ -115,44 +77,9 @@ android {
 
     namespace 'com.dualdesk.rdp'
 
-    sourceSets {
-        main {
-            jniLibs.srcDirs += rustdeskJniDir
-        }
-    }
-
     lint {
         disable 'Instantiatable'
     }
-}
-
-/*
- * Places the core where Android expects it: lib/arm64-v8a/librustdesk.so.
- *
- * The task is a no-op when the property is absent, so the ordinary build stays unchanged; when it
- * is present, `preBuild` copies the file into the generated directory, which is itself a source
- * set — nothing is written into `src/`, so the tree stays clean.
- */
-tasks.register('copieRustDeskLib', Copy) {
-    group = 'dualdesk'
-    description = 'Copie librustdesk.so et la libc++ (arm64-v8a) dans les jniLibs du variant, si fournies.'
-    // Le dossier généré survit d'une compilation à l'autre : sans cela, la deuxième copie
-    // échoue sur « Entry libc++_shared.so is a duplicate ».
-    duplicatesStrategy = org.gradle.api.file.DuplicatesStrategy.INCLUDE
-    if (rustdeskLib) {
-        from file(rustdeskLib)
-        rename { 'librustdesk.so' }
-        into rustdeskJniDir.map { it.dir('arm64-v8a') }
-    }
-    if (libcxxShared) {
-        from file(libcxxShared)
-        rename { 'libc++_shared.so' }
-        into rustdeskJniDir.map { it.dir('arm64-v8a') }
-    }
-}
-
-tasks.named('preBuild') {
-    dependsOn 'copieRustDeskLib'
 }
 
 /*

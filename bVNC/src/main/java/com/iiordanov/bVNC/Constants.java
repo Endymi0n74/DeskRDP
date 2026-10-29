@@ -41,11 +41,12 @@ public class Constants {
     public static final int CONN_TYPE_STUNNEL = 5;
 
     /**
-     * Connection handed to the installed RustDesk application instead of being opened by our own
-     * engine. Stored in the same table as the others: the device id lives in ADDRESS and the
-     * password in PASSWORD, so no schema change is needed.
+     * Connection type of the RustDesk accesses of 1.12 and earlier.
+     *
+     * RustDesk has left the fork. The value is kept only so the load pass can find those rows and
+     * remove them, rather than leaving entries in the grid that open nothing at all.
      */
-    public static final int CONN_TYPE_RUSTDESK = 6;
+    public static final int CONN_TYPE_RETIRED = 6;
 
     public static final int SOCKET_CONN_TIMEOUT = 20 * 1000;
 

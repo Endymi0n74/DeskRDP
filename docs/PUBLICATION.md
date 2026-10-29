@@ -37,8 +37,7 @@ keytool -genkeypair -keystore _keystore/dualdesk-release.jks -storetype PKCS12 \
 **Gardez-en une copie.** Une archive chiffrée, stockée à deux endroits distincts, et la phrase de
 passe dans un gestionnaire de mots de passe. Perdre le magasin ou sa phrase, c'est ne plus jamais
 pouvoir publier de mise à jour : Android refuse une APK signée d'une autre clé, donc chaque
-utilisateur installé devrait désinstaller — en perdant les mots de passe RustDesk scellés sous le
-Keystore.
+utilisateur installé devrait désinstaller — en perdant les accès enregistrés.
 
 ```bash
 # archive (la phrase de passe est lue dans l'environnement, jamais tapée sur la ligne de commande)
@@ -95,19 +94,6 @@ de construire quoi que ce soit, il refuse un arbre sale, un commit absent de `or
 version dont le tag ou la release existe déjà, un `_keystore/` manquant, et une version sans section
 dans `CHANGELOG.md`. Les notes de version sont cette section du journal, plus le SHA-256 que le
 script a lui-même mesuré sur les fichiers copiés.
-
-Une version qui annonce le cœur RustDesk le désigne explicitement, et le script vérifie qu'il est
-bien **dans** les APK produits :
-
-```bash
-DUALDESK_RUSTDESK_LIB=/chemin/vers/librustdesk.so \
-DUALDESK_LIBCXX=/chemin/vers/libc++_shared.so \
-./publish-release.sh
-```
-
-La libc++ est obligatoire avec le cœur : celle des prébuilt FreeRDP est trop ancienne et `dlopen`
-échoue sur `__libcpp_verbose_abort`, ce qui fait retomber la session sur le report par Intent — sans
-erreur visible, d'où le refus.
 
 ## Pièges connus
 
