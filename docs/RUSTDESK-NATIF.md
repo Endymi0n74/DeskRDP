@@ -41,12 +41,20 @@ et les 16 symboles exportés par la bibliothèque (`Java_com_dualdesk_rdp_RustDe
 `llvm-nm`). Un décalage de paquet ou de nom aurait donné un `UnsatisfiedLinkError` à la première
 session : c'est précisément ce que ce contrôle écarte.
 
-**Non vérifié** — aucune session réelle n'a été ouverte depuis ce fork. Le POCO n'était pas branché,
-et la bibliothèque est arm64-v8a uniquement : un émulateur x86_64 ne peut pas la charger. Les gestes
-(tap = clic gauche, appui long = clic droit, glisser = déplacement), le rendu des images et la
-reprise après perte de surface sont donc écrits d'après une mesure qui a réussi dans `dualdesk`, pas
-mesurés ici. Les trois premiers essais sur appareil devront confirmer : première image, position du
-pointeur au pixel, et clic droit.
+**Non vérifié au moment de la mise en place** — aucune session réelle n'avait alors été ouverte
+depuis ce fork, la bibliothèque étant arm64-v8a uniquement et l'émulateur x86_64 incapable de la
+charger. C'est depuis mesuré, sur le POCO et avec l'APK publié (29 octobre) :
+
+- **Rendu** : `new video handler for display #0, format: AV1`, `remote desktop: 2560x1440`,
+  `Set fps to 30`, HUD à `29 fps` — le bureau distant s'affiche, redimensionné dans la bande utile
+  (échelle `min(cw/iw, ch/ih)`).
+- **Gestes** : appui bref, appui long et glissement ont été relevés côté poste, pas seulement dans le
+  journal de l'activité — menu Démarrer ouvert, menu contextuel de la barre des tâches, glissement
+  d'onglet, et curseur posé au point visé. Le masque envoyé au cœur portait le type dans les trois
+  bits bas et le bouton à partir du bit trois ; il est corrigé depuis.
+- **Reprise après perte de surface** : écran éteint puis rallumé, la même activité revient et le
+  compteur de trames continue sans reconnexion.
+- **Clavier** : `ESC` reçu par le poste, qui ferme bien le menu ouvert par un appui.
 
 ## Limites assumées
 
@@ -62,9 +70,11 @@ pointeur au pixel, et clic droit.
 - **Pas de décodage H.264 matériel** : `hwcodec` ne se compile pas pour Android depuis un hôte
   Windows (son `build.rs` décide de la plateforme avec `cfg(windows)`, qui décrit l'hôte). Le
   décodeur logiciel est utilisé, comme lors de la mesure de référence.
-- **Adresse du serveur** : la façade expose `setOption`, mais la session ne renseigne aujourd'hui que
-  l'identifiant et le mot de passe de l'accès. Un serveur d'auto-hébergement n'est donc pas encore
-  configurable depuis l'interface.
+- **Adresse du serveur** : une entrée « Serveur RustDesk » (adresse + clé) du menu de la grille
+  l'applique avant la connexion ; vider le champ revient au serveur public. Les deux champs restent
+  indépendants : une clé laissée en place rend le mode public inutilisable
+  (`Handshake failed: invalid public key from rendezvous server`), et le message ne parle pas de la
+  clé — défaut connu, à corriger.
 
 ## Compiler le cœur
 
