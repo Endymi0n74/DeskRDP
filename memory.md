@@ -1073,6 +1073,114 @@ Deux défauts trouvés en installant l'APK arm64 publié sur le POCO (Android 16
   `v1.11 -> commit 97c5b2d6`, et les deux actifs de la release gardent leurs empreintes
   (`0a373e42…`, `c9a15ec8…`). Déplacer un tag ne touche pas les actifs attachés à la release, mais
   il faut `git push --force origin refs/tags/v1.11` — un `push` ordinaire est refusé.
+- **Le masque souris n'est pas un numéro de bouton (29/10).** C'était la cause des gestes inertes :
+  l'activité envoyait `1` puis `2`, que le cœur interprète comme *down* et *up* **sans bouton**
+  (`mask & 0x7` = type, `mask >> 3` = bouton). Un clic gauche est donc
+  `MOUSE_TYPE_DOWN | MOUSE_BUTTON_LEFT << 3` = `9`, puis `10` ; le droit, `17` puis `18`. Le poste
+  accepte ces messages vides et n'en fait rien — aucune erreur nulle part, d'où le diagnostic par
+  lecture du code du cœur (`common.rs`, `input_service.rs`) plutôt que par les journaux.
+  Correctif dans `RustDeskEmbeddedActivity` : constantes exactes, appui gauche posé seulement quand
+  le geste est connu (toucher bref = clic, glissement = glisser avec le bouton gauche, appui long =
+  clic droit), bouton relâché sur `ACTION_CANCEL`, et appui dans la bande noire ignoré au lieu d'être
+  ramené sur le bord du bureau.
+- **Vérification des gestes bloquée par le poste, pas par l'application (29/10).** Le client
+  s'authentifie bien (les infos du pair arrivent, donc `LoginResponse` est passé), mais aucune trame
+  n'arrive : le journal du service du PC répète
+  `Error of monitor0 service: Failed to copy screen to Windows buffer`, précédé de
+  `HDR DuplicateOutput1 failed: hr=0x80070005` avec `gdi: false`. Le service voit `session id 1` —
+  la session RDP depuis laquelle le poste est utilisé — et n'a pas le droit de capturer son bureau.
+  Redémarrer le service ne change rien (contrairement à la panne précédente) : **il faut le poste à
+  la console**, ou RustDesk en mode utilisateur dans la session RDP, pour revoir des trames.
+  Piège utile : sur cette machine le journal du service n'est pas dans le profil local habituel mais
+  dans `C:\Windows\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\log\server\`, et il faut
+  l'élévation pour le lire.
+- **Gestes vérifiés sur le bureau de la console (29/10).** Poste à la console et déverrouillé :
+  l'appui simple ouvre le menu Démarrer (14,7 % des pixels de la bande changent), l'appui long
+  ouvre le menu contextuel de la barre des tâches, `ESC` ferme les deux (donc le clavier passe
+  aussi), et le survol suit le doigt à l'endroit visé. Le journal de l'activité confirme la
+  séquence émise, deux lignes par geste :
+  - appui simple : `press type=1 button=1` puis `type=2 button=1`, même point ;
+  - appui long : `type=1 button=2` puis `type=2 button=2` — clic droit seul, aucun appui gauche
+    parasite avant ;
+  - glissement : `type=1 button=1` au point de départ (`1049,602`), `type=2 button=1` au point
+    d'arrivée (`1678,854`), les mouvements entre les deux n'étant pas journalisés.
+- **Deux limites du poste, pas du client.** L'écran de verrouillage est un bureau sécurisé : les
+  appuis y sont ignorés (aucun pixel ne bouge sur le champ PIN), comme le veut RustDesk quand le
+  service n'a pas la main dessus. Et une session **RDP** ne peut être ni capturée ni pilotée par le
+  service : `DuplicateOutput1 hr=0x80070005` pour l'image, `input_service.rs:1377 "Accès refusé"`
+  pour chaque appui. Ces deux erreurs sont donc des diagnostics de session, pas de régression
+  applicative — et le journal de l'activité, lui, continue de montrer les appuis émis.
 - **Reste à faire :** rendre le scellement des accès RustDesk compatible d'un appareil à l'autre
-  (phrase de passe à l'export), et vérifier le rendu de la session embarquée sur le POCO — bloqué
-  jusqu'ici par le serveur privé injoignable.
+  (phrase de passe à l'export), et vérifier réellement les gestes de la session embarquée sur le
+  POCO — bloqué jusqu'ici par le serveur privé injoignable, puis par la capture du poste.
+
+## Session embarquée : établie et authentifiée, toujours sans image (29/10)
+
+- **APK de la release installé tel quel.** Téléchargé depuis `v1.11`, empreinte identique à celle
+  des notes (`0a373e42…`), `adb install -r` passe ; `librustdesk.so` (32,8 Mo) et
+  `libc++_shared.so` sont bien dans l'archive. Rien à redire du produit publié.
+- **Une clé de serveur orpheline casse tout le rendez-vous public.** Vider le champ « Serveur » ne
+  suffit pas : la clé du serveur privé reste dans le champ « Clé », le cœur s'en sert pour vérifier
+  l'identité du pair, et chaque tentative meurt sur `Handshake failed: invalid public key from
+  rendezvous server`, même une fois le trou percé. En y inscrivant la clé publique des serveurs
+  RustDesk — celle que le cœur embarque déjà : `OeVuKk5nlHiXp+APNn0Y3pC1Iwpwn44JGqrQCsWqmBw=` — la
+  poignée de main passe (`Connection secured`).
+  **Défaut à corriger :** les deux champs sont indépendants ; avec un serveur vide, la clé devrait
+  être ignorée. Aujourd'hui une clé oubliée suffit à rendre le mode public inutilisable, et le
+  message affiché ne parle pas de la clé.
+- **Jusqu'où va la session, mesuré :** rendez-vous sur `rs-ny`, punch TCP/UDP/WebRTC, `Connection
+  secured`, `peer info supported_encoding`, `Start client clipboard loop` — l'authentification est
+  donc acceptée par le pair. **Aucune trame** pour autant : le HUD affiche `0x0 — 0 fps — 0 frames`
+  en continu, et rien ne dessine le bureau distant.
+- **Piste écartée : la demande de flux partait trop tôt.** `requestDisplay` n'était appelé qu'une
+  fois, quand `state()` passe à 2 — or ce 2 est posé dès que le socket est établi
+  (`set_connected`), donc avant l'authentification, et une demande reçue si tôt n'est pas honorée.
+  Correctif dans `RustDeskEmbeddedActivity.pumpFrames` : la demande est refaite toutes les 2 s tant
+  qu'aucune trame n'est arrivée. Reconstruit, réinstallé, retesté — **toujours 0 trame** à ce
+  moment-là. Le correctif reste juste (la première demande course bien l'authentification) mais
+  **ce n'était pas la cause** : voir plus bas.
+- **La vraie cause était le processus hôte périmé.** Après un redémarrage de l'hôte fait avec
+  l'élévation — arrêt de tous les `rustdesk.exe`, `--password` sur la configuration publique, puis
+  `Start-Service rustdesk` — les trames arrivent immédiatement : `new video handler for display #0,
+  format: AV1`, `create AV1 decoder success`, `remote desktop: 1920x1080`, `Set fps to 30`, et le
+  HUD passe à `1920x1080 — 15 fps — 171 frames` puis continue. L'application de session gardait
+  donc bien en mémoire l'ancien serveur et l'ancien mot de passe ; elle ne se recharge pas tant
+  qu'elle tourne.
+- **Rendu vérifié.** Le bureau Windows distant s'affiche, redimensionné dans la bande utile de
+  l'écran (échelle `min(cw/iw, ch/ih)` : 1920x1080 tient dans 1220x686, bande de y=1013 à y=1699
+  sur un écran de 2712 px de haut). Tout appui hors de cette bande est ignoré : c'est ce qui a fait
+  croire à une panne d'entrée au premier essai.
+- **Reprise après perte de surface vérifiée.** Écran éteint puis rallumé : la même activité reprend,
+  le compteur garde ses trames (3163) et l'image se redessine sans reconnexion. Le `lockCanvas` par
+  trame et le `unlockCanvasAndPost` protégé suffisent donc à survivre à la destruction de la
+  surface.
+- **Gestes : toujours non concluants.** Des appuis et un glissement dans la bande utile (bouton
+  Démarrer distant, barre des tâches, glissement au centre) ne produisent **aucune trame nouvelle**
+  et aucun changement visible côté poste. `sendMouse` est bien appelé avec les coordonnées
+  converties, sans erreur ; soit l'événement n'atteint pas le poste, soit il y est ignoré.
+  À reprendre : `mouse()` du pont appelle `send_mouse(mask, x, y, …)` — vérifier la convention de
+  masque attendue par le cœur (down/up séparés) et l'état d'autorisation de la session.
+- **Côté poste, ce qui a été vu.** Sans service, le pair n'écoute qu'en UDP 21119 et rien n'arrive ;
+  `--install-service` et `--password` exigent l'élévation. Le socket qui accepte la session
+  appartient à l'**application de session**, lancée avant le changement de mot de passe : elle
+  garde l'ancien en mémoire et `taskkill` est refusé (autre contexte de sécurité), donc la relancer
+  demande aussi l'élévation. La configuration RustDesk du poste a été restaurée à l'identique après
+  l'essai — les trois `.toml` sont identiques à la sauvegarde, octet pour octet.
+- **Pièges de compilation à ne pas repayer :**
+  - `JAVA_HOME` doit pointer sur le JDK 21 (`D:\Codex\tools\jdk-21`) ; en 17, `:common` échoue sur
+    `invalid source release: 21`.
+  - `lintVitalAnalyze*` et `lintVitalReport*` plantent sous JDK 21 (`Unexpected lint invalid
+    arguments`). Un script d'init qui désactive les tâches `lintVital*` règle le problème ; `-x`
+    échoue dès qu'une tâche n'existe pas dans un module.
+  - `COMPILE_API` attend un nom de plateforme (`android-36`) mais `TARGET_API` un **nombre** (36).
+    Avec `android-36` des deux côtés, l'APK se construit mais l'installation est refusée :
+    `INSTALL_FAILED_OLDER_SDK: Requires development platform android-36`.
+  - `libc++_shared.so` se reprend directement dans l'APK publié (`unzip -j … lib/arm64-v8a/`) au
+    lieu du NDK : c'est exactement le fichier qui a compilé le cœur.
+
+**Rendu et reprise après perte de surface vérifiés ; gestes non concluants.**
+
+- **État laissé sur le poste :** configuration RustDesk basculée sur les serveurs publics, mot de
+  passe permanent remplacé par un mot de passe temporaire, service RustDesk installé et démarré.
+  Sauvegarde de la configuration d'origine (serveur privé + mot de passe d'origine) :
+  `D:\Codex\tmpshot\rd-backup\` — la restaurer remet tout en état, mais casse la session publique.

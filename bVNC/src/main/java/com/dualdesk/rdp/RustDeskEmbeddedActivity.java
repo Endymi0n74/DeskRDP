@@ -39,12 +39,25 @@ public class RustDeskEmbeddedActivity extends Activity implements SurfaceHolder.
     public static final String EXTRA_DEVICE_ID = "com.dualdesk.rdp.extra.DEVICE_ID";
     public static final String EXTRA_PASSWORD = "com.dualdesk.rdp.extra.PASSWORD";
 
-    /** 0 = move only, 1 = left button, 2 = right button (RustDesk's own mask). */
-    private static final int MASK_MOVE = 0;
-    private static final int MASK_LEFT = 1;
-    private static final int MASK_RIGHT = 2;
+    /**
+     * RustDesk's mouse mask is not a button number: the event type occupies the low three bits and
+     * the buttons start at bit three (the host reads {@code mask >> 3} for the buttons and
+     * {@code mask & 0x7} for the type). A bare {@code 1} is therefore a press *without any
+     * button* — accepted, and quietly ignored — not a left click.
+     */
+    private static final int MOUSE_TYPE_MOVE = 0;
+    private static final int MOUSE_TYPE_DOWN = 1;
+    private static final int MOUSE_TYPE_UP = 2;
+
+    private static final int MOUSE_TYPE_MASK = 0x7;
+
+    private static final int MOUSE_BUTTON_LEFT = 0x01;
+    private static final int MOUSE_BUTTON_RIGHT = 0x02;
+
+    private static final int MASK_MOVE = MOUSE_TYPE_MOVE;
 
     private static final long LONG_PRESS_MS = 480;
+    private static final float TOUCH_SLOP_DP = 8f;
 
     private SurfaceView surfaceView;
     private TextView statusView;
@@ -68,7 +81,9 @@ public class RustDeskEmbeddedActivity extends Activity implements SurfaceHolder.
 
     private float downX;
     private float downY;
-    private boolean longPressFired;
+    // Which button the host currently holds down because of this gesture, if any.
+    private boolean leftHeld;
+    private boolean rightHeld;
     private Runnable longPressRunnable;
 
     @Override
@@ -186,6 +201,7 @@ public class RustDeskEmbeddedActivity extends Activity implements SurfaceHolder.
         long frames = 0;
         long framesSinceReport = 0;
         long lastReport = System.currentTimeMillis();
+        long lastRequest = 0;
         boolean requested = false;
         String current = sessionId;
 
@@ -195,10 +211,17 @@ public class RustDeskEmbeddedActivity extends Activity implements SurfaceHolder.
                 setStatus("RustDesk: session closed by the host");
                 break;
             }
-            if (state == 2 && !requested) {
+            long now = System.currentTimeMillis();
+            if (state == 2 && frames == 0 && now - lastRequest >= 2000) {
                 // The host captures nothing until it is asked to: without this the session is
-                // connected, silent and frameless.
+                // connected, silent and frameless. The request has to be repeated, because the
+                // first one races the authentication: `state` reports the peer as connected as
+                // soon as the socket is up, while the host only starts capturing once its
+                // LoginResponse has been accepted — a request sent before that is dropped, and
+                // the session then stays silent forever. Asking again until a frame arrives
+                // costs one message every two seconds, and stops as soon as pixels come.
                 RustDeskNative.INSTANCE.requestDisplay(current, 0);
+                lastRequest = now;
                 requested = true;
                 setStatus("RustDesk: connected, waiting for the first frame");
             }
@@ -226,7 +249,6 @@ public class RustDeskEmbeddedActivity extends Activity implements SurfaceHolder.
                 }
             }
 
-            long now = System.currentTimeMillis();
             long elapsed = now - lastReport;
             if (elapsed >= 1000) {
                 int fps = (int) (framesSinceReport * 1000 / elapsed);
@@ -289,10 +311,15 @@ public class RustDeskEmbeddedActivity extends Activity implements SurfaceHolder.
     // ------------------------------------------------------------------ input
 
     /**
-     * Pointer mapping: one finger moves the pointer, a brief touch clicks left, a long press
-     * clicks right, a drag after the long press drags with the right button held.
+     * Pointer mapping: one finger moves the pointer, a brief touch clicks left, a swipe drags with
+     * the left button held, and a long press clicks right.
+     *
+     * The button is pressed only once the gesture is known: a tap presses and releases at the same
+     * point, a swipe presses at the point the drag started. Pressing on every touch-down would make
+     * a long press send a left click before the right one.
      */
     private void installTouchHandling() {
+        final float slop = TOUCH_SLOP_DP * getResources().getDisplayMetrics().density;
         surfaceView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent event) {
@@ -302,35 +329,78 @@ public class RustDeskEmbeddedActivity extends Activity implements SurfaceHolder.
                 }
                 switch (event.getActionMasked()) {
                     case MotionEvent.ACTION_DOWN:
+                        if (!insideFrame(event.getX(), event.getY())) {
+                            // The black letterbox around the desktop is not the remote screen;
+                            // clicking there would clamp onto its border.
+                            return false;
+                        }
                         downX = event.getX();
                         downY = event.getY();
-                        longPressFired = false;
+                        leftHeld = false;
+                        rightHeld = false;
+                        sendMouse(current, MASK_MOVE, downX, downY);
                         longPressRunnable = new Runnable() {
                             @Override
                             public void run() {
-                                longPressFired = true;
-                                sendMouse(current, MASK_RIGHT, downX, downY);
+                                longPressRunnable = null;
+                                rightHeld = true;
+                                sendMouse(current, mask(MOUSE_TYPE_DOWN, MOUSE_BUTTON_RIGHT), downX, downY);
                             }
                         };
                         surfaceView.postDelayed(longPressRunnable, LONG_PRESS_MS);
                         return true;
 
                     case MotionEvent.ACTION_MOVE:
-                        if (Math.abs(event.getX() - downX) > 8 || Math.abs(event.getY() - downY) > 8) {
+                        if (Math.abs(event.getX() - downX) > slop
+                                || Math.abs(event.getY() - downY) > slop) {
                             cancelLongPress();
-                            sendMouse(current, longPressFired ? MASK_RIGHT : MASK_MOVE,
+                            if (!leftHeld && !rightHeld) {
+                                // Past the slop this is a drag: the button has to go down before
+                                // the pointer moves, otherwise the host only sees a hover.
+                                leftHeld = true;
+                                sendMouse(current, mask(MOUSE_TYPE_DOWN, MOUSE_BUTTON_LEFT),
+                                        downX, downY);
+                            }
+                            sendMouse(current, heldButtonMask(MOUSE_TYPE_MOVE),
                                     event.getX(), event.getY());
                         }
                         return true;
 
                     case MotionEvent.ACTION_UP:
-                        boolean wasLong = longPressFired;
                         cancelLongPress();
-                        if (wasLong) {
+                        if (rightHeld) {
+                            rightHeld = false;
                             sendMouse(current, MASK_MOVE, event.getX(), event.getY());
+                            sendMouse(current, mask(MOUSE_TYPE_UP, MOUSE_BUTTON_RIGHT),
+                                    event.getX(), event.getY());
+                        } else if (leftHeld) {
+                            leftHeld = false;
+                            sendMouse(current, mask(MOUSE_TYPE_UP, MOUSE_BUTTON_LEFT),
+                                    event.getX(), event.getY());
                         } else {
-                            sendMouse(current, MASK_LEFT, event.getX(), event.getY());
+                            // A tap: press and release at the same point, which the host turns
+                            // into a click.
                             sendMouse(current, MASK_MOVE, event.getX(), event.getY());
+                            sendMouse(current, mask(MOUSE_TYPE_DOWN, MOUSE_BUTTON_LEFT),
+                                    event.getX(), event.getY());
+                            sendMouse(current, mask(MOUSE_TYPE_UP, MOUSE_BUTTON_LEFT),
+                                    event.getX(), event.getY());
+                        }
+                        return true;
+
+                    case MotionEvent.ACTION_CANCEL:
+                        // Without this a cancelled gesture leaves its button down on the host, and
+                        // the desktop then drags on every later move.
+                        cancelLongPress();
+                        if (rightHeld) {
+                            rightHeld = false;
+                            sendMouse(current, mask(MOUSE_TYPE_UP, MOUSE_BUTTON_RIGHT),
+                                    event.getX(), event.getY());
+                        }
+                        if (leftHeld) {
+                            leftHeld = false;
+                            sendMouse(current, mask(MOUSE_TYPE_UP, MOUSE_BUTTON_LEFT),
+                                    event.getX(), event.getY());
                         }
                         return true;
 
@@ -339,6 +409,32 @@ public class RustDeskEmbeddedActivity extends Activity implements SurfaceHolder.
                 }
             }
         });
+    }
+
+    /** Builds a mask: event type in the low three bits, button from bit three upwards. */
+    private static int mask(int type, int button) {
+        return type | (button << 3);
+    }
+
+    /** The mask of a move that keeps whatever button this gesture holds. */
+    private int heldButtonMask(int type) {
+        if (rightHeld) {
+            return mask(type, MOUSE_BUTTON_RIGHT);
+        }
+        if (leftHeld) {
+            return mask(type, MOUSE_BUTTON_LEFT);
+        }
+        return type;
+    }
+
+    /** True when the point falls inside the drawn desktop, not in the letterbox around it. */
+    private boolean insideFrame(float viewX, float viewY) {
+        float scale = drawnScale;
+        if (scale <= 0f || remoteWidth <= 0 || remoteHeight <= 0) {
+            return false;
+        }
+        return viewX >= drawnLeft && viewX < drawnLeft + remoteWidth * scale
+                && viewY >= drawnTop && viewY < drawnTop + remoteHeight * scale;
     }
 
     private void cancelLongPress() {
@@ -358,6 +454,12 @@ public class RustDeskEmbeddedActivity extends Activity implements SurfaceHolder.
         int y = (int) ((viewY - drawnTop) / scale);
         x = Math.max(0, Math.min(remoteWidth - 1, x));
         y = Math.max(0, Math.min(remoteHeight - 1, y));
+        if ((mask & MOUSE_TYPE_MASK) != MOUSE_TYPE_MOVE) {
+            // Un geste se lit dans ce journal : un appui puis un relâchement par clic, et rien
+            // d'autre. Les mouvements sont tus, ils arrivent par dizaines par seconde.
+            Log.d(TAG, "press type=" + (mask & MOUSE_TYPE_MASK) + " button=" + (mask >> 3)
+                    + " at " + x + "," + y);
+        }
         RustDeskNative.INSTANCE.mouse(id, mask, x, y);
     }
 
