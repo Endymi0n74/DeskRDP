@@ -56,6 +56,25 @@ abandonnée, et la raison est dans les binaires livrés :
   que changer la taille de ce bureau. RDP n'expose donc pas le second écran du poste dans ce fork.
   C'est écrit tel quel dans le README (FR et EN) pour ne pas promettre l'inverse.
 
+### Reconnexion automatique (1.14, en cours)
+
+- `bVNC/.../input/ReconnectPolicy.java` : table pure `2 s, 5 s, 10 s, 20 s, 30 s`, `MAX_ATTEMPTS = 5`,
+  testée par `ReconnectPolicyTest` (`./gradlew :bVNC:testDebugUnitTest --tests
+  "com.iiordanov.bVNC.input.ReconnectPolicyTest"`).
+- `RemoteCanvasHandler` : `RDP_CONNECT_FAILURE` ne quitte plus, il programme un message interne
+  `MSG_RECONNECT` (0x5243) ; ce message rappelle `initializeConnection()` puis `setParameters(...)`,
+  comme le fait déjà `REINIT_SESSION`. `RDP_UNABLE_TO_CONNECT` ne consomme une étape de plus que si
+  une reconnexion est déjà en cours (`reconnectAttempts > 0`) : une première connexion ratée garde
+  son message immédiat, sinon un mot de passe faux boucherait sur cinq essais. Le compteur est remis
+  à zéro à `GRAPHICS_SETTINGS_RECEIVED`, seul signal qui prouve que la session est de nouveau vivante.
+- **Pas encore mesuré de bout en bout** : couper le réseau pendant une session RDP suppose une
+  session ouverte, donc le mot de passe du poste — que l'agent n'a pas. Vérifié à la place : les
+  tests de la politique, la compilation, l'installation, et le fait que le chemin normal est intact
+  (appui sur l'accès → dialogue d'identifiants RDP, certificat déjà accepté). Pour finir la mesure :
+  saisir le mot de passe une fois avec « Conserver » coché, puis couper le Wi-Fi ; le journal doit
+  montrer `Scheduling reconnect n in Xs` à 2, 5, 10, 20, 30 s, puis le dialogue d'échec au 5e.
+- `versionCode` 6, `versionName` 1.14-dualdesk : **non publiée** tant que la mesure manque.
+
 ## Construire (état 29/10/2026)
 
 ```bash

@@ -12,6 +12,7 @@ import android.os.Message;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
@@ -42,6 +43,20 @@ import java.util.ArrayList;
 
 public class RemoteCanvasHandler extends Handler implements HttpsFileDownloader.OnDownloadFinishedListener {
     private static final String TAG = "RemoteCanvasHandler";
+
+    /**
+     * Message réémis par le handler lui-même pour relancer la session après une coupure. La valeur
+     * est hors de la plage de {@link RemoteClientLibConstants}, qui occupe les petits entiers.
+     */
+    private static final int MSG_RECONNECT = 0x5243;
+
+    /**
+     * Tentatives de reconnexion écoulées depuis que la session était vivante. Remis à zéro dès
+     * qu'une session aboutit (voir GRAPHICS_SETTINGS_RECEIVED) : une coupure ultérieure a droit à
+     * la même série de temporisations, elle ne part pas du budget déjà consommé.
+     */
+    private int reconnectAttempts = 0;
+
     private final Context context;
     private final RemoteCanvas c;
     RemoteConnection remoteConnection;
@@ -355,6 +370,22 @@ public class RemoteCanvasHandler extends Handler implements HttpsFileDownloader.
         );
     }
 
+    /**
+     * Programme la prochaine tentative et dit à l'utilisateur quand elle aura lieu.
+     *
+     * Le message est un toast plutôt qu'une boîte de dialogue : une coupure Wi-Fi passagère se
+     * répare toute seule, et une boîte à valider à chaque hoquet serait pire que le hoquet.
+     */
+    private void scheduleReconnect() {
+        reconnectAttempts++;
+        int seconds = ReconnectPolicy.delaySecondsFor(reconnectAttempts);
+        Log.i(TAG, "Scheduling reconnect " + reconnectAttempts + " in " + seconds + "s");
+        removeMessages(MSG_RECONNECT);
+        Toast.makeText(context, context.getString(R.string.reconnecting_in, seconds,
+                reconnectAttempts, ReconnectPolicy.MAX_ATTEMPTS), Toast.LENGTH_LONG).show();
+        sendEmptyMessageDelayed(MSG_RECONNECT, ReconnectPolicy.delayMillisFor(reconnectAttempts));
+    }
+
     private void dismissProgressDialog() {
         if (remoteConnection.pd != null && remoteConnection.pd.isShowing()) {
             try {
@@ -489,13 +520,31 @@ public class RemoteCanvasHandler extends Handler implements HttpsFileDownloader.
                 break;
             case RemoteClientLibConstants.RDP_CONNECT_FAILURE:
                 if (remoteConnection.maintainConnection) {
-                    remoteConnection.showFatalMessageAndQuit(context.getString(R.string.error_rdp_connection_failed));
+                    // Session perdue après avoir été établie : on la relance au lieu de quitter.
+                    if (ReconnectPolicy.shouldRetry(reconnectAttempts)) {
+                        scheduleReconnect();
+                    } else {
+                        remoteConnection.showFatalMessageAndQuit(context.getString(R.string.error_rdp_connection_failed));
+                    }
                 }
                 break;
             case RemoteClientLibConstants.RDP_UNABLE_TO_CONNECT:
                 if (remoteConnection.maintainConnection) {
-                    remoteConnection.showFatalMessageAndQuit(context.getString(R.string.error_rdp_unable_to_connect));
+                    // Une tentative de reconnexion qui échoue à son tour consomme l'étape suivante ;
+                    // une première connexion ratée garde le comportement d'avant (message immédiat),
+                    // sinon un mot de passe faux boucherait sur cinq essais inutiles.
+                    if (reconnectAttempts > 0 && ReconnectPolicy.shouldRetry(reconnectAttempts)) {
+                        scheduleReconnect();
+                    } else {
+                        remoteConnection.showFatalMessageAndQuit(context.getString(R.string.error_rdp_unable_to_connect));
+                    }
                 }
+                break;
+            case MSG_RECONNECT:
+                Log.i(TAG, "RECONNECT attempt " + reconnectAttempts + " of " + ReconnectPolicy.MAX_ATTEMPTS);
+                remoteConnection.initializeConnection();
+                c.setParameters(remoteConnection.getRfbConn(), connection, this,
+                        remoteConnection.getPointer(), setModes);
                 break;
             case RemoteClientLibConstants.RDP_AUTH_FAILED:
                 if (remoteConnection.maintainConnection) {
@@ -634,6 +683,9 @@ public class RemoteCanvasHandler extends Handler implements HttpsFileDownloader.
                 break;
             case RemoteClientLibConstants.GRAPHICS_SETTINGS_RECEIVED:
                 Log.i(TAG, "GRAPHICS_SETTINGS_RECEIVED");
+                // La session est de nouveau vivante : la prochaine coupure repart de la première
+                // temporisation.
+                reconnectAttempts = 0;
                 dismissProgressDialog();
                 synchronized (remoteConnection.getRfbConn()) {
                     remoteConnection.graphicsSettingsReceived = true;

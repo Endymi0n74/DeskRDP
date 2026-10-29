@@ -216,6 +216,7 @@
     <string name="error_pick_correct_item">Veuillez vous assurer d\'avoir sélectionné le bon élément dans Type de connexion.</string>
     <string name="error_rdp_authentication_failed">Échec de l\'authentification RDP ! Veuillez vérifier le nom d\'utilisateur et le mot de passe RDP, puis réessayez.</string>
     <string name="error_rdp_connection_failed">Échec de la connexion RDP ! La connectivité réseau a été interrompue, le serveur RDP a été éteint ou désactivé, ou votre session a été prise en charge par quelqu\'un d\'autre.</string>
+    <string name="reconnecting_in">Connexion perdue. Nouvelle tentative dans %1$d s (essai %2$d sur %3$d).</string>
     <string name="error_rdp_unable_to_connect">Impossible de se connecter au serveur RDP ! Veuillez vous assurer que le paramètre Serveur RDP est correct, que le serveur est allumé, que RDP est activé et que le serveur est sur le même réseau que cet appareil.</string>
     <string name="error_security_type">Le serveur n\'a proposé aucun type de sécurité pris en charge.</string>
     <string name="error_spice_unable_to_connect">Impossible de se connecter ou de s\'authentifier. Veuillez vérifier l\'adresse du serveur et le port.</string>

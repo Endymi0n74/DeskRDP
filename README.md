@@ -37,6 +37,10 @@ Tout ce que fait aRDP, sous le nom DualDesk :
 - **Gestes** : appui bref = clic, glissement = glisser avec le bouton gauche tenu, appui long = clic
   droit, pincement = zoom. Hors de la bande du bureau distant, l'appui est ignoré plutôt que ramené
   sur le bord.
+- **Reconnexion automatique** : une session coupée (Wi-Fi qui saute, poste qui redémarre) est
+  relancée toute seule — 2 s, puis 5, 10, 20 et 30 s, cinq essais en tout, avec un message qui dit
+  quand la tentative suivante aura lieu. Une première connexion ratée garde son message immédiat :
+  cinq essais sur un mot de passe faux n'aideraient personne.
 
 ### Limite connue : plusieurs écrans côté poste
 
@@ -129,6 +133,10 @@ Everything aRDP does, under the DualDesk name:
 - **Clipboard**: text, both ways.
 - **Gestures**: brief touch = click, swipe = drag with the left button held, long press = right click,
   pinch = zoom. Outside the remote desktop band, the touch is ignored rather than clamped to the edge.
+- **Automatic reconnection**: a dropped session (Wi-Fi hiccup, host reboot) is restarted on its own —
+  2 s, then 5, 10, 20 and 30 s, five attempts in all, with a message saying when the next one will
+  happen. A first connection that fails keeps its immediate message: five attempts against a wrong
+  password would help nobody.
 
 ### Known limit: several screens on the host
 
