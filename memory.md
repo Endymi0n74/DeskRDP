@@ -1241,3 +1241,32 @@ Deux défauts trouvés en installant l'APK arm64 publié sur le POCO (Android 16
     pendant l'extinction est noire. `input keyevent 224` réveille sans toucher au verrou.
   - Chercher un élément par `uiautomator dump` puis `grep` : le XML tient sur **une** ligne, donc
     découper sur `>` avec `tr` ne marche pas — parser les `<node …>` en Python.
+
+## 1.12 : README réécrit et release publiée par le script (29/10)
+
+- **Le README est passé de 732 à 204 lignes.** Il mélangeait quatre documents : présentation, manuel
+  de signature, recette de compilation, et la documentation entière de l'amont recopiée après un
+  « # Intro ». Il ne garde que le parcours d'un utilisateur — ce que c'est, installer, ce qu'elle
+  fait, construire, publier, licence — en français puis en anglais, et renvoie à `docs/`.
+- **Le détail opérationnel a déménagé dans `docs/PUBLICATION.md`** (clé, sauvegarde, contrôle de
+  signature, chaîne `publish-release.sh`, pièges de `gh`). Avant d'écrire un nouveau document, regarder
+  `docs/` : `RUSTDESK-NATIF.md` portait déjà le détail du cœur, c'est le même partage.
+- **La documentation de l'amont n'est plus recopiée**, seulement liée. Elle n'est pas à nous et
+  vieillissait ici.
+- **Publication faite par le script, comme prévu** : `publish-release.sh --dry-run` construit,
+  contrôle la signature et laisse les APK dans `build/outputs/apk/release` ; `--skip-build` les
+  réutilise et ne fait que la copie, le tag et la release. C'est le chemin le plus court quand la
+  compilation n'a pas à être rejouée — 50 s de construction incrémentale, un seul build.
+  - `cœur` : `D:\Codex\dualdesk-artifacts\rustdesk\librustdesk.so` (32 868 352 o) et
+    `libc++_shared.so` (1 374 336 o), passés par `DUALDESK_RUSTDESK_LIB` et `DUALDESK_LIBCXX`.
+- **Release `v1.12`** : tag sur `2d138df6` (= `HEAD` de `master`), 
+  `dualdesk-app-arm64-v8a-release.apk` 75 950 636 o `301603c2f69a6edda0e97c50945b5fec83c2292f0e32278a1b8fedf53104ab6a`
+  et `dualdesk-app-universal-release.apk` 190 633 686 o `d28b489976acf5dbc0ea0dd3d08f13cfd593289c24d10055552f7692af5196cd`.
+  Vérifié après coup : l'APK arm64 retéléchargé porte l'empreinte des notes, `aapt2 dump badging`
+  répond `versionCode='4' versionName='1.12-dualdesk'`, et les deux fichiers natifs sont bien dans
+  l'archive (`librustdesk.so` 32 868 352 o, `libc++_shared.so` 1 374 336 o).
+- **1.12 ne change aucun comportement** : le code est celui de la 1.11 corrigée, seul le
+  `versionCode` bouge (3 → 4) pour que les appareils distinguent les deux builds. Le dire dans les
+  notes évite qu'un utilisateur cherche la nouveauté fonctionnelle.
+- **Rendu vérifié sur GitHub** : la page du dépôt et celle de la release affichent bien les titres,
+  le tableau des fichiers et les liens relatifs vers `docs/`.
