@@ -1004,3 +1004,21 @@ RustDesk **dans son processus**. Il est maintenant ici, dans le fork, et `dualde
 - **Licence** : le cœur est AGPL-3.0 (`LICENCE-RustDesk.txt`). Une build qui l'embarque est
   distribuée sous AGPL-3.0 **dans son ensemble** ; sans le cœur, elle reste GPLv3. C'est la première
   fois que le fork change de licence selon la build : à dire clairement au moment de publier.
+
+### Publication de la 1.11 — 29/10/2026
+
+La 1.11 est publiée (`https://github.com/Endymi0n74/DualDesk/releases/tag/v1.11`), tag sur
+`17802f6c`, deux APK signés de la clé de publication : arm64-v8a 75 797 212 o
+(`5fe11ef7…`) et universel 190 480 273 o (`9d7f7099…`).
+
+- **Le piège évité** : `publish-release.sh` compilait sans `-Pdualdesk.rustdeskLib`. Les notes
+  extraites du journal annonçaient le cœur embarqué, et les APK ne l'avaient pas — une release
+  signée, installable, et fausse sur son point principal. Le script accepte maintenant
+  `--rustdesk-lib <fichier>` ou `DUALDESK_RUSTDESK_LIB`, passe la propriété à Gradle et **relit
+  l'APK** (`zipfile`, entrée `lib/arm64-v8a/librustdesk.so`) avant de copier quoi que ce soit. Il
+  écrit aussi dans les notes si le cœur est présent ou non, au lieu de le supposer.
+- **Repère de taille** : le `.so` pèse 32 868 352 o et l'APK arm64 passe de 62,4 Mo (1.10) à
+  75,8 Mo. Un arm64 autour de 62 Mo est une build sans cœur.
+- `assembleRelease` complet : 1 min 48 à chaud, cinq splits plus l'universel.
+- La licence de la release est dite explicitement (AGPL-3.0 pour cette build), la mention n'est
+  pas laissée au seul journal.

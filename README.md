@@ -8,9 +8,8 @@ RustDesk accesses as well. The state of each feature and the measurements behind
 ## This repository is the product
 
 **DualDesk ships from here.** This fork is where versions are built, signed with the project's
-publication key and published — 1.10 on the
-[Releases](https://github.com/Endymi0n74/DualDesk/releases) page, 1.11 committed and not yet
-released. It was called `ardp` until 28/10/2026: GitHub redirects
+publication key and published — 1.10 and 1.11 on the
+[Releases](https://github.com/Endymi0n74/DualDesk/releases) page. It was called `ardp` until 28/10/2026: GitHub redirects
 the old URL, so existing clones keep fetching. It is also the one whose export carries the sealed
 RustDesk passwords behind a passphrase, so they can be restored on another device.
 
@@ -28,8 +27,8 @@ here.
 ## Ce dépôt est le produit
 
 **DualDesk est livré d'ici.** Ce fork est l'endroit où les versions sont construites, signées avec la
-clé de publication du projet et publiées — la 1.10 sur la page
-[Releases](https://github.com/Endymi0n74/DualDesk/releases), la 1.11 commitée et pas encore publiée.
+clé de publication du projet et publiées — la 1.10 et la 1.11 sur la page
+[Releases](https://github.com/Endymi0n74/DualDesk/releases).
 Il s'appelait `ardp` jusqu'au 28/10/2026 : GitHub redirige l'ancienne URL, les clones existants
 continuent donc de fonctionner. C'est aussi celui dont l'export emporte les mots de passe RustDesk
 scellés derrière une phrase de passe, donc restaurables sur un autre appareil.
