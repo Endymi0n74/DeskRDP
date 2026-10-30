@@ -30,6 +30,21 @@ le dépôt s'appellent **DeskRDP** depuis la 1.16.
 - **Piège de grep** : `grep -rIl` à la racine du dépôt dépasse les 30 s (les `.so` de FreeRDP) ;
   filtrer avec `--include` et les dossiers de sources.
 
+### Publication de la 1.16 (30/10/2026)
+
+- Commit du renommage `87e08456`, poussé sur `Endymi0n74/DeskRDP`. Release `v1.16` publiée avec les
+  deux APK signés, empreintes relevées sur GitHub et identiques à celles calculées localement : arm64
+  62 423 332 o (`b5c281dd…`), universel 177 106 425 o (`af1565be…`).
+- **`publish-release.sh` trouve le JDK tout seul… sauf ici.** Sa liste de candidats ne contient pas
+  `D:\Codex\tools\jdk-21`, et le `JAVA_HOME` de la machine pointe sur un JRE **11** — il faut donc
+  exporter `JAVA_HOME=/d/Codex/tools/jdk-21` avant de lancer le script, sinon il s'arrête sur « aucun
+  JDK 21+ trouvé ».
+- `_released/` est entièrement ignoré par git (`.gitignore:224`) : les notes de version produites par
+  le script ne se commitent pas, seul le journal et cette mémoire portent la trace.
+- **Pas encore vérifié sur le POCO** : il n'était pas branché (`adb devices` vide). La 1.16 s'installe
+  à côté de la 1.15 (`com.deskrdp.rdp` ≠ `com.dualdesk.rdp`) — restent à voir le libellé, l'icône et
+  un accès RDP ressaisi une fois.
+
 > **1.13 (29/10/2026) — décision : retour au RDP seul.** RustDesk est retiré du fork. Les sections
 > qui décrivent la partie RustDesk ci-dessous sont de l'**histoire** : elles restent pour expliquer
 > ce qui a été essayé et pourquoi ça s'arrête, pas pour décrire le code actuel. Où en est le dépôt :
