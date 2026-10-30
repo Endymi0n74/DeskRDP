@@ -180,6 +180,28 @@ abandonnée, et la raison est dans les binaires livrés :
   - la barre flottante de session (`OnTouchViewMover`) avale les appuis : viser la bande d'image,
     repérée par la couleur du témoin, et non des coordonnées figées qui changent avec le zoom.
 
+### 1.15 publiée, et ce que le téléphone exécute (30/10, 07:16)
+
+- **Publication** : `./publish-release.sh` a construit (19 s), contrôlé la signature, tagué `v1.15`
+  sur `5cdcb5d7` et créé la release `DualDesk 1.15`, *Latest*. Actifs : arm64 62 423 364 o
+  `99a4c39dec88b696349ef7f71ba6f49735c59dd6320c542693c3ebf8f1b3e757`, universel 177 106 447 o
+  `4b6ca62cb85b02e1dd52053b4d1c46958150d25f1a9ce75192c348e591c2e59f`.
+- **Rien de tout cela n'a été cru sur parole** : l'arm64 retéléchargé porte l'empreinte des notes et
+  `aapt2 dump badging` y lit `versionCode='7' versionName='1.15-dualdesk'`.
+- **Le téléphone exécute exactement le binaire publié** : `pm path` puis extraction du `classes.dex`
+  de l'APK *installé* donne `99d863f4117a2d3c888c81bbbe956df48b309b899b58b538d79b9e8dd9a0f486`, le
+  même que celui de l'actif de la release. Les deux APK diffèrent de quelques octets (horodatages),
+  le code est identique. C'est la vérification la plus directe qui existe entre « ce qui est en
+  ligne » et « ce qui tourne sur l'appareil ».
+- **Piège MIUI** : impossible d'installer une version publiée *plus ancienne* que celle déjà
+  installée. `adb install -r -d` et `pm install -r -d` échouent tous deux
+  (`INSTALL_FAILED_VERSION_DOWNGRADE: Update version code 6 is older than current 7`), y compris
+  avec `--downgrade`. Le seul chemin est désinstaller — donc perdre l'accès enregistré et le mot de
+  passe — puis installer. À annoncer avant, jamais à faire d'office.
+- **Vérifier un APK publié sans l'installer** : extraire ses `classes*.dex` et y chercher un marqueur
+  du code concerné. Pour la 1.14 : `ReconnectPolicy` et la chaîne `Scheduling reconnect` présentes,
+  `dragPending` absente — le binaire est bien celui de la reconnexion, pas un build postérieur.
+
 ## Construire (état 29/10/2026)
 
 ```bash
