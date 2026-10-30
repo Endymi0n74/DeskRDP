@@ -107,6 +107,17 @@ abandonnée, et la raison est dans les binaires livrés :
 - **Conséquence à connaître** : les cinq essais couvrent ~70 s au total. Une coupure plus longue se
   termine sur le retour à la grille, pas sur une reprise silencieuse — le réseau revenu à 06:47:00
   n'a pas ressuscité la session, le budget étant déjà dépensé à 06:46:46.
+- **Publiée le 30/10 à 06:53** par `./publish-release.sh` : tag `v1.14` sur `08ecb831`, release
+  `DualDesk 1.14` marquée *Latest*, `dualdesk-app-arm64-v8a-release.apk` 62 423 245 o
+  `3a708e382f54a7d125b980091a3cf6878bd9e426ff40164a9518e0fd22d6f7ad` et
+  `dualdesk-app-universal-release.apk` 177 106 334 o
+  `dc3511d8eca6b242ad220ee7824d4a616bd5eb6659236c2996d507b19cc63d18`. Vérifié après coup :
+  l'arm64 retéléchargé porte l'empreinte des notes, `aapt2 dump badging` répond
+  `versionCode='6' versionName='1.14-dualdesk'`, et le corps de la release contient bien les deux
+  sections, le tableau des fichiers et le certificat.
+- **Piège `gh`** : depuis `/d/Codex/ardp`, `gh release view` sans `-R` interroge
+  `iiordanov/remote-desktop-clients` (le dépôt parent résolu par `gh`) et répond « release not found »
+  alors que la release existe. Toujours passer `-R Endymi0n74/DualDesk` pour vérifier.
 - **Deux détails de terrain** : la première perte est immédiate (coupure locale, pas de délai TCP),
   et chaque relance échoue aussi instantanément sans réseau — d'où des paliers collés les uns aux
   autres dans le journal ; c'est le délai programmé, pas la durée de la tentative, qui espace les
