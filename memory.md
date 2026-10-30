@@ -41,9 +41,34 @@ le dépôt s'appellent **DeskRDP** depuis la 1.16.
   JDK 21+ trouvé ».
 - `_released/` est entièrement ignoré par git (`.gitignore:224`) : les notes de version produites par
   le script ne se commitent pas, seul le journal et cette mémoire portent la trace.
+- **Vérifié sur émulateur** faute de POCO branché, avec l'APK **universel de la release** (empreinte
+  `af1565be…` recontrôlée avant installation) : Android 14 x86_64, `com.deskrdp.rdp` versionCode 8 /
+  `1.16-deskrdp`. La grille s'affiche sous le titre « DeskRDP », le lanceur montre l'icône à deux
+  écrans et le libellé « DeskRDP », l'ajout d'un accès ouvre bien le formulaire **RDP** (type « RDP »,
+  port 3389, champs RDP Server/Username/Domain/Password) — donc `Utils.isRdp()` reconnaît le nouveau
+  paquet. Une tentative de connexion a chargé `libfreerdp-android.so` x86_64 (« Successfully loaded
+  native library. H264 is supported »), négocié les canaux `rdpdr`/`rdpsnd`/`cliprdr`/`drdynvc` puis
+  échoué proprement sur `OnConnectionFailure` : rien ne manque à l'x86_64 de l'APK universel.
+  Captures : `preuve-poco/1.16-emulateur-0{1..4}-*.png`.
+- **Le poste n'a pas d'écoute RDP** : `netstat` ne montre que `:33899`, donc une session réelle n'est
+  pas reproductible depuis l'émulateur tant que le serveur RDP de Windows n'est pas activé.
 - **Pas encore vérifié sur le POCO** : il n'était pas branché (`adb devices` vide). La 1.16 s'installe
-  à côté de la 1.15 (`com.deskrdp.rdp` ≠ `com.dualdesk.rdp`) — restent à voir le libellé, l'icône et
-  un accès RDP ressaisi une fois.
+  à côté de la 1.15 (`com.deskrdp.rdp` ≠ `com.dualdesk.rdp`) — restent à voir le rendu à l'écran et un
+  accès RDP ressaisi une fois.
+
+### Émulateur : la recette (30/10/2026)
+
+- AVD sous `D:\Codex\android-avd` (`avd/`, `user/`), image `system-images;android-34;default;x86_64`
+  déjà présente dans `D:\android-sdk`. Rien n'est écrit sous `C:\` : `avdmanager` et l'émulateur
+  reçoivent `ANDROID_AVD_HOME` et `ANDROID_USER_HOME` pointant sur `D:\Codex`.
+- **`avdmanager.bat` a besoin du JDK 21** : avec le Java 11 du PATH il meurt en
+  `UnsupportedClassVersionError` (classe 61.0). Exporter `JAVA_HOME=/d/Codex/tools/jdk-21`.
+- Lancement sans fenêtre, ce qui suffit pour `exec-out screencap` :
+  `emulator -avd DeskRDP34 -no-window -no-audio -no-boot-anim -no-snapshot -gpu swiftshader_indirect
+  -port 5556`. WHPX est disponible ; démarrage complet en ~40 s.
+- Les coordonnées `input tap` doivent venir de `uiautomator dump` (l'image rendue n'est pas à
+  l'échelle du `wm size`) ; sans `MSYS_NO_PATHCONV=1`, Git Bash transforme `/sdcard/ui.xml` en chemin
+  Windows et `cat` échoue.
 
 > **1.13 (29/10/2026) — décision : retour au RDP seul.** RustDesk est retiré du fork. Les sections
 > qui décrivent la partie RustDesk ci-dessous sont de l'**histoire** : elles restent pour expliquer
