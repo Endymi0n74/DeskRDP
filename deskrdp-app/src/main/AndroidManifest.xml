@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:installLocation="auto"
-    android:versionCode="7"
-    android:versionName="1.15-dualdesk">
+    android:versionCode="8"
+    android:versionName="1.16-deskrdp">
 
     <uses-permission tools:node="removeAll" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -23,15 +23,15 @@
     <application
         android:name="com.iiordanov.bVNC.App"
         android:allowBackup="false"
-        android:icon="@mipmap/ic_dualdesk"
-        android:label="DualDesk"
+        android:icon="@mipmap/ic_deskrdp"
+        android:label="DeskRDP"
         android:theme="@style/AppThemeDayNight"
         tools:replace="android:label,android:theme">
         <activity
             android:name="com.undatech.opaque.ConnectionGridActivity"
             android:configChanges="keyboardHidden"
             android:exported="true"
-            android:label="DualDesk"
+            android:label="DeskRDP"
             android:theme="@style/AppThemeDayNight"
             android:resizeableActivity="true"
             >
@@ -46,7 +46,7 @@
         <activity
             android:name="com.iiordanov.bVNC.aRDP"
             android:configChanges="orientation|keyboardHidden"
-            android:label="DualDesk"
+            android:label="DeskRDP"
             android:resizeableActivity="true"
             android:screenOrientation="fullUser"
             android:theme="@style/AppThemeDayNight"

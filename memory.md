@@ -1,8 +1,34 @@
-# ardp — mémoire du fork DualDesk
+# ardp — mémoire du fork DeskRDP
 
 Fork de [iiordanov/remote-desktop-clients](https://github.com/iiordanov/remote-desktop-clients) (GPLv3),
 cloné le 26/10/2026 (v6.4.9, versionCode 116490). But : garder le client RDP mature (FreeRDP 2.11.7,
-RDPGFX + H.264 MediaCodec) et y greffer la partie DualDesk — les accès **RustDesk**.
+RDPGFX + H.264 MediaCodec). Le dossier local s'appelle toujours `ardp`, d'où ce titre ; le projet et
+le dépôt s'appellent **DeskRDP** depuis la 1.16.
+
+> **1.16 (30/10/2026) — le projet s'appelle DeskRDP.** Il ne fait que du RDP depuis la 1.13, et
+> « DualDesk » ne décrivait plus rien. Voir « Le renommage en 1.16 » juste en dessous.
+
+## Le renommage en 1.16 (30/10/2026)
+
+- **Ce qui change de nom** : dépôt `Endymi0n74/DualDesk` → `Endymi0n74/DeskRDP`, module
+  `dualdesk-app` → `deskrdp-app`, `applicationId`/namespace `com.dualdesk.rdp` → `com.deskrdp.rdp`,
+  libellé et nom d'activité `DeskRDP`, icône `ic_dualdesk*` → `ic_deskrdp*`, couleur
+  `dualdesk_icon_background` → `deskrdp_icon_background`, APK `deskrdp-app-*.apk`, dossier de sortie
+  `_released/deskrdp`, `versionName` `1.16-deskrdp`, `versionCode` 8.
+- **Le « rdp » du paquet n'est pas décoratif.** `Utils.isRdp()` (`bVNC/…/Utils.java:297`) décide du
+  protocole à partir du seul nom de paquet (`contains("rdp")`). Un id sans « rdp » ferait démarrer
+  l'app en mode VNC. `com.deskrdp.rdp` le contient deux fois, par sécurité.
+- **Conséquence à ne pas oublier** : un nouvel `applicationId`, c'est une **autre application** pour
+  Android. La 1.16 s'installe à côté de la 1.15 au lieu de la remplacer, et rien ne migre les accès
+  enregistrés (la base est privée au paquet). Sur le POCO il faut donc ressaisir l'accès RDP, puis
+  désinstaller `com.dualdesk.rdp`.
+- **La clé de publication garde son nom** : `_keystore/dualdesk-release.jks`, alias `dualdesk`,
+  `CN=DualDesk`. Une signature est indépendante de l'`applicationId` ; la renommer obligerait à
+  réécrire le magasin, l'alias, le `CN` et l'archive de sauvegarde, pour un nom qu'aucun utilisateur
+  ne voit. C'est documenté dans `docs/PUBLICATION.md`.
+- **Aucun changement de comportement** : gestes, reconnexion, presse-papiers, rendu inchangés.
+- **Piège de grep** : `grep -rIl` à la racine du dépôt dépasse les 30 s (les `.so` de FreeRDP) ;
+  filtrer avec `--include` et les dossiers de sources.
 
 > **1.13 (29/10/2026) — décision : retour au RDP seul.** RustDesk est retiré du fork. Les sections
 > qui décrivent la partie RustDesk ci-dessous sont de l'**histoire** : elles restent pour expliquer
@@ -18,7 +44,7 @@ RDPGFX + H.264 MediaCodec) et y greffer la partie DualDesk — les accès **Rust
 - `Constants.CONN_TYPE_RETIRED = 6` : la valeur reste pour que le chargement de la liste retrouve les
   accès de 1.12 et les supprime (`ConnectionGridActivity.dropRetiredAccesses`, appelée depuis
   `loadSavedConnections`). Le nombre d'entrées retirées va au journal, pas à un message.
-- `dualdesk-app/build.gradle` n'a plus ni `rustdeskLib`, ni `libcxxShared`, ni `rustdeskJniDir`, ni la
+- `deskrdp-app/build.gradle` (alors `dualdesk-app`) n'a plus ni `rustdeskLib`, ni `libcxxShared`, ni `rustdeskJniDir`, ni la
   tâche `copieRustDeskLib`. `bVNC/build.gradle` n'a plus la dépendance Kotlin du JNI.
 - `publish-release.sh` n'a plus `--rustdesk-lib` ni `--libcxx`.
 - Licence : retour en **GPLv3**. `versionCode` 5, `versionName` 1.13-dualdesk.

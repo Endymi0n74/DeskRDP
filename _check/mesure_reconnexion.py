@@ -20,7 +20,7 @@ import subprocess
 import sys
 import time
 
-APP = "com.dualdesk.rdp"
+APP = "com.deskrdp.rdp"
 CANVAS = "com.iiordanov.bVNC.RemoteCanvasActivity"
 TAG = "RemoteCanvasHandler"
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Test temoin GFX cote poste : la machine annonce-t-elle le canal graphique RDP ?
 
-Le probleme mesure : le client DualDesk negocie le canal GFX, envoie son annonce de
+Le probleme mesure : le client DeskRDP negocie le canal GFX, envoie son annonce de
 capacites, puis **rien ne revient** et aucune image n'arrive. Deux lectures possibles :
 le poste n'annonce pas de GFX, ou le client annonce mal. Un troisieme client tranche.
 
@@ -137,7 +137,7 @@ def verdict(avant: dict, apres: dict, lignes: list[str], session: str) -> str:
     if client_confirm:
         return ("Le POSTE ANNONCE le graphique : le temoin a recu un CapsConfirm"
                 + (" avec AVC disponible." if client_avc else " (sans AVC apparent).")
-                + " L'echec observe avec DualDesk vient donc du client.")
+                + " L'echec observe avec DeskRDP vient donc du client.")
     if gfx_ouvert:
         return ("Le POSTE ouvre bien le canal dynamique mais le temoin n'a pas recu de "
                 "CapsConfirm : la reponse graphique du poste est en cause, pas notre client.")

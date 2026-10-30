@@ -19,7 +19,7 @@ import subprocess
 import sys
 import time
 
-APP = "com.dualdesk.rdp"
+APP = "com.deskrdp.rdp"
 PATH = "save"
 for _arg in sys.argv:
     if _arg.startswith("--package="):

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Teal de l'accent de l'application : l'icône et l'interface se répondent. -->
-    <color name="dualdesk_icon_background">#0E6E6E</color>
+    <color name="deskrdp_icon_background">#0E6E6E</color>
 </resources>

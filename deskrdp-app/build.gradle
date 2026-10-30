@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 
 /*
- * DualDesk application module.
+ * DeskRDP application module.
  *
  * Same code base and same resources as freeaRDP-app: the RDP client, its settings screens and
  * its resources live in :bVNC, and every application variant in this repository is only a
@@ -9,7 +9,11 @@ apply plugin: 'com.android.application'
  * README: reconnection, the shortcut bar, the gestures and the framing of a wide desktop.
  *
  * The application id must keep the letters "rdp": Utils.isRdp() decides which protocol an
- * application speaks from its package name alone.
+ * application speaks from its package name alone. `com.deskrdp.rdp` satisfies that.
+ *
+ * The id changed in 1.16, when the project was renamed from DualDesk to DeskRDP: Android treats
+ * a new id as a new application, so 1.16 installs alongside 1.15 instead of over it, and the
+ * accesses saved under `com.dualdesk.rdp` are not carried across.
  */
 /*
  * Signature de publication.
@@ -75,7 +79,7 @@ android {
         targetCompatibility JavaVersion.VERSION_21
     }
 
-    namespace 'com.dualdesk.rdp'
+    namespace 'com.deskrdp.rdp'
 
     lint {
         disable 'Instantiatable'

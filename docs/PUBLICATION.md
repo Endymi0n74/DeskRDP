@@ -17,8 +17,14 @@ application.
   sont en clair : ce dossier ne se commite pas, ne part pas dans un artefact de construction et ne se
   colle nulle part.
 
+Le nom `dualdesk` de ces fichiers, de l'alias et du `CN` du certificat date du temps où
+l'application s'appelait DualDesk. Il est **volontairement conservé** : une signature ne dépend pas de
+l'`applicationId`, la renommer n'apporte rien et toucherait la seule chose qu'on ne peut pas
+reconstruire. La renommer par confort voudrait dire réécrire le magasin, l'alias, le `CN` et l'archive
+chiffrée de sauvegarde — pour un identifiant qu'aucun utilisateur ne voit.
+
 ```bash
-./gradlew :dualdesk-app:assembleRelease   # -> dualdesk-app/build/outputs/apk/release/
+./gradlew :deskrdp-app:assembleRelease   # -> deskrdp-app/build/outputs/apk/release/
 ```
 
 Si `_keystore/` manque (clone neuf, autre machine), la construction aboutit quand même mais les
@@ -68,7 +74,7 @@ garantir, et sa défaillance n'apparaît que sur le téléphone de l'utilisateur
 (`INSTALL_FAILED_UPDATE_INCOMPATIBLE`). D'où la dernière étape, avant tout envoi :
 
 ```bash
-./gradlew :dualdesk-app:verifieSignatureRelease
+./gradlew :deskrdp-app:verifieSignatureRelease
 ```
 
 Elle reconstruit, lit le certificat des deux APK et échoue si ce n'est pas la clé ci-dessus, en
@@ -89,7 +95,7 @@ copie, tag, release GitHub — et s'arrête au premier refus :
 ```
 
 La version n'est pas un argument : elle est lue dans `versionName` de
-`dualdesk-app/src/main/AndroidManifest.xml`, donc ce qui est publié est ce qui a été compilé. Avant
+`deskrdp-app/src/main/AndroidManifest.xml`, donc ce qui est publié est ce qui a été compilé. Avant
 de construire quoi que ce soit, il refuse un arbre sale, un commit absent de `origin/master`, une
 version dont le tag ou la release existe déjà, un `_keystore/` manquant, et une version sans section
 dans `CHANGELOG.md`. Les notes de version sont cette section du journal, plus le SHA-256 que le

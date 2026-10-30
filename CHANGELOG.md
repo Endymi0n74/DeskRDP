@@ -1,7 +1,37 @@
 # Journal des versions / Changelog
 
-Les versions publiées sont sur la page [Releases](https://github.com/Endymi0n74/DualDesk/releases).
-Published builds live on the [Releases](https://github.com/Endymi0n74/DualDesk/releases) page.
+Les versions publiées sont sur la page [Releases](https://github.com/Endymi0n74/DeskRDP/releases).
+Published builds live on the [Releases](https://github.com/Endymi0n74/DeskRDP/releases) page.
+
+## 1.16 — 30 octobre 2026
+
+### Français
+
+- **Le projet s'appelle DeskRDP.** Il ne fait que du RDP depuis la 1.13, et « DualDesk » ne décrivait
+  plus rien : ni deux bureaux, ni deux protocoles. Le nom change partout — dépôt, module
+  `deskrdp-app`, icône, libellé à l'écran, noms des APK publiés, page d'aide.
+- **Nouveau paquet `com.deskrdp.rdp`** (il doit contenir « rdp » : `Utils.isRdp()` déduit le
+  protocole du nom de paquet). Conséquence à connaître : Android voit une **autre application**. La
+  1.16 s'installe donc **à côté** de la 1.15, sans la remplacer, et les accès enregistrés ne sont pas
+  repris — il faut les ressaisir une fois, puis désinstaller l'ancienne.
+- **La signature ne change pas** : même clé, même certificat. Seul le nom du paquet diffère, ce qui
+  suffit à faire deux applications distinctes.
+- **Aucun changement de comportement** : ni les gestes, ni la reconnexion, ni le presse-papiers, ni
+  l'affichage ne bougent. `versionCode` 7 → 8.
+
+### English
+
+- **The project is now called DeskRDP.** It has been RDP-only since 1.13, and "DualDesk" no longer
+  described anything: not two desktops, not two protocols. The name changes everywhere — repository,
+  `deskrdp-app` module, icon, on-screen label, published APK names, help screen.
+- **New package `com.deskrdp.rdp`** (it must contain "rdp": `Utils.isRdp()` infers the protocol from
+  the package name). The consequence worth knowing: Android sees **another application**. 1.16
+  therefore installs **next to** 1.15, without replacing it, and saved accesses are not carried over —
+  enter them once more, then uninstall the old one.
+- **The signature does not change**: same key, same certificate. Only the package name differs, which
+  is enough to make two distinct applications.
+- **No behaviour change**: gestures, reconnection, clipboard and rendering are untouched.
+  `versionCode` 7 → 8.
 
 ## 1.15 — 30 octobre 2026
 

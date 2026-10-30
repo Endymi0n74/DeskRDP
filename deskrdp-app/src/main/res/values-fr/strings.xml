@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Ce que la variante DeskRDP fait de l'écran d'aide partagé et du nom de l'application.
+-->
+<resources>
+    <string name="action_rate_or_share_app">⭐ Aide et partage</string>
+    <string name="rdp_intro_title">DeskRDP : client RDP</string>
+</resources>

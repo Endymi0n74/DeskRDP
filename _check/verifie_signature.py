@@ -15,7 +15,7 @@ Usage :
     python _check/verifie_signature.py [apk...]
 
 Sans argument, il contrôle les deux fichiers publiés pour la 1.10 :
-`dualdesk-app-arm64-v8a-release.apk` et `dualdesk-app-universal-release.apk`.
+`deskrdp-app-arm64-v8a-release.apk` et `deskrdp-app-universal-release.apk`.
 Code de sortie : 0 si tout est conforme, 1 sinon, 2 si l'outillage manque.
 """
 import os
@@ -28,7 +28,7 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 RACINE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SORTIE = os.path.join(RACINE, "dualdesk-app", "build", "outputs", "apk", "release")
+SORTIE = os.path.join(RACINE, "deskrdp-app", "build", "outputs", "apk", "release")
 
 # Empreinte SHA-256 du certificat de la clé de publication (voir README, « Signing the release »).
 EMPREINTE_ATTENDUE = (
@@ -36,8 +36,8 @@ EMPREINTE_ATTENDUE = (
 )
 
 DEFAUT = [
-    os.path.join(SORTIE, "dualdesk-app-arm64-v8a-release.apk"),
-    os.path.join(SORTIE, "dualdesk-app-universal-release.apk"),
+    os.path.join(SORTIE, "deskrdp-app-arm64-v8a-release.apk"),
+    os.path.join(SORTIE, "deskrdp-app-universal-release.apk"),
 ]
 
 

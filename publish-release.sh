@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================
-# publish-release.sh — construire, contrôler et publier une version de DualDesk
+# publish-release.sh — construire, contrôler et publier une version de DeskRDP
 # ============================================================
 # Une seule commande, et dans cet ordre :
 #   1. contrôles d'avant-vol (clé, outillage, arbre propre, commit poussé, tag libre,
@@ -15,7 +15,7 @@
 # tag. C'est la raison d'être de ce fichier — l'étape 3 est la seule qu'une compilation ne sait
 # pas faire, et son échec ne se voit que sur le téléphone (`INSTALL_FAILED_UPDATE_INCOMPATIBLE`).
 #
-# La version vient du manifeste, pas d'un argument : `versionName="1.10-dualdesk"` donne la
+# La version vient du manifeste, pas d'un argument : `versionName="1.16-deskrdp"` donne la
 # version `1.10` et le tag `v1.10`. On ne peut donc pas publier une version qui n'est pas celle
 # qui est compilée.
 #
@@ -32,11 +32,11 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT"
 
-MANIFESTE="dualdesk-app/src/main/AndroidManifest.xml"
+MANIFESTE="deskrdp-app/src/main/AndroidManifest.xml"
 JOURNAL="CHANGELOG.md"
-SORTIE="dualdesk-app/build/outputs/apk/release"
-APK_ARM64="$SORTIE/dualdesk-app-arm64-v8a-release.apk"
-APK_UNIVERSEL="$SORTIE/dualdesk-app-universal-release.apk"
+SORTIE="deskrdp-app/build/outputs/apk/release"
+APK_ARM64="$SORTIE/deskrdp-app-arm64-v8a-release.apk"
+APK_UNIVERSEL="$SORTIE/deskrdp-app-universal-release.apk"
 PYTHON="${PYTHON:-python}"
 
 SEC_DRY_RUN=0
@@ -140,7 +140,7 @@ version_code="$(sed -n 's/.*android:versionCode="\([^"]*\)".*/\1/p' "$MANIFESTE"
 [ -n "$version_name" ] || die "versionName illisible dans $MANIFESTE."
 [ -n "$version_code" ] || die "versionCode illisible dans $MANIFESTE."
 
-# « 1.10-dualdesk » -> « 1.10 » : le suffixe fait partie de l'identité affichée, pas du numéro.
+# « 1.16-deskrdp » -> « 1.10 » : le suffixe fait partie de l'identité affichée, pas du numéro.
 VERSION="${version_name%%-*}"
 TAG="v$VERSION"
 DEST="$ROOT/_released/$TAG"
@@ -215,8 +215,8 @@ fi
 if [ "$SEC_SANS_BUILD" = "1" ]; then
   etape "construction ignorée (--skip-build) : les APK présents dans $SORTIE sont réutilisés"
 else
-  etape "construction : :dualdesk-app:assembleRelease"
-  ./gradlew :dualdesk-app:assembleRelease ||
+  etape "construction : :deskrdp-app:assembleRelease"
+  ./gradlew :deskrdp-app:assembleRelease ||
     die "la compilation a échoué : rien n'est copié, rien n'est publié."
 fi
 
@@ -285,13 +285,13 @@ corps="$(awk -v v="$VERSION" '
 [ -n "$corps" ] || die "la section $VERSION du journal est vide : rien à annoncer, rien à publier."
 
 {
-  printf '# DualDesk %s\n\n' "$VERSION"
+  printf '# DeskRDP %s\n\n' "$VERSION"
   printf '%s\n' "$corps"
   printf '\n## Fichiers / Files\n\n'
   printf '| Fichier / File | Taille / Size | SHA-256 |\n|---|---|---|\n'
   printf '%s' "$lignes_fichiers"
   printf '\nSignés par la clé de publication du projet / signed with the project publication key —\ncertificat SHA-256 `%s`.\n' "$EMPREINTE_CLE"
-  printf '\nAndroid 5.0 (API 21) ou plus récent / Android 5.0 (API 21) or newer. Paquet `com.dualdesk.rdp`.\n'
+  printf '\nAndroid 5.0 (API 21) ou plus récent / Android 5.0 (API 21) or newer. Paquet `com.deskrdp.rdp`.\n'
 } >"$NOTES"
 
 etape "notes de version : $NOTES"
@@ -303,10 +303,10 @@ printf '    %s lignes\n' "$(wc -l <"$NOTES" | tr -d ' ')"
 if [ "$SEC_DRY_RUN" = "1" ]; then
   etape "arrêt en dry-run : rien n'est poussé ni publié"
   if [ "$REPRISE" = "0" ]; then
-    printf '    aurait lancé : git tag -a %s -m "DualDesk %s"\n' "$TAG" "$VERSION"
+    printf '    aurait lancé : git tag -a %s -m "DeskRDP %s"\n' "$TAG" "$VERSION"
     printf '                   git push origin %s\n' "$TAG"
   fi
-  printf '                   gh release create -R %s %s --title "DualDesk %s" --notes-file %s --verify-tag %s %s\n' \
+  printf '                   gh release create -R %s %s --title "DeskRDP %s" --notes-file %s --verify-tag %s %s\n' \
     "$DEPOT" "$TAG" "$VERSION" "$NOTES" "$DEST/$(basename "$APK_ARM64")" "$DEST/$(basename "$APK_UNIVERSEL")"
   printf '\nContrôles passés ; la publication elle-même reste à faire.\n'
   exit 0
@@ -314,7 +314,7 @@ fi
 
 if [ "$REPRISE" = "0" ]; then
   etape "tag $TAG"
-  git tag -a "$TAG" -m "DualDesk $VERSION"
+  git tag -a "$TAG" -m "DeskRDP $VERSION"
   git push origin "$TAG" || die "poussée du tag refusée : la release n'a pas été créée.
         Le tag local existe ; relancez pour reprendre à l'étape suivante."
 else
@@ -323,7 +323,7 @@ fi
 
 etape "release GitHub"
 if ! gh release create -R "$DEPOT" "$TAG" \
-      --title "DualDesk $VERSION" \
+      --title "DeskRDP $VERSION" \
       --notes-file "$NOTES" \
       --verify-tag \
       "$DEST/$(basename "$APK_ARM64")" \

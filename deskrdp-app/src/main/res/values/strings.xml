@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    What the DualDesk flavour makes of the shared help screen and of the application's own name.
+    What the DeskRDP flavour makes of the shared help screen and of the application's own name.
 
     The code base in :bVNC belongs to the upstream project and is shared with its other
     applications, so it keeps pointing at the upstream forum, store listing and support address.
-    DualDesk has none of those: it is built and published from its own repository, and a surface
+    DeskRDP has none of those: it is built and published from its own repository, and a surface
     it has no target for is left out of the help screen rather than pointing somewhere else.
 -->
 <resources>
     <string name="action_rate_or_share_app">⭐ Help and share</string>
-    <string name="rdp_intro_title">DualDesk: a remote desktop client</string>
-    <string name="project_url_bug_reports" translatable="false">https://github.com/Endymi0n74/DualDesk/issues</string>
-    <string name="project_url_share" translatable="false">https://github.com/Endymi0n74/DualDesk</string>
+    <string name="rdp_intro_title">DeskRDP: an RDP client</string>
+    <string name="project_url_bug_reports" translatable="false">https://github.com/Endymi0n74/DeskRDP/issues</string>
+    <string name="project_url_share" translatable="false">https://github.com/Endymi0n74/DeskRDP</string>
     <string name="project_url_help_forum" translatable="false"></string>
     <string name="project_url_releases" translatable="false"></string>
     <string name="project_url_more_apps" translatable="false"></string>

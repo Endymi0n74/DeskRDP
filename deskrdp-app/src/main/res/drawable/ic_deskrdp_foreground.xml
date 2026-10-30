@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Deux écrans qui se chevauchent : le duo de « DualDesk ». Le glyphe reste dans la zone sûre
-    de l'icône adaptative (72 dp centrés sur 108), pour qu'aucun masque de lanceur ne le rogne.
+    Deux fenêtres qui se chevauchent : le bureau du poste ouvert sur le téléphone. Le glyphe reste
+    dans la zone sûre de l'icône adaptative (72 dp centrés sur 108), pour qu'aucun masque de lanceur
+    ne le rogne.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
