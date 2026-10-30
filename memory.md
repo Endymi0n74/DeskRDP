@@ -82,14 +82,36 @@ abandonnée, et la raison est dans les binaires livrés :
   serveur RDP » à l'écran, et **zéro** ligne `Scheduling reconnect` / `RECONNECT attempt` : une
   première connexion ratée ne boucle pas. C'est exactement ce que la condition `reconnectAttempts > 0`
   doit produire.
-- **Pas encore mesuré de bout en bout** : couper le réseau pendant une session RDP suppose une
-  session ouverte, donc le mot de passe du poste — que l'agent n'a pas. Vérifié à la place : les
-  tests de la politique, la compilation, l'installation, le chemin normal intact (appui sur l'accès →
-  dialogue d'identifiants RDP, certificat déjà accepté) et le garde-fou ci-dessus. Pour finir la
-  mesure : saisir le mot de passe une fois avec « Conserver » coché, puis couper le Wi-Fi ; le
-  journal doit montrer `Scheduling reconnect n in Xs` à 2, 5, 10, 20, 30 s, puis le dialogue d'échec
-  au 5e.
+- **Mesuré de bout en bout le 30/10 à 06:45** (voir « Mesure de la reconnexion, faite sur coupure
+  réelle » plus bas) : cinq délais conformes sur une vraie coupure Wi-Fi + 4G, puis retour à la
+  grille au cinquième échec. Avant cela, seuls la politique, la compilation, l'installation, le
+  chemin normal et le garde-fou étaient vérifiés ; la session elle-même a attendu que le mot de
+  passe du compte Microsoft de `KEYRA-PC` soit saisi sur le téléphone, ce que l'agent ne peut pas
+  faire à la place de l'utilisateur.
 - `versionCode` 6, `versionName` 1.14-dualdesk : **non publiée** tant que la mesure manque.
+
+### Mesure de la reconnexion, faite sur coupure réelle (30/10, 06:45)
+
+- **Protocole** : session ouverte sur `KEYRA-PC` (l'hôte RDP du POCO est cette machine), puis
+  `_check/mesure_reconnexion.py` coupe Wi-Fi **et** données mobiles (`wifi_on=0 mobile_data=0`) et
+  relit le journal. La veille `_check/veille_session.sh` avait déclenché le relevé d'elle-même à
+  06:45:35, dès que le dialogue d'identifiants a laissé place à `RemoteCanvasActivity`.
+- **Relevé** (programmations → relances) : `06:45:37.476` dans 2 s → `06:45:39.500` ; `06:45:39.743`
+  dans 5 s → `06:45:44.752` ; `06:45:45.055` dans 10 s → `06:45:55.062` ; `06:45:55.511` dans 20 s →
+  `06:46:15.517` ; `06:46:15.991` dans 30 s → `06:46:46.026`. Écarts mesurés 2,0 / 5,0 / 10,0 / 20,0 /
+  30,0 s — conformes à la table, verdict code 0. Réseau rendu à 06:47:01.
+- **Après le cinquième échec** : `RECONNECT attempt 5 of 5` à `06:46:46`, plus aucune ligne
+  `Scheduling reconnect`, et retour à `ConnectionGridActivity` — le budget épuisé rend la main au lieu
+  de boucler, comme voulu. La vignette de la grille montre le bureau capturé par la session, preuve
+  que la session était bien vivante avant la coupure.
+- **Conséquence à connaître** : les cinq essais couvrent ~70 s au total. Une coupure plus longue se
+  termine sur le retour à la grille, pas sur une reprise silencieuse — le réseau revenu à 06:47:00
+  n'a pas ressuscité la session, le budget étant déjà dépensé à 06:46:46.
+- **Deux détails de terrain** : la première perte est immédiate (coupure locale, pas de délai TCP),
+  et chaque relance échoue aussi instantanément sans réseau — d'où des paliers collés les uns aux
+  autres dans le journal ; c'est le délai programmé, pas la durée de la tentative, qui espace les
+  essais. Par ailleurs `adb shell uiautomator dump` exige `MSYS_NO_PATHCONV=1` sous Git Bash, sinon
+  `/sdcard/...` est réécrit en chemin Windows.
 
 ### L'hôte RDP est cette machine — et le mot de passe enregistré est refusé (30/10, 06:37)
 

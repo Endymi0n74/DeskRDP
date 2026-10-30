@@ -40,7 +40,10 @@ Tout ce que fait aRDP, sous le nom DualDesk :
 - **Reconnexion automatique** : une session coupée (Wi-Fi qui saute, poste qui redémarre) est
   relancée toute seule — 2 s, puis 5, 10, 20 et 30 s, cinq essais en tout, avec un message qui dit
   quand la tentative suivante aura lieu. Une première connexion ratée garde son message immédiat :
-  cinq essais sur un mot de passe faux n'aideraient personne.
+  cinq essais sur un mot de passe faux n'aideraient personne. Mesuré sur un vrai téléphone en
+  coupant Wi-Fi et données mobiles : les cinq délais relevés au journal tombent à 2,0 / 5,0 / 10,0 /
+  20,0 / 30,0 s, puis l'application revient à la grille. Le budget couvre donc une coupure d'une
+  minute environ ; au-delà, il faut rouvrir l'accès à la main.
 
 ### Limite connue : plusieurs écrans côté poste
 
@@ -136,7 +139,9 @@ Everything aRDP does, under the DualDesk name:
 - **Automatic reconnection**: a dropped session (Wi-Fi hiccup, host reboot) is restarted on its own —
   2 s, then 5, 10, 20 and 30 s, five attempts in all, with a message saying when the next one will
   happen. A first connection that fails keeps its immediate message: five attempts against a wrong
-  password would help nobody.
+  password would help nobody. Measured on a real phone with Wi-Fi and mobile data switched off: the
+  five journal delays land at 2.0 / 5.0 / 10.0 / 20.0 / 30.0 s, then the app returns to the grid. The
+  budget therefore covers an outage of about a minute; past that, the access has to be reopened by hand.
 
 ### Known limit: several screens on the host
 
