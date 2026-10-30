@@ -91,6 +91,33 @@ abandonnée, et la raison est dans les binaires livrés :
   au 5e.
 - `versionCode` 6, `versionName` 1.14-dualdesk : **non publiée** tant que la mesure manque.
 
+### L'hôte RDP est cette machine — et le mot de passe enregistré est refusé (30/10, 06:37)
+
+- **`pedrobear74.hd.free.fr` = `82.64.31.129` = l'IP publique de `KEYRA-PC`, le PC où tourne l'agent.**
+  Vérifié par `nslookup` et par `curl https://api.ipify.org`. Le poste que le POCO pilote est donc la
+  machine sur laquelle se fait tout le travail : une capture locale (`qwinsta`, `Get-LocalUser`) ou
+  une action côté pair se font sans second appareil.
+- **Le compte `endymion` est un compte Microsoft** (`Get-LocalUser` :
+  `PrincipalSource = MicrosoftAccount`, activé, dernière ouverture de session 29/10 11:31). L'identifiant
+  envoyé par l'application (`stephane.rivoire74@gmail.com`) et le champ « Nom de domaine » vide sont
+  donc dans le bon format.
+- **Échec constaté, mot de passe périmé** : à 06:37:26 le serveur répond
+  `SPNEGO received NTSTATUS: STATUS_LOGON_FAILURE [0xC000006D]`, puis
+  `nla_recv_pdu: ERRCONNECT_LOGON_FAILURE [0x00020014]` et `RdpCommunicator: OnDisconnecting,
+  reattemptWithoutCredentials: false, authenticationAttempted: true` → l'application ouvre son
+  dialogue « Veuillez entrer les identifiants RDP ». L'enregistrement garde un mot de passe que le
+  poste n'accepte plus ; il n'y a rien à corriger côté application.
+- **Conséquence pratique** : aucune session ne s'ouvre, donc aucune coupure réseau ne peut être
+  mesurée. « La session est ouverte » suppose un identifiant validé par `KEYRA-PC`, ce que seul le
+  propriétaire du compte peut faire. Ne pas chercher de contournement : ni compte local de test, ni
+  serveur RDP tiers, ni lecture du mot de passe scellé.
+- `_check/mesure_reconnexion.py` prêt pour le moment où le mot de passe sera saisi : il refuse de
+  mesurer si la toile RDP n'est pas au premier plan ou si un dialogue est ouvert (code 2, réseau
+  intact — vérifié avec le dialogue d'identifiants affiché), coupe ensuite Wi-Fi **et** données
+  mobiles (sinon la 4G masque la coupure), relève `Scheduling reconnect n in Xs` et `RECONNECT attempt
+  n of 5` dans le journal, compare chaque écart à la table et rend le réseau. `svc wifi disable`
+  fonctionne sur ce POCO (`global.wifi_on` passe à 0, puis revient à 1).
+
 ## Construire (état 29/10/2026)
 
 ```bash
