@@ -57,6 +57,12 @@ abstract class TouchInputHandlerGeneric extends GestureDetector.SimpleOnGestureL
     // Various drag modes in which we don't detect gestures.
     protected boolean panMode = false;
     protected boolean dragMode = false;
+    // Appui long en attente : le bouton gauche n'est pas encore enfoncé, on attend de savoir si le
+    // doigt va glisser (glissement) ou se relever sur place (clic droit).
+    protected boolean dragPending = false;
+    protected float dragPendingX, dragPendingY;
+    /** Distance, en pixels de vue, avant qu'un appui long ne devienne un glissement. */
+    protected static final float DRAG_PENDING_SLOP = 12.f;
     protected boolean rightDragMode = false;
     protected boolean middleDragMode = false;
     protected float dragX, dragY;
@@ -381,6 +387,7 @@ abstract class TouchInputHandlerGeneric extends GestureDetector.SimpleOnGestureL
         inSwiping = false;
         inScrolling = false;
         immersiveSwipe = false;
+        dragPending = false;
         if (dragMode || rightDragMode || middleDragMode) {
             nonDragGesture = false;
             dragMode = false;
@@ -457,6 +464,8 @@ abstract class TouchInputHandlerGeneric extends GestureDetector.SimpleOnGestureL
                         thirdPointerWasDown = false;
                         // Cancel any effect of scaling having "just finished" (e.g. ignoring scrolling).
                         scalingJustFinished = false;
+                        // Un nouvel appui annule un appui long resté en attente.
+                        dragPending = false;
                         // Cancel drag modes and scrolling.
                         if (!singleHandedGesture)
                             endDragModesAndScrolling();
@@ -478,6 +487,20 @@ abstract class TouchInputHandlerGeneric extends GestureDetector.SimpleOnGestureL
                             return true;
                         }
 
+                        // Appui long relâché sans avoir glissé : c'est le clic droit. Le bouton
+                        // gauche n'a jamais été enfoncé, donc rien à relâcher ; on nettoie les modes
+                        // et on sort, sinon un mouse-up sans bouton partirait au poste.
+                        if (dragPending) {
+                            dragPending = false;
+                            endDragModesAndScrolling();
+                            GeneralUtils.debugLog(debugLogging, TAG,
+                                    "onTouchEvent: appui long sans glissement, clic droit");
+                            viewable.movePanToMakePointerVisible();
+                            remoteInput.getPointer().rightButtonDown(getX(e), getY(e), meta);
+                            remoteInput.getPointer().releaseButton(getX(e), getY(e), meta);
+                            return true;
+                        }
+
                         if (!endDragModesAndScrolling()) {
                             // If no non-drag gestures were going on, send a mouse up event.
                             GeneralUtils.debugLog(debugLogging, TAG,
@@ -488,7 +511,25 @@ abstract class TouchInputHandlerGeneric extends GestureDetector.SimpleOnGestureL
                     case MotionEvent.ACTION_MOVE:
                         GeneralUtils.debugLog(debugLogging, TAG, "onTouchEvent: ACTION_MOVE");
                         // Send scroll up/down events if swiping is happening.
-                        if (panMode) {
+                        if (dragPending) {
+                            // Le doigt n'a pas assez bougé : on ne touche à rien, pour qu'un appui
+                            // long immobile ne laisse pas un bouton gauche enfoncé sur le poste.
+                            if (Math.hypot(e.getX() - dragPendingX, e.getY() - dragPendingY)
+                                    < DRAG_PENDING_SLOP) {
+                                return true;
+                            }
+                            // Il glisse : le glissement commence là où le doigt s'était posé.
+                            float x = e.getX();
+                            float y = e.getY();
+                            setEventCoordinates(e, dragPendingX, dragPendingY);
+                            viewable.movePanToMakePointerVisible();
+                            remoteInput.getPointer().leftButtonDown(getX(e), getY(e), meta);
+                            setEventCoordinates(e, x, y);
+                            dragMode = true;
+                            dragPending = false;
+                            GeneralUtils.debugLog(debugLogging, TAG,
+                                    "onTouchEvent: appui long puis glissement, bouton gauche enfoncé");
+                        } else if (panMode) {
                             float scale = viewable.getZoomFactor();
                             viewable.relativePan(-(int) ((e.getX() - dragX) * scale), -(int) ((e.getY() - dragY) * scale));
                             dragX = e.getX();

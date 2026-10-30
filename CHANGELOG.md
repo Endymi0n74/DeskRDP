@@ -3,6 +3,39 @@
 Les versions publiées sont sur la page [Releases](https://github.com/Endymi0n74/DualDesk/releases).
 Published builds live on the [Releases](https://github.com/Endymi0n74/DualDesk/releases) page.
 
+## 1.15 — 30 octobre 2026
+
+### Français
+
+- **L'appui long ne laisse plus le bouton gauche enfoncé.** Il l'enfonçait dès la détection de
+  l'appui long, et le maintenait tant que le doigt restait posé : sur le poste, un doigt immobile
+  une seconde suffisait à démarrer un glisser-déposer involontaire. Le bouton n'est désormais
+  enfoncé qu'au premier vrai mouvement, à l'endroit où le doigt s'était posé.
+- **L'appui long devient le clic droit.** Relâché sans avoir bougé, il envoie un clic droit ; jusque-là
+  un doigt ne pouvait pas ouvrir un menu contextuel, il fallait la barre de touches supplémentaires
+  ou une souris.
+- **Le glissement fonctionne comme avant** pour qui enchaîne appui long puis déplacement, avec le
+  bouton gauche tenu d'un bout à l'autre — mais il n'est enfoncé qu'au moment où le doigt glisse.
+- **Mesuré sur un téléphone**, avec une fenêtre témoin sur le poste qui journalise les événements
+  reçus : appui bref → `down/up button=Left`, appui long → `down/up button=Right` sans aucun `Left`
+  parasite, appui long puis glissement → `down button=Left`, `drag`, `up button=Left`.
+- `versionCode` 6 → 7. Le reste est inchangé : ni les accès, ni la reconnexion, ni le presse-papiers.
+
+### English
+
+- **A long press no longer leaves the left button held.** It used to press it as soon as the long
+  press fired, and keep it pressed while the finger rested: on the host, a finger still for a
+  second was enough to start an accidental drag-and-drop. The button is now only pressed on the
+  first real movement, at the point where the finger first landed.
+- **A long press now gives a right click.** Released without moving, it sends a right click; until
+  now a finger could not open a context menu at all, it took the extra-keys bar or a mouse.
+- **Dragging works as before** for anyone who holds then moves, with the left button held
+  throughout — but it is pressed only when the finger starts to move.
+- **Measured on a phone**, with a witness window on the host logging the events it receives: brief
+  tap → `down/up button=Left`, long press → `down/up button=Right` with no stray `Left`, long press
+  then drag → `down button=Left`, `drag`, `up button=Left`.
+- `versionCode` 6 → 7. Everything else is unchanged: accesses, reconnection, clipboard.
+
 ## 1.14 — 30 octobre 2026
 
 ### Français

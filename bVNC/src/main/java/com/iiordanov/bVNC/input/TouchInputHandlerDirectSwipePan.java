@@ -66,6 +66,29 @@ public class TouchInputHandlerDirectSwipePan extends TouchInputHandlerGeneric {
         return true;
     }
 
+    /**
+     * Appui long : on arme le glissement sans rien envoyer tout de suite.
+     *
+     * L'ancien comportement enfonçait le bouton gauche dès l'appui long, ce qui laissait un bouton
+     * maintenu sur le poste pendant tout le temps où le doigt restait posé — assez pour démarrer un
+     * glisser-déposer involontaire. Le bouton n'est désormais enfoncé qu'au premier vrai mouvement
+     * (voir {@code onTouchEvent}, branche {@code dragPending}) ; relâché sur place, l'appui long est
+     * un clic droit, que rien d'autre ne permettait de faire au doigt.
+     */
+    @Override
+    public void onLongPress(MotionEvent e) {
+        GeneralUtils.debugLog(debugLogging, TAG, "onLongPress, e: " + e);
+        if (secondPointerWasDown || thirdPointerWasDown) {
+            GeneralUtils.debugLog(debugLogging, TAG,
+                    "onLongPress: clic droit ou milieu déjà en cours, pas de glissement");
+            return;
+        }
+        touchInputDelegate.sendShortVibration();
+        dragPending = true;
+        dragPendingX = e.getX();
+        dragPendingY = e.getY();
+    }
+
     /*
      * (non-Javadoc)
      * @see android.view.GestureDetector.SimpleOnGestureListener#onFling(android.view.MotionEvent, android.view.MotionEvent, float, float)

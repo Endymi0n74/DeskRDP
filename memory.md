@@ -151,6 +151,35 @@ abandonnée, et la raison est dans les binaires livrés :
   n of 5` dans le journal, compare chaque écart à la table et rend le réseau. `svc wifi disable`
   fonctionne sur ce POCO (`global.wifi_on` passe à 0, puis revient à 1).
 
+### Gestes revus et mesurés (1.15, 30/10)
+
+- **Ce que la mesure d'avant a établi** (build 1.14, témoin `click-target.ps1`, mode « Direct,
+  balayage pour déplacer ») : appui = `Left` ✓ ; appui long = `Left` **maintenu** pendant tout le
+  maintien (1,1 s mesurée), donc pas de clic droit et un glisser-déposer involontaire possible ;
+  appui long puis mouvement = `Left` + `drag` ✓ ; balayage simple = **rien** (il fait glisser la vue,
+  et à l'échelle 1:1 il n'y a rien à faire glisser) ; hors de la bande d'image, l'appui est ignoré
+  (comportement voulu depuis la 1.11).
+- **La cause** : `TouchInputHandlerGeneric.onLongPress` faisait `leftButtonDown` immédiatement et
+  passait en `dragMode` ; le clic droit n'existait qu'au **deuxième doigt** (`ACTION_POINTER_UP`),
+  donc inatteignable avec un seul doigt.
+- **Le correctif, trois endroits** : `TouchInputHandlerGeneric` gagne `dragPending` (point d'appui +
+  seuil `DRAG_PENDING_SLOP = 12 px`) ; en `ACTION_MOVE`, le bouton gauche n'est enfoncé qu'au premier
+  mouvement, à la position de départ ; en `ACTION_UP`, s'il n'y a pas eu de mouvement, un **clic
+  droit** part à la place, sans `mouse-up` parasite. `TouchInputHandlerDirectSwipePan.onLongPress`
+  arme ce mode au lieu d'enfoncer le bouton. `TouchInputHandlerDirectDragPan` et `SingleHanded`
+  gardent leur propre `onLongPress`, et le mode pavé tactile aussi — aucun n'est modifié.
+- **Mesuré sur le POCO (1.15, `versionCode` 7)** par `_check/gestes.py` : appui → `down/up
+  button=Left` ; appui long immobile → `down/up button=Right` **sans aucun `Left`** ; appui long puis
+  glissement → `down button=Left` à 2254, `drag` à 2711, `up button=Left`. Verdict code 0.
+- **Trois choses à retenir pour la prochaine mesure** :
+  - quand le téléphone se connecte en RDP à ce PC, Windows bascule la session : `qwinsta` montre
+    alors `rdp-tcp#2 endymion` et les processus de l'agent (`powershell`, `explorer`) sont dans
+    **cette** session, donc une fenêtre créée ici est visible et cliquable depuis le téléphone ;
+  - `adb shell input motionevent DOWN|MOVE|UP` permet un vrai appui long et un vrai glissement
+    (MOVE réels) ; `input swipe` envoie des MOVE qui faussent un appui long ;
+  - la barre flottante de session (`OnTouchViewMover`) avale les appuis : viser la bande d'image,
+    repérée par la couleur du témoin, et non des coordonnées figées qui changent avec le zoom.
+
 ## Construire (état 29/10/2026)
 
 ```bash
