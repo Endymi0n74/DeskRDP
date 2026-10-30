@@ -3,6 +3,43 @@
 Les versions publiées sont sur la page [Releases](https://github.com/Endymi0n74/DualDesk/releases).
 Published builds live on the [Releases](https://github.com/Endymi0n74/DualDesk/releases) page.
 
+## 1.14 — 30 octobre 2026
+
+### Français
+
+- **Reconnexion automatique.** Une session coupée n'affiche plus un message puis ne quitte plus :
+  elle est relancée toute seule, à 2 s, 5 s, 10 s, 20 s puis 30 s — cinq essais en tout, chacun
+  annoncé par un message disant quand la tentative suivante aura lieu. Un Wi-Fi qui saute ou un
+  poste qui redémarre ne demandent donc plus de revenir sur la grille et de rouvrir l'accès.
+- **Le compteur repart à zéro quand la session est vraiment revenue**, à la première image reçue du
+  poste — pas au moment où la relance est lancée. Une tentative qui échoue à son tour consomme
+  l'étape suivante du barème.
+- **Une première connexion ratée garde son message immédiat** : cinq essais sur un mot de passe faux
+  n'aideraient personne. Seules les relances consomment le budget.
+- **Mesuré sur un téléphone en coupant Wi-Fi et données mobiles** : les cinq relances tombent à
+  2,0 / 5,0 / 10,0 / 20,0 / 30,0 s dans le journal, puis l'application revient à la grille au
+  cinquième échec. Les cinq essais couvrent donc une coupure d'une minute environ ; au-delà, il faut
+  rouvrir l'accès à la main.
+- `versionCode` 5 → 6. Aucun autre changement : ni les accès, ni les gestes, ni le presse-papiers,
+  ni l'affichage ne bougent.
+
+### English
+
+- **Automatic reconnection.** A dropped session no longer shows a message and quits: it is restarted
+  on its own — 2 s, then 5, 10, 20 and 30 s, five attempts in all, each announced by a message
+  saying when the next one will happen. A Wi-Fi hiccup or a rebooting host no longer means going
+  back to the grid and reopening the access by hand.
+- **The counter resets only when the session is really back**, on the first frame received from the
+  host — not when the retry is launched. A retry that fails in turn consumes the next step.
+- **A first connection that fails keeps its immediate message**: five attempts against a wrong
+  password would help nobody. Only retries consume the budget.
+- **Measured on a phone with Wi-Fi and mobile data switched off**: the five retries land at
+  2.0 / 5.0 / 10.0 / 20.0 / 30.0 s in the journal, then the app returns to the grid after the fifth
+  failure. The five attempts therefore cover an outage of about a minute; past that, the access has
+  to be reopened by hand.
+- `versionCode` 5 → 6. Nothing else changes: accesses, gestures, clipboard and rendering are
+  untouched.
+
 ## 1.13 — 29 octobre 2026
 
 ### Français
